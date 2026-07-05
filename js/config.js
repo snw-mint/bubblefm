@@ -2,21 +2,18 @@
  * BubbleFM Configuration
  * 
  * Environment variables and API endpoints. 
- * Since this is a vanilla JS project without a bundler, we use this module 
- * to handle environment-specific logic (e.g., local development vs production).
+ * Managed via Vite's import.meta.env with fallback values.
  */
-
-const isLocal = window.location.hostname === "localhost" || window.location.hostname.includes("127.0.0.1");
 
 export const CONFIG = {
   APP_NAME: "BubbleFM",
   
-  // Replace with the Vercel production URL once deployed
-  BASE_URL: isLocal ? "" : "https://bubblefm.vercel.app", 
+  // Base URL for the app
+  BASE_URL: import.meta.env.BASE_URL || "", 
   
-  // API Endpoints
-  WORKER_API: "https://main.snw-mint.workers.dev",
-  WORKER_COUNTER: "https://counter.snw-mint.workers.dev",
+  // API Endpoints (loaded from .env via Vite)
+  WORKER_API: import.meta.env.VITE_WORKER_API || "https://main.snw-mint.workers.dev",
+  WORKER_COUNTER: import.meta.env.VITE_WORKER_COUNTER || "https://counter.snw-mint.workers.dev",
   
   /**
    * Helper function to build Main API URLs
