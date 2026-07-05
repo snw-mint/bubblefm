@@ -6,13 +6,123 @@ document.addEventListener("DOMContentLoaded", () => {
   const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const currentTheme = savedTheme || (systemPrefersDark ? "dark" : "light");
   setTheme(currentTheme);
-  themeToggle.addEventListener("click", () => {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    setTheme(isDark ? "light" : "dark");
-  });
+  
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      setTheme(isDark ? "light" : "dark");
+    });
+  }
+
   function setTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
-    themeToggle.innerHTML = theme === "dark" ? SUN_ICON : MOON_ICON;
+    if (themeToggle) {
+      themeToggle.innerHTML = theme === "dark" ? SUN_ICON : MOON_ICON;
+    }
+  }
+
+  // Handle form submission on index.html
+  const formUsername = document.getElementById("form-username");
+  if (formUsername) {
+    formUsername.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const userInput = document.getElementById("userInput").value.trim();
+      if (userInput) {
+        sessionStorage.setItem("lastfm_user", userInput);
+        window.location.href = "result.html";
+      }
+    });
+  }
+
+  // Handle API fetching on result.html
+  if (window.location.pathname.endsWith("result.html") || window.location.pathname.includes("result.html")) {
+    const user = sessionStorage.getItem("lastfm_user");
+    if (!user) {
+      window.location.href = "index.html";
+    } else {
+      fetchLastfmAndDeezerData(user);
+    }
   }
 });
+
+async function fetchLastfmAndDeezerData(username) {
+  try {
+    console.log("Fetching data for:", username);
+    const baseUrl = "https://main.snw-mint.workers.dev/";
+
+    // Fetch Last.fm Data
+    const [userInfoRes, topArtistRes, topAlbumRes] = await Promise.all([
+      fetch(`${baseUrl}?method=user.getinfo&user=${username}&_t=${Date.now()}`),
+      fetch(`${baseUrl}?method=user.gettopartists&user=${username}&limit=1&period=overall&_t=${Date.now()}`),
+      fetch(`${baseUrl}?method=user.gettopalbums&user=${username}&limit=1&period=overall&_t=${Date.now()}`)
+    ]);
+
+    const userInfo = await userInfoRes.json();
+    const topArtistData = await topArtistRes.json();
+    const topAlbumData = await topAlbumRes.json();
+
+    const topArtistName = topArtistData?.topartists?.artist?.[0]?.name;
+    const topAlbumName = topAlbumData?.topalbums?.album?.[0]?.name;
+    const topAlbumArtist = topAlbumData?.topalbums?.album?.[0]?.artist?.name;
+
+    let artistImage = null;
+    let albumImage = null;
+
+    // Fetch Deezer Data
+    if (topArtistName) {
+      const deezerArtistRes = await fetch(`/api/deezer/search?q=artist:"${encodeURIComponent(topArtistName)}"`);
+      const deezerArtistData = await deezerArtistRes.json();
+      if (deezerArtistData.data && deezerArtistData.data.length > 0) {
+        artistImage = deezerArtistData.data[0].artist.picture_xl || deezerArtistData.data[0].artist.picture_big || deezerArtistData.data[0].artist.picture;
+      }
+    }
+
+    if (topAlbumName && topAlbumArtist) {
+      const deezerAlbumRes = await fetch(`/api/deezer/search?q=artist:"${encodeURIComponent(topAlbumArtist)}" album:"${encodeURIComponent(topAlbumName)}"`);
+      const deezerAlbumData = await deezerAlbumRes.json();
+      if (deezerAlbumData.data && deezerAlbumData.data.length > 0) {
+        albumImage = deezerAlbumData.data[0].album.cover_xl || deezerAlbumData.data[0].album.cover_big || deezerAlbumData.data[0].album.cover;
+      }
+    }
+
+    console.log("=== API RESULTS ===");
+    console.log("Dados do Last.fm:", {
+      userInfo,
+      topArtist: topArtistData?.topartists?.artist?.[0],
+      topAlbum: topAlbumData?.topalbums?.album?.[0]
+    });
+    console.log("Foto do artista mais ouvido:", artistImage);
+    console.log("Foto do album mais ouvido:", albumImage);
+    console.log("===================");
+
+    // Update UI Header
+    const userAvatarEl = document.getElementById("userAvatar");
+    const userDisplayNameEl = document.getElementById("userDisplayName");
+    const artistCoverEl = document.getElementById("artistCover");
+
+    if (userDisplayNameEl) {
+      userDisplayNameEl.textContent = userInfo?.user?.realname || userInfo?.user?.name || username;
+    }
+
+    if (userAvatarEl) {
+      const images = userInfo?.user?.image;
+      const avatarUrl = Array.isArray(images)
+        ? images.find(img => img.size === "extralarge")?.["#text"] ||
+          images.find(img => img.size === "large")?.["#text"] ||
+          images[images.length - 1]?.["#text"]
+        : null;
+      if (avatarUrl && avatarUrl.trim() !== "") {
+        userAvatarEl.src = avatarUrl;
+      }
+    }
+
+    if (artistCoverEl && artistImage) {
+      artistCoverEl.src = artistImage;
+    }
+
+  } catch (error) {
+    console.error("Error fetching API data:", error);
+  }
+}
+
