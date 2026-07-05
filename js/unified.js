@@ -121,6 +121,28 @@ async function fetchLastfmAndDeezerData(username) {
       artistCoverEl.src = artistImage;
     }
 
+    // Update Stats Cards
+    const userScrobblesEl = document.getElementById("userScrobbles");
+    const userMinutesEl = document.getElementById("userMinutes");
+    const userDailyAvgEl = document.getElementById("userDailyAvg");
+
+    if (userScrobblesEl && userInfo?.user?.playcount) {
+      const playcount = parseInt(userInfo.user.playcount, 10);
+      userScrobblesEl.textContent = playcount.toLocaleString("en-US");
+
+      if (userMinutesEl) {
+        const estimatedMinutes = Math.round(playcount * 3.5);
+        userMinutesEl.textContent = estimatedMinutes.toLocaleString("en-US");
+      }
+
+      if (userDailyAvgEl && userInfo?.user?.registered?.unixtime) {
+        const regDate = parseInt(userInfo.user.registered.unixtime, 10) * 1000;
+        const daysRegistered = Math.max(1, Math.round((Date.now() - regDate) / (1000 * 60 * 60 * 24)));
+        const dailyAvg = Math.round(playcount / daysRegistered);
+        userDailyAvgEl.textContent = dailyAvg.toLocaleString("en-US");
+      }
+    }
+
   } catch (error) {
     console.error("Error fetching API data:", error);
   }

@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet" />
 
     <link rel="stylesheet" href="/css/main.css" />
@@ -42,22 +42,163 @@
 
     <main class="result-main">
       <section class="user-cover-section">
-        <div class="cover-image-container">
-          <img
-            id="artistCover"
-            src="assets/images/cover.jpg"
-            alt="Artist Cover"
-            class="cover-image"
-          />
+        <div class="cover-image-container skeleton skeleton-icon" id="coverContainer">
+          <svg id="coverSkeletonIcon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0 0v-560 560Zm80-80h400q12 0 18-11t-2-21L586-459q-6-8-16-8t-16 8L450-320l-74-99q-6-8-16-8t-16 8l-80 107q-8 10-2 21t18 11Z"/></svg>
+          <img id="artistCover" alt="Artist Cover" class="cover-image" style="display: none;" />
         </div>
         <div class="user-profile-container">
-          <img
-            id="userAvatar"
-            src="assets/images/user.webp"
-            alt="User Avatar"
-            class="user-profile-image"
-          />
-          <h1 id="userDisplayName" class="user-display-name">Loading...</h1>
+          <div id="userAvatarContainer" class="user-profile-image skeleton skeleton-icon">
+            <svg id="userAvatarSkeletonIcon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"/></svg>
+            <img id="userAvatar" alt="User Avatar" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+          </div>
+          <div class="user-info-details">
+            <h1 id="userDisplayName" class="user-display-name skeleton skeleton-text" style="width: 200px; height: 36px; border-radius: 8px;"></h1>
+            <div class="stats-cards-container">
+              <div class="stat-card">
+                <span class="stat-title">Scrobbles</span>
+                <span id="userScrobbles" class="stat-value skeleton skeleton-text" style="width: 80px; height: 20px;"></span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-title">Minutes</span>
+                <span id="userMinutes" class="stat-value skeleton skeleton-text" style="width: 80px; height: 20px;"></span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-title">Daily Avg</span>
+                <span id="userDailyAvg" class="stat-value skeleton skeleton-text" style="width: 50px; height: 20px;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="charts-section">
+        <div class="charts-grid">
+            <section class="chart-card" id="cardArtists">
+                <h2>Top Artists</h2>
+                <div class="lista-top" id="listTopArtists">
+                    <div class="chart-item top-1">
+                        <div class="top1-image skeleton skeleton-icon" id="artist1Skeleton">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-300q75 0 127.5-52.5T660-480q0-75-52.5-127.5T480-660q-75 0-127.5 52.5T300-480q0 75 52.5 127.5T480-300Zm-28.5-151.5Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                        </div>
+                        <img class="top1-image" id="artist1Img" alt="Top Artist" style="display: none;" />
+                        <div class="text-content">
+                            <span class="skeleton skeleton-text" style="width: 120px; height: 18px;"></span>
+                            <span class="skeleton skeleton-text" style="width: 80px; height: 14px; margin-top: 4px;"></span>
+                        </div>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#2</span> <span class="skeleton skeleton-text" style="width: 150px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#3</span> <span class="skeleton skeleton-text" style="width: 130px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#4</span> <span class="skeleton skeleton-text" style="width: 160px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#5</span> <span class="skeleton skeleton-text" style="width: 140px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#6</span> <span class="skeleton skeleton-text" style="width: 170px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#7</span> <span class="skeleton skeleton-text" style="width: 120px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#8</span> <span class="skeleton skeleton-text" style="width: 145px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#9</span> <span class="skeleton skeleton-text" style="width: 155px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#10</span> <span class="skeleton skeleton-text" style="width: 135px; height: 16px;"></span>
+                    </div>
+                </div>
+            </section>
+            <section class="chart-card" id="cardTracks">
+                <h2>Top Songs</h2>
+                <div class="lista-top" id="listTopTracks">
+                    <div class="chart-item top-1">
+                        <div class="top1-image skeleton skeleton-icon" id="track1Skeleton">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-300q75 0 127.5-52.5T660-480q0-75-52.5-127.5T480-660q-75 0-127.5 52.5T300-480q0 75 52.5 127.5T480-300Zm-28.5-151.5Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                        </div>
+                        <img class="top1-image" id="track1Img" alt="Top Track" style="display: none;" />
+                        <div class="text-content">
+                            <span class="skeleton skeleton-text" style="width: 130px; height: 18px;"></span>
+                            <span class="skeleton skeleton-text" style="width: 90px; height: 14px; margin-top: 4px;"></span>
+                        </div>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#2</span> <span class="skeleton skeleton-text" style="width: 160px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#3</span> <span class="skeleton skeleton-text" style="width: 140px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#4</span> <span class="skeleton skeleton-text" style="width: 150px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#5</span> <span class="skeleton skeleton-text" style="width: 130px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#6</span> <span class="skeleton skeleton-text" style="width: 170px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#7</span> <span class="skeleton skeleton-text" style="width: 145px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#8</span> <span class="skeleton skeleton-text" style="width: 155px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#9</span> <span class="skeleton skeleton-text" style="width: 125px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#10</span> <span class="skeleton skeleton-text" style="width: 140px; height: 16px;"></span>
+                    </div>
+                </div>
+            </section>
+            <section class="chart-card" id="cardAlbums">
+                <h2>Top Albums</h2>
+                <div class="lista-top" id="listTopAlbums">
+                    <div class="chart-item top-1">
+                        <div class="top1-image skeleton skeleton-icon" id="album1Skeleton">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-300q75 0 127.5-52.5T660-480q0-75-52.5-127.5T480-660q-75 0-127.5 52.5T300-480q0 75 52.5 127.5T480-300Zm-28.5-151.5Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                        </div>
+                        <img class="top1-image" id="album1Img" alt="Top Album" style="display: none;" />
+                        <div class="text-content">
+                            <span class="skeleton skeleton-text" style="width: 140px; height: 18px;"></span>
+                            <span class="skeleton skeleton-text" style="width: 110px; height: 14px; margin-top: 4px;"></span>
+                        </div>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#2</span> <span class="skeleton skeleton-text" style="width: 160px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#3</span> <span class="skeleton skeleton-text" style="width: 120px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#4</span> <span class="skeleton skeleton-text" style="width: 150px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#5</span> <span class="skeleton skeleton-text" style="width: 130px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#6</span> <span class="skeleton skeleton-text" style="width: 170px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#7</span> <span class="skeleton skeleton-text" style="width: 145px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#8</span> <span class="skeleton skeleton-text" style="width: 155px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#9</span> <span class="skeleton skeleton-text" style="width: 125px; height: 16px;"></span>
+                    </div>
+                    <div class="chart-item">
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#10</span> <span class="skeleton skeleton-text" style="width: 165px; height: 16px;"></span>
+                    </div>
+                </div>
+            </section>
         </div>
       </section>
     </main>

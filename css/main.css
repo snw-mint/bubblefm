@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
 :root {
   --color-primary: #b90000;
@@ -11,7 +11,7 @@
   --color-neutral-300: #d1d5db;
   --color-neutral-500: #6b7280;
   --color-neutral-800: #1f2937;
-  --font-title: "DM Sans", sans-serif;
+  --font-title: "Archivo", sans-serif;
   --font-text: "Poppins", sans-serif;
   --radius-sm: 0.3125rem;
   --radius-md: 0.5rem;
@@ -19,9 +19,11 @@
 }
 
 [data-theme="dark"] {
+  --color-primary: #ff4444;
+  --color-secondary: #ff6666;
   --color-text: #fdfdfd;
   --color-bg: #0a0a0a;
-  --color-radial-accent: rgba(185, 0, 0, 0.25);
+  --color-radial-accent: rgba(255, 68, 68, 0.15);
   --color-neutral-100: #121212;
   --color-neutral-200: #1e1e1e;
   --color-neutral-300: #2d2d2d;
