@@ -43,7 +43,7 @@ body {
   font-family: var(--font-text);
   color: var(--color-text);
   background-color: var(--color-bg);
-  background-image: radial-gradient(circle at 100% 0%, var(--color-radial-accent) 0%, transparent 60%);
+  background-image: radial-gradient(circle at 100% 0%, rgb(185 0 0 / 20%) 0%, transparent 60%);
   background-repeat: no-repeat;
   background-attachment: fixed;
   line-height: 1.5;
