@@ -1,0 +1,83 @@
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+.logo-container {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  position: relative;
+  gap: 0.5rem;
+}
+.logo-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+  z-index: 2;
+  position: relative;
+}
+.logo-text {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  z-index: 1;
+  position: relative;
+  animation: slideOutText 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.brand-bubble {
+  color: var(--color-text);
+}
+.brand-fm {
+  color: var(--color-primary);
+}
+@keyframes slideOutText {
+  0% {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.theme-toggle-btn,
+.github-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background-color: transparent;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+.theme-toggle-btn:hover,
+.github-link-btn:hover {
+  background-color: var(--color-neutral-100);
+}
+.theme-toggle-btn:active,
+.github-link-btn:active {
+  transform: scale(0.95);
+}
+.theme-toggle-btn svg,
+.github-link-btn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+}
