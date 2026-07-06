@@ -13,7 +13,9 @@
 
     <title>TasteMatch - BubbleFM Compatibility</title>
     <meta name="title" content="TasteMatch - BubbleFM Compatibility" />
-    <meta name="description" content="Compare your Last.fm music taste with a friend. Discover your shared artists, tracks, and generate a beautiful compatibility card." />
+    <meta
+      name="description"
+      content="Compare your Last.fm music taste with a friend. Discover your shared artists, tracks, and generate a beautiful compatibility card." />
     <meta
       name="keywords"
       content="last.fm, lastfm stats, music compatibility, taste match, shareable cards, lastfm friend comparison, bubblefm tastematch" />
@@ -36,8 +38,10 @@
       content="Compare your Last.fm music taste with a friend. Discover your shared artists, tracks, and generate a beautiful compatibility card." />
     <meta property="twitter:image" content="https://bubblefm.vercel.app/assets/images/og-match.jpg" />
 
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,8 +52,6 @@
     <link rel="stylesheet" href="/css/main.css" />
     <link rel="stylesheet" href="/css/layout.css" />
     <link rel="stylesheet" href="/css/components.css" />
-
-
   </head>
   <body>
     <header class="home-header">
@@ -286,7 +288,7 @@
           closeBtn.addEventListener("click", dismissSnackbar);
         }
 
-        setTimeout(dismissSnackbar, 60000); // 1 minuto
+        setTimeout(dismissSnackbar, 60000);
       })();
     </script>
 

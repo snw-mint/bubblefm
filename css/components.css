@@ -307,7 +307,7 @@
   position: fixed;
   bottom: 1rem;
   right: 1rem;
-  background-color: var(--color-primary);
+  background-color: rgb(36, 144, 52);
   color: #ffffff;
   border: none;
   border-radius: 30px;
@@ -329,7 +329,7 @@
 .fab-generate:hover {
   transform: translateY(-3px);
   filter: brightness(1.1);
-  box-shadow: 0 6px 6px rgba(255, 68, 68, 0.2);
+  box-shadow: 0 6px 6px rgba(36, 144, 52, 0.2);
 }
 
 .fab-generate:active {
