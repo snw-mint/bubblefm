@@ -1,3 +1,11 @@
+/*
+ * BubbleFM
+ * Copyright (c) 2026 SnowMint
+ * Licensed under the GNU General Public License v3.0 (GPL-3.0)
+ * You should have received a copy of the GNU General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920t28.5 11.5T520-880v80q0 17-11.5 28.5T480-760t-28.5-11.5M678-678q-11-11-11-27.5t11-28.5l56-57q12-12 28.5-12t28.5 12q11 11 11 28t-11 28l-57 57q-11 11-28 11t-28-11m122 238q-17 0-28.5-11.5T760-480t11.5-28.5T800-520h80q17 0 28.5 11.5T920-480t-11.5 28.5T880-440zM451.5-51.5Q440-63 440-80v-80q0-17 11.5-28.5T480-200t28.5 11.5T520-160v80q0 17-11.5 28.5T480-40t-28.5-11.5M226-678l-57-56q-12-12-12-29t12-28q11-11 28-11t28 11l57 57q11 11 11 28t-11 28q-12 11-28 11t-28-11m508 509-56-57q-11-12-11-28.5t11-27.5 27.5-11 28.5 11l57 56q12 11 11.5 28T791-169q-12 12-29 12t-28-12M80-440q-17 0-28.5-11.5T40-480t11.5-28.5T80-520h80q17 0 28.5 11.5T200-480t-11.5 28.5T160-440zm89 271q-11-11-11-28t11-28l57-57q11-11 27.5-11t28.5 11q12 12 12 28.5T282-225l-56 56q-12 12-29 12t-28-12m141-141q-70-70-70-170t70-170 170-70 170 70 70 170-70 170-170 70-170-70"/></svg>`;
 const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
 
@@ -40,6 +48,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const userInput = document.getElementById("userInput").value.trim();
       if (userInput) {
         sessionStorage.setItem("lastfm_user", userInput);
+        window.location.href = "result.html";
+      }
+    });
+  }
+
+  const formMatch = document.getElementById("form-match");
+  if (formMatch) {
+    formMatch.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const userInput1 = document.getElementById("userInput1").value.trim();
+      const userInput2 = document.getElementById("userInput2").value.trim();
+      if (userInput1 && userInput2) {
+        sessionStorage.setItem("lastfm_user1", userInput1);
+        sessionStorage.setItem("lastfm_user2", userInput2);
         window.location.href = "result.html";
       }
     });
@@ -770,6 +792,16 @@ document.addEventListener("DOMContentLoaded", () => {
       storyCardContainer.style.zIndex = "-999";
       confirmImageBtn.textContent = "Generating...";
 
+      const generationModal = document.getElementById("generationModal");
+      const stateLoading = document.getElementById("generationStateLoading");
+      const stateComplete = document.getElementById("generationStateComplete");
+
+      if (generationModal) {
+        generationModal.style.display = "flex";
+        stateLoading.style.display = "flex";
+        stateComplete.style.display = "none";
+      }
+
       setTimeout(() => {
         const cardElement = document.getElementById("storyCard");
         html2canvas(cardElement, {
@@ -787,10 +819,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             confirmImageBtn.textContent = "Next";
             confirmImageBtn.disabled = false;
+
+            if (generationModal) {
+              stateLoading.style.display = "none";
+              stateComplete.style.display = "flex";
+              setTimeout(() => {
+                generationModal.style.display = "none";
+              }, 3000);
+            }
           })
           .catch((err) => {
             console.error("Error generating canvas", err);
             confirmImageBtn.textContent = "Error";
+            if (generationModal) {
+              generationModal.style.display = "none";
+            }
           });
       }, 1000);
     });

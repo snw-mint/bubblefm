@@ -7,7 +7,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         result: resolve(__dirname, 'result.html'),
-        matcher: resolve(__dirname, 'matcher.html')
+        match: resolve(__dirname, 'match/index.html'),
+        matchResult: resolve(__dirname, 'match/result.html')
       }
     }
   },

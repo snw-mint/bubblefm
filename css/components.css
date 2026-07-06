@@ -1,3 +1,11 @@
+/*
+ * BubbleFM
+ * Copyright (c) 2026 SnowMint
+ * Licensed under the GNU General Public License v3.0 (GPL-3.0)
+ * You should have received a copy of the GNU General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 .username-form {
   width: 100%;
   margin-bottom: 1.5rem;
@@ -831,4 +839,116 @@
   font-weight: 600;
   color: var(--color-neutral-500);
   letter-spacing: 0px;
+}
+
+/* Loader and Loading Modal Styles */
+.modal-no-close .close-button {
+  display: none;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.loader {
+  --color-1: var(--color-primary);
+  --size: 1px;
+
+  width: calc(48 * var(--size));
+  height: calc(48 * var(--size));
+  display: inline-block;
+  position: relative;
+}
+.loader::after,
+.loader::before {
+  content: "";
+  box-sizing: border-box;
+  width: calc(48 * var(--size));
+  height: calc(48 * var(--size));
+  border-radius: 50%;
+  border: calc(2 * var(--size)) solid var(--color-1);
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: animloader 2s linear infinite;
+}
+.loader::after {
+  animation-delay: 1s;
+}
+
+@keyframes animloader {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.migration-snackbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-neutral-300);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  color: var(--color-text);
+  padding: 12px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  max-width: 90%;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+.migration-snackbar.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 20px);
+}
+.migration-snackbar-icon {
+  display: flex;
+  color: var(--color-primary);
+  align-items: center;
+  justify-content: center;
+}
+.migration-snackbar-icon svg {
+  fill: currentColor;
+}
+.migration-snackbar-text {
+  flex: 1;
+}
+.migration-snackbar-close {
+  background: none;
+  border: none;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+.migration-snackbar-close:hover {
+  background-color: var(--color-neutral-200);
+  color: var(--color-text);
+}
+.migration-snackbar-close svg {
+  fill: currentColor;
 }
