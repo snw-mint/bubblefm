@@ -1,0 +1,157 @@
+<!doctype html>
+<!--
+ - BubbleFM
+ - Copyright (c) 2026 SnowMint
+ - Licensed under the GNU General Public License v3.0 (GPL-3.0)
+ - You should have received a copy of the GNU General Public License along with this program.
+ - If not, see <https://www.gnu.org/licenses/>.
+ -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Terms of Use - BubbleFM</title>
+    <meta name="title" content="Terms of Use - BubbleFM" />
+    <meta name="description" content="Terms of Use for BubbleFM." />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet" />
+
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+
+    <style>
+      .document-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        background-color: var(--color-neutral-100);
+        border: 1px solid var(--color-neutral-200);
+        border-radius: var(--radius-lg);
+        text-align: left;
+      }
+      .document-container h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--color-primary);
+      }
+      .document-container h2 {
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        color: var(--color-text);
+      }
+      .document-container p {
+        margin-bottom: 1rem;
+        color: var(--color-neutral-500);
+        line-height: 1.6;
+      }
+      .document-container ul {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--color-neutral-500);
+        line-height: 1.6;
+      }
+      .document-container a {
+        color: var(--color-primary);
+        text-decoration: underline;
+      }
+      .document-container a:hover {
+        color: var(--color-secondary);
+      }
+      .uppercase-text {
+        text-transform: uppercase;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="home-header">
+      <a href="/index.html" class="logo-container">
+        <img src="/logo.webp" alt="BubbleFM Logo" class="logo-icon" />
+        <span class="logo-text">
+          <span class="brand-bubble">Bubble</span>
+          <span class="brand-fm">FM</span>
+        </span>
+      </a>
+      <div class="header-actions">
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Alternar tema"></button>
+        <a
+          href="https://github.com/snw-mint/bubblefm"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="github-link-btn"
+          aria-label="Repositório do GitHub">
+          <svg width="800" height="800" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+            <path
+              d="M12 2.247a10 10 0 0 0-3.162 19.487c.5.088.687-.212.687-.475 0-.237-.012-1.025-.012-1.862-2.513.462-3.163-.613-3.363-1.175a3.64 3.64 0 0 0-1.025-1.413c-.35-.187-.85-.65-.013-.662a2 2 0 0 1 1.538 1.025 2.137 2.137 0 0 0 2.912.825 2.1 2.1 0 0 1 .638-1.338c-2.225-.25-4.55-1.112-4.55-4.937a3.9 3.9 0 0 1 1.025-2.688 3.6 3.6 0 0 1 .1-2.65s.837-.262 2.75 1.025a9.43 9.43 0 0 1 5 0c1.912-1.3 2.75-1.025 2.75-1.025a3.6 3.6 0 0 1 .1 2.65 3.87 3.87 0 0 1 1.025 2.688c0 3.837-2.338 4.687-4.562 4.937a2.37 2.37 0 0 1 .674 1.85c0 1.338-.012 2.413-.012 2.75 0 .263.187.575.687.475A10.005 10.005 0 0 0 12 2.247" />
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    <main class="main-container" style="display: block; padding-top: 2rem;">
+      <div class="document-container">
+        <h1>Terms of Use</h1>
+        <p><strong>Last Updated:</strong> July 6, 2026</p>
+
+        <p>Welcome to BubbleFM. By accessing and using our website, you agree to be bound by the following terms and conditions. If you do not agree with any part of these terms, please do not use our service.</p>
+
+        <h2>1. Open Source License</h2>
+        <p>BubbleFM is an open-source project. The source code is freely available and licensed under the <strong>GNU General Public License v3.0 (GPL-3.0)</strong>.</p>
+        <p>You are free to use, modify, and distribute the source code in accordance with the terms of the GPL-3.0 license. For more details, you can view the full license text in our <a href="https://github.com/snw-mint/bubblefm/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GitHub repository</a>.</p>
+
+        <h2>2. Third-Party Services & API Usage</h2>
+        <p>BubbleFM utilizes the Last.fm API to generate visualizations based on your public scrobble data. By using BubbleFM, you agree that:</p>
+        <ul>
+          <li>You will comply with the <a href="https://www.last.fm/legal/terms" target="_blank" rel="noopener noreferrer">Last.fm Terms of Service</a>.</li>
+          <li>BubbleFM is an independent project and is not affiliated with, endorsed by, or sponsored by Last.fm or CBS Interactive.</li>
+        </ul>
+
+        <h2>3. Disclaimer of Warranty</h2>
+        <p class="uppercase-text">The service is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.</p>
+
+        <h2>4. Changes to Terms</h2>
+        <p>We reserve the right to modify or replace these Terms of Use at any time. We will notify users of any significant changes by updating the "Last Updated" date at the top of this document.</p>
+        
+        <h2>5. Contact Us</h2>
+        <p>If you have any questions about these Terms of Use, please reach out to us by opening an issue on <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="footer-info">
+        <span class="info-line-1">
+          ©
+          <span id="currentYear">2026</span>
+          BubbleFM.
+        </span>
+        <span class="separator">|</span>
+        <span class="info-line-3">
+          by
+          <a href="https://github.com/snw-mint/" target="_blank" rel="noopener noreferrer">Snow Mint</a>
+        </span>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy.html">Privacy Policy</a>
+        <span class="dot">•</span>
+        <a href="/terms.html">Terms of Use</a>
+        <span class="dot">•</span>
+        <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+        <span class="dot">•</span>
+        <span class="versao">v1.0.0</span>
+      </div>
+    </footer>
+
+    <script type="module" src="/js/unified.js"></script>
+  </body>
+</html>
