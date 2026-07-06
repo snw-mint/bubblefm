@@ -108,3 +108,114 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-neutral-500);
 }
+
+.matcher-cta-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem 0.5rem;
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+.matcher-cta-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  background-color: var(--color-neutral-200);
+}
+.matcher-icon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+}
+.matcher-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.landing-features {
+  display: flex;
+  flex-direction: column;
+  gap: 6rem;
+  margin-top: 6rem;
+  padding-bottom: 2rem;
+  width: 100%;
+  max-width: 1200px;
+}
+.feature-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2.5rem;
+}
+.feature-content h2 {
+  font-size: 2.25rem;
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+.feature-content p {
+  font-size: 1.125rem;
+  color: var(--color-neutral-500);
+  line-height: 1.6;
+}
+.feature-image-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.feature-img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+.img-dark {
+  display: none;
+}
+.img-light {
+  display: block;
+}
+[data-theme="dark"] .img-dark {
+  display: block;
+}
+[data-theme="dark"] .img-light {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .feature-section {
+    flex-direction: row;
+    text-align: left;
+  }
+  .feature-section.reverse {
+    flex-direction: row-reverse;
+  }
+  .feature-content,
+  .feature-image-container {
+    flex: 1;
+  }
+  .feature-section.centered {
+    flex-direction: column;
+    text-align: center;
+  }
+  .feature-section.centered .feature-content {
+    max-width: 800px;
+  }
+  .feature-section.centered .feature-image-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+}
+
+.main-container {
+  flex-direction: column;
+  justify-content: flex-start;
+}
