@@ -1,4 +1,4 @@
-const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-280q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>`;
+const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920t28.5 11.5T520-880v80q0 17-11.5 28.5T480-760t-28.5-11.5M678-678q-11-11-11-27.5t11-28.5l56-57q12-12 28.5-12t28.5 12q11 11 11 28t-11 28l-57 57q-11 11-28 11t-28-11m122 238q-17 0-28.5-11.5T760-480t11.5-28.5T800-520h80q17 0 28.5 11.5T920-480t-11.5 28.5T880-440zM451.5-51.5Q440-63 440-80v-80q0-17 11.5-28.5T480-200t28.5 11.5T520-160v80q0 17-11.5 28.5T480-40t-28.5-11.5M226-678l-57-56q-12-12-12-29t12-28q11-11 28-11t28 11l57 57q11 11 11 28t-11 28q-12 11-28 11t-28-11m508 509-56-57q-11-12-11-28.5t11-27.5 27.5-11 28.5 11l57 56q12 11 11.5 28T791-169q-12 12-29 12t-28-12M80-440q-17 0-28.5-11.5T40-480t11.5-28.5T80-520h80q17 0 28.5 11.5T200-480t-11.5 28.5T160-440zm89 271q-11-11-11-28t11-28l57-57q11-11 27.5-11t28.5 11q12 12 12 28.5T282-225l-56 56q-12 12-29 12t-28-12m141-141q-70-70-70-170t70-170 170-70 170 70 70 170-70 170-170 70-170-70"/></svg>`;
 const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
 
 function escapeHTML(str) {
@@ -438,3 +438,361 @@ function renderData(username, data) {
     }
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
+  const columnPickerModal = document.getElementById("columnPickerModal");
+  const closeColumnPicker = document.getElementById("closeColumnPicker");
+  const chartColOptions = document.querySelectorAll(".chart-col-option");
+  const confirmColumnsBtn = document.getElementById("confirmColumnsBtn");
+
+  if (btnGerarRelatorio && columnPickerModal) {
+    btnGerarRelatorio.addEventListener("click", () => {
+      columnPickerModal.classList.add("show");
+    });
+
+    if (closeColumnPicker) {
+      closeColumnPicker.addEventListener("click", () => {
+        columnPickerModal.classList.remove("show");
+      });
+    }
+
+    columnPickerModal.addEventListener("click", (e) => {
+      if (e.target === columnPickerModal) {
+        columnPickerModal.classList.remove("show");
+      }
+    });
+  }
+
+  if (chartColOptions.length > 0) {
+    chartColOptions.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        const row = checkbox.closest(".custom-checkbox-row");
+        if (checkbox.checked) {
+          row.classList.add("checked");
+        } else {
+          row.classList.remove("checked");
+        }
+
+        const selectedCount = Array.from(chartColOptions).filter((cb) => cb.checked).length;
+
+        if (selectedCount >= 2) {
+          chartColOptions.forEach((cb) => {
+            if (!cb.checked) {
+              cb.disabled = true;
+              cb.closest(".custom-checkbox-row").classList.add("disabled");
+            }
+          });
+        } else {
+          chartColOptions.forEach((cb) => {
+            cb.disabled = false;
+            cb.closest(".custom-checkbox-row").classList.remove("disabled");
+          });
+        }
+
+        if (selectedCount > 0 && selectedCount <= 2) {
+          confirmColumnsBtn.disabled = false;
+        } else {
+          confirmColumnsBtn.disabled = true;
+        }
+      });
+
+      const row = checkbox.closest(".custom-checkbox-row");
+      row.addEventListener("click", (e) => {
+        if (e.target !== checkbox && !checkbox.disabled) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event("change"));
+        }
+      });
+    });
+  }
+
+  const colorPickerModal = document.getElementById("colorPickerModal");
+  const closeColorPicker = document.getElementById("closeColorPicker");
+  const colorOptions = document.querySelectorAll(".color-option");
+  const customColorBtn = document.getElementById("customColorBtn");
+  const customColorPicker = document.getElementById("customColorPicker");
+  const confirmColorBtn = document.getElementById("confirmColorBtn");
+
+  let selectedColor = null;
+
+  if (confirmColumnsBtn && colorPickerModal) {
+    confirmColumnsBtn.addEventListener("click", () => {
+      columnPickerModal.classList.remove("show");
+      colorPickerModal.classList.add("show");
+    });
+
+    if (closeColorPicker) {
+      closeColorPicker.addEventListener("click", () => {
+        colorPickerModal.classList.remove("show");
+      });
+    }
+
+    colorPickerModal.addEventListener("click", (e) => {
+      if (e.target === colorPickerModal) {
+        colorPickerModal.classList.remove("show");
+      }
+    });
+  }
+
+  if (colorOptions.length > 0) {
+    colorOptions.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.id === "customColorBtn") {
+          customColorPicker.click();
+          return;
+        }
+
+        colorOptions.forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedColor = btn.dataset.color;
+
+        if (confirmColorBtn) confirmColorBtn.disabled = false;
+      });
+    });
+  }
+
+  if (customColorPicker) {
+    customColorPicker.addEventListener("input", (e) => {
+      const hexColor = e.target.value;
+      customColorBtn.style.backgroundColor = hexColor;
+
+      colorOptions.forEach((b) => b.classList.remove("selected"));
+      customColorBtn.classList.add("selected");
+      selectedColor = hexColor;
+
+      if (confirmColorBtn) confirmColorBtn.disabled = false;
+    });
+  }
+
+  const imagePickerModal = document.getElementById("imagePickerModal");
+  const closeImagePicker = document.getElementById("closeImagePicker");
+  const defaultBgCard = document.getElementById("defaultBgCard");
+  const customBgCard = document.getElementById("customBgCard");
+  const customBgInput = document.getElementById("customBgInput");
+  const confirmImageBtn = document.getElementById("confirmImageBtn");
+
+  let selectedBgType = null;
+  let customBgDataUrl = null;
+
+  if (confirmColorBtn && imagePickerModal) {
+    confirmColorBtn.addEventListener("click", () => {
+      colorPickerModal.classList.remove("show");
+      imagePickerModal.classList.add("show");
+    });
+
+    if (closeImagePicker) {
+      closeImagePicker.addEventListener("click", () => {
+        imagePickerModal.classList.remove("show");
+      });
+    }
+
+    imagePickerModal.addEventListener("click", (e) => {
+      if (e.target === imagePickerModal) {
+        imagePickerModal.classList.remove("show");
+      }
+    });
+  }
+
+  if (defaultBgCard && customBgCard) {
+    defaultBgCard.addEventListener("click", () => {
+      defaultBgCard.classList.add("selected");
+      customBgCard.classList.remove("selected");
+      selectedBgType = "default";
+      if (confirmImageBtn) confirmImageBtn.disabled = false;
+    });
+
+    customBgCard.addEventListener("click", (e) => {
+      if (e.target.tagName.toLowerCase() !== "input") {
+        customBgInput.click();
+      }
+    });
+  }
+
+  if (customBgInput) {
+    customBgInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          customBgDataUrl = event.target.result;
+          selectedBgType = "custom";
+
+          customBgCard.classList.add("selected");
+          defaultBgCard.classList.remove("selected");
+          if (confirmImageBtn) confirmImageBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  const storyCardContainer = document.getElementById("storyCardContainer");
+  const storyBody = document.getElementById("storyBody");
+
+  if (confirmImageBtn && storyCardContainer) {
+    confirmImageBtn.addEventListener("click", async () => {
+      imagePickerModal.classList.remove("show");
+      const chartColOptions = document.querySelectorAll(".chart-col-option");
+      const selectedCharts = Array.from(chartColOptions)
+        .filter((cb) => cb.checked)
+        .map((cb) => cb.value);
+      const activePeriodBtn = document.querySelector(".period-toggle.active");
+      const period = activePeriodBtn ? activePeriodBtn.dataset.period : "month";
+      if (typeof periodCache === "undefined" || !periodCache[period]) {
+        alert("Data not fully loaded yet. Please wait.");
+        return;
+      }
+      const data = periodCache[period];
+      const gradient = document.getElementById("storyCardGradient");
+      if (gradient) {
+        const c = selectedColor || "#bb86fc";
+        gradient.style.background = `radial-gradient(circle at 100% 100%, ${c} 0%, transparent 55%)`;
+        gradient.style.filter = "none";
+        gradient.style.opacity = "0.25";
+      }
+
+      const separator = document.querySelector(".story-separator");
+      if (separator) {
+        separator.style.backgroundColor = selectedColor || "#bb86fc";
+      }
+      const customStoryBg = document.getElementById("customStoryBg");
+      const userImg = document.getElementById("storyUserImg");
+
+      if (selectedBgType === "custom" && customBgDataUrl) {
+        customStoryBg.style.backgroundImage = `url(${customBgDataUrl})`;
+        customStoryBg.style.display = "block";
+      } else {
+        customStoryBg.style.display = "none";
+        if (data.artistCoverImage) {
+          customStoryBg.style.backgroundImage = `url(${data.artistCoverImage})`;
+          customStoryBg.style.display = "block";
+        }
+      }
+      if (data.userInfo && data.userInfo.user) {
+        userImg.src =
+          data.userInfo.user.image.find((img) => img.size === "extralarge")?.["#text"] ||
+          data.userInfo.user.image[0]?.["#text"];
+        const storyTitleEl = document.getElementById("storyTitle");
+        storyTitleEl.textContent = data.userInfo.user.name;
+        storyTitleEl.style.color = selectedColor || "#bb86fc";
+      }
+      const date = new Date();
+      const monthStr = date.toLocaleString("default", { month: "long" }).toUpperCase();
+      const storySubtitleEl = document.getElementById("storySubtitle");
+      storySubtitleEl.textContent = monthStr;
+      storySubtitleEl.style.color = selectedColor || "#bb86fc";
+      const minutes = Math.round(data.rawTracks.length * 3.5);
+      document.getElementById("storyScrobblesValue").textContent = minutes.toLocaleString("en-US");
+      document.getElementById("storyScrobblesLabel").textContent = "Total Minutes";
+      storyBody.innerHTML = "";
+      const isSingle = selectedCharts.length === 1;
+
+      const getTop5 = (list) => list.slice(0, 5);
+      const fetchAssetImage = async (type, query) => {
+        try {
+          const res = await fetch(
+            `https://bubblefm.snw-mint.workers.dev/assets?type=${type}&query=${encodeURIComponent(query)}`,
+          );
+          const json = await res.json();
+          if (json.data && json.data.length > 0) {
+            return type === "artist"
+              ? json.data[0].picture_medium || json.data[0].picture
+              : json.data[0].cover_medium || json.data[0].cover;
+          }
+        } catch (e) {}
+        return null;
+      };
+
+      for (let i = 0; i < selectedCharts.length; i++) {
+        const chartType = selectedCharts[i];
+        let items = [];
+        let title = "";
+        let searchType = "";
+
+        if (chartType === "artists") {
+          items = getTop5(data.artists);
+          title = "Top Artists";
+          searchType = "artist";
+        } else if (chartType === "tracks") {
+          items = getTop5(data.tracks);
+          title = "Top Songs";
+          searchType = "track";
+        } else if (chartType === "albums") {
+          items = getTop5(data.albums);
+          title = "Top Albums";
+          searchType = "album";
+        }
+
+        const colDiv = document.createElement("div");
+        colDiv.className = "story-column" + (isSingle ? " single-col" : "");
+        colDiv.innerHTML = `<h3 style="border-left-color: ${selectedColor || "#bb86fc"}">${title}</h3>`;
+
+        const listDiv = document.createElement("div");
+        listDiv.className = "story-list";
+
+        for (let j = 0; j < items.length; j++) {
+          const item = items[j];
+          const rank = j + 1;
+          const itemDiv = document.createElement("div");
+          itemDiv.className = `story-item ${rank === 1 ? "top-1" : ""}`;
+
+          let imgHtml = "";
+          if (isSingle) {
+            let q = chartType === "artists" ? item.name : `${item.name} ${item.artist?.name || ""}`;
+            let t = chartType === "artists" ? "artist" : "album";
+            const imgSrc = (await fetchAssetImage(t, q)) || "https://via.placeholder.com/150";
+            imgHtml = `<img src="${imgSrc}" class="story-item-img" />`;
+          }
+
+          let metaHtml = "";
+          if (chartType === "tracks" || chartType === "albums") {
+            metaHtml = `<span class="story-meta">${item.artist.name}</span>`;
+          } else {
+            metaHtml = `<span class="story-meta">${item.playcount} streams</span>`;
+          }
+
+          itemDiv.innerHTML = `
+            <span class="story-rank" style="color: ${selectedColor || "#bb86fc"}">${rank}</span>
+            ${imgHtml}
+            <div class="story-item-content">
+              <span class="story-text">${item.name}</span>
+              ${metaHtml}
+            </div>
+          `;
+          listDiv.appendChild(itemDiv);
+        }
+
+        colDiv.appendChild(listDiv);
+        storyBody.appendChild(colDiv);
+      }
+      storyCardContainer.style.opacity = "0";
+      storyCardContainer.style.zIndex = "-999";
+      confirmImageBtn.textContent = "Generating...";
+
+      setTimeout(() => {
+        const cardElement = document.getElementById("storyCard");
+        html2canvas(cardElement, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+          backgroundColor: null,
+        })
+          .then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `bubblefm_report_${new Date().getTime()}.png`;
+            link.href = imgData;
+            link.click();
+
+            confirmImageBtn.textContent = "Next";
+            confirmImageBtn.disabled = false;
+          })
+          .catch((err) => {
+            console.error("Error generating canvas", err);
+            confirmImageBtn.textContent = "Error";
+          });
+      }, 1000);
+    });
+  }
+});

@@ -314,6 +314,161 @@
       </div>
     </footer>
 
+    <button id="btnGerarRelatorio" class="fab-generate" title="Generate Card">
+      Generate Card
+    </button>
+
+    <div id="columnPickerModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" id="closeColumnPicker">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentcolor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
+        </span>
+        <h2>What do you want to show?</h2>
+        <p class="modal-info">Choose 1 or 2 charts to display.</p>
+        
+        <div class="chart-selection-options">
+          <div class="custom-checkbox-row">
+            <input type="checkbox" class="chart-col-option" value="artists" />
+            <div class="checkbox-icon unselected">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200z"/></svg>
+            </div>
+            <div class="checkbox-icon selected">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="m424-424-86-86q-11-11-28-11t-28 11-11 28 11 28l114 114q12 12 28 12t28-12l226-226q11-11 11-28t-11-28-28-11-28 11zM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120z"/></svg>
+            </div>
+            <span>Top Artists</span>
+          </div>
+          
+          <div class="custom-checkbox-row">
+            <input type="checkbox" class="chart-col-option" value="tracks" />
+            <div class="checkbox-icon unselected">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200z"/></svg>
+            </div>
+            <div class="checkbox-icon selected">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="m424-424-86-86q-11-11-28-11t-28 11-11 28 11 28l114 114q12 12 28 12t28-12l226-226q11-11 11-28t-11-28-28-11-28 11zM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120z"/></svg>
+            </div>
+            <span>Top Songs</span>
+          </div>
+          
+          <div class="custom-checkbox-row">
+            <input type="checkbox" class="chart-col-option" value="albums" />
+            <div class="checkbox-icon unselected">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200z"/></svg>
+            </div>
+            <div class="checkbox-icon selected">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="m424-424-86-86q-11-11-28-11t-28 11-11 28 11 28l114 114q12 12 28 12t28-12l226-226q11-11 11-28t-11-28-28-11-28 11zM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120z"/></svg>
+            </div>
+            <span>Top Albums</span>
+          </div>
+        </div>
+        
+        <button id="confirmColumnsBtn" class="btn-proceed" disabled>Next</button>
+      </div>
+    </div>
+
+    <div id="colorPickerModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" id="closeColorPicker">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentcolor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
+        </span>
+        <h2>Choose your accent color!</h2>
+        <p class="modal-info">Select a color to personalize your card.</p>
+        
+        <div class="color-palette">
+          <button class="color-option" data-color="#F44336" style="background-color: #F44336" title="Red"></button>
+          <button class="color-option" data-color="#FF5733" style="background-color: #FF5733" title="Orange"></button>
+          <button class="color-option" data-color="#FFD700" style="background-color: #FFD700" title="Yellow"></button>
+          <button class="color-option" data-color="#28A745" style="background-color: #28A745" title="Green"></button>
+          <button class="color-option" data-color="#39CCCC" style="background-color: #39CCCC" title="Cyan"></button>
+          <button class="color-option" data-color="#337AFF" style="background-color: #337AFF" title="Blue"></button>
+          <button class="color-option" data-color="#BB86FC" style="background-color: #BB86FC" title="Purple"></button>
+          <div style="position: relative; display: inline-block;">
+            <button class="color-option custom-color-btn" id="customColorBtn" title="Custom Color">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M346-140 100-386q-10-10-15-22t-5-25 5-25 15-22l230-229-75-75q-13-13-13.5-31t12.5-32 32-14 33 14l367 367q10 10 14.5 22t4.5 25-4.5 25-14.5 22L440-140q-10 10-22 15t-25 5-25-5-22-15m47-506L179-432h428zm399 526q-36 0-61-25.5T706-208q0-27 13.5-51t30.5-47l19-24q9-11 23.5-11.5T816-331l20 25q16 23 30 47t14 51q0 37-26 62.5T792-120"/></svg>
+            </button>
+            <input type="color" id="customColorPicker" style="position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;" value="#ffffff" />
+          </div>
+        </div>
+        
+        <button id="confirmColorBtn" class="btn-proceed" disabled>Next</button>
+      </div>
+    </div>
+
+    <div id="imagePickerModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" id="closeImagePicker">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentcolor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
+        </span>
+        <h2>Card Background</h2>
+        <p class="modal-info">Choose the background style for your report.</p>
+        
+        <div class="card-options-grid">
+          <div class="card-option" data-bg="default" id="defaultBgCard">
+            <div class="card-option-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm0 0v-560zm80-80h400q12 0 18-11t-2-21L586-459q-6-8-16-8t-16 8L450-320l-74-99q-6-8-16-8t-16 8l-80 107q-8 10-2 21t18 11"/></svg>
+            </div>
+            <h3>Original</h3>
+            <p>Use the same background as the site</p>
+          </div>
+          
+          <div class="card-option" data-bg="custom" id="customBgCard">
+            <div class="card-option-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32" fill="currentColor"><path d="M480-480ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280q17 0 28.5 11.5T520-800q0 17-11.5 28.5T480-760H200v560h560v-280q0-17 11.5-28.5T800-520q17 0 28.5 11.5T840-480v280q0 33-23.5 56.5T760-120H200Zm40-160h480L570-480 450-320l-90-120-120 160Zm440-400h-40q-17 0-28.5-11.5T600-720q0-17 11.5-28.5T640-760h40v-40q0-17 11.5-28.5T720-840q17 0 28.5 11.5T760-800v40h40q17 0 28.5 11.5T840-720q0 17-11.5 28.5T800-680h-40v40q0 17-11.5 28.5T720-600q-17 0-28.5-11.5T680-640v-40Z"/></svg>
+            </div>
+            <h3>Custom</h3>
+            <p>Upload your own background image</p>
+            <input type="file" id="customBgInput" accept="image/png, image/jpeg, image/webp" style="display: none;" />
+          </div>
+        </div>
+        
+        <button id="confirmImageBtn" class="btn-proceed" disabled>Next</button>
+      </div>
+    </div>
+
+    <!-- Hidden Card Container for Rendering -->
+    <div id="storyCardContainer" class="hidden-card-container">
+      <div id="storyCard">
+        <div id="storyCardGradient" style="position: absolute; inset: 0; opacity: 0.25; z-index: 0; pointer-events: none;"></div>
+        
+        <div class="story-header">
+          <div id="customStoryBg" style="display: none; width: 100%; height: 100%; background-size: cover; background-position: center; position: absolute; top: 0; left: 0; z-index: 1;"></div>
+          <div id="storyGradientOverlay" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 2;"></div>
+          <div class="story-header-overlay" style="position: relative; z-index: 3;"></div>
+        </div>
+
+        <div class="story-separator"></div>
+
+        <div class="story-avatar-container">
+          <img id="storyUserImg" src="" alt="" class="story-avatar-img">
+        </div>
+        
+        <div class="story-info-container">
+          <div class="story-info-row">
+            <div class="story-info-left">
+              <span class="story-label-small">Month Review</span>
+              <span id="storySubtitle" class="story-subtitle"></span>
+            </div>
+            <div class="story-info-right">
+              <span class="story-label-small">Prepared for</span>
+              <h1 id="storyTitle" class="story-username"></h1>
+            </div>
+          </div>
+        </div>
+        
+        <div class="story-body" id="storyBody">
+          <!-- Dynamically populated by unified.js based on 1 or 2 columns -->
+        </div>
+        
+        <div class="story-footer">
+          <div class="footer-stat-group">
+            <span id="storyScrobblesValue" class="footer-stat-value">0</span>
+            <span id="storyScrobblesLabel" class="footer-stat-label">Total Time</span>
+          </div>
+          <div class="story-brand">Create yours at bubblefm.vercel.app</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script type="module" src="/js/unified.js"></script>
     <style>
       @keyframes spin {
