@@ -28,34 +28,7 @@
     <link rel="stylesheet" href="/css/layout.css" />
     <link rel="stylesheet" href="/css/components.css" />
 
-    <style>
-      .match-inputs-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0px;
-        width: 100%;
-        margin-bottom: 25px;
-      }
-      .vs-text {
-        font-weight: 800;
-        color: var(--color-primary);
-        font-size: 1.1rem;
-        background-color: var(--color-neutral-100);
-        padding: 4px 12px;
-        border-radius: 12px;
-        border: 2px solid var(--color-neutral-200);
-        z-index: 10;
-        margin: -16px 0;
-      }
-      .match-form {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-      }
-    </style>
+
   </head>
   <body>
     <header class="home-header">
@@ -130,6 +103,106 @@
 
         <p id="mensagemErro" class="error-message"></p>
       </section>
+
+      <a href="/" class="landing-card matcher-cta-card">
+        <span class="matcher-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="28px"
+            viewBox="0 -960 960 960"
+            width="28px"
+            fill="currentColor">
+            <path
+              d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h240q17 0 28.5 11.5T480-800q0 17-11.5 28.5T440-760H200v560h560v-240q0-17 11.5-28.5T800-480q17 0 28.5 11.5T840-440v240q0 33-23.5 56.5T760-120H200Zm560-584L416-360q-11 11-28 11t-28-11q-11-11-11-28t11-28l344-344H600q-17 0-28.5-11.5T560-800q0-17 11.5-28.5T600-840h200q17 0 28.5 11.5T840-800v200q0 17-11.5 28.5T800-560q-17 0-28.5-11.5T760-600v-104Z" />
+          </svg>
+        </span>
+        <span class="matcher-text">Check your individual stats!</span>
+      </a>
+
+      <div class="landing-features">
+        <section class="feature-section">
+          <div class="feature-content">
+            <h2>See How You Match Up</h2>
+            <p>
+              Compare your Last.fm data directly with a friend. Discover shared artists, tracks, and see who listens
+              more all in one beautiful interface.
+            </p>
+          </div>
+          <div class="feature-image-container">
+            <img
+              src="/assets/leading-m/screen-light(match).webp"
+              alt="Match interface light"
+              class="feature-img img-light"
+              loading="lazy" />
+            <img
+              src="/assets/leading-m/screen-dark(match).webp"
+              alt="Match interface dark"
+              class="feature-img img-dark"
+              loading="lazy" />
+          </div>
+        </section>
+
+        <section class="feature-section reverse">
+          <div class="feature-content">
+            <h2>Share Your Compatibility</h2>
+            <p>
+              Generate stunning, customizable compatibility cards. Perfect for sharing on Instagram, Twitter, and
+              showing off your music connection.
+            </p>
+          </div>
+          <div class="feature-image-container">
+            <img
+              src="/assets/leading-m/mockup(light).webp"
+              alt="Shareable match cards light"
+              class="feature-img img-light"
+              loading="lazy" />
+            <img
+              src="/assets/leading-m/mockup(dark).webp"
+              alt="Shareable match cards dark"
+              class="feature-img img-dark"
+              loading="lazy" />
+          </div>
+        </section>
+
+        <section class="feature-section centered">
+          <div class="feature-content">
+            <h2>Ready to Find Your Match?</h2>
+            <p>
+              Join thousands of Last.fm users discovering their music compatibility. It's completely free and takes
+              seconds.
+            </p>
+            <a
+              href="#"
+              onclick="
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return false;
+              "
+              class="btn-primary"
+              style="
+                width: max-content;
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+                margin-top: 1.5rem;
+                text-decoration: none;
+                border-radius: 30px;
+              ">
+              Compare Now
+            </a>
+          </div>
+          <div class="feature-image-container" style="box-shadow: none; background: transparent">
+            <img
+              src="/assets/leading-m/mockup2(light).webp"
+              alt="Animated match card effect light"
+              class="feature-img img-light"
+              loading="lazy" />
+            <img
+              src="/assets/leading-m/mockup2(dark).webp"
+              alt="Animated match card effect dark"
+              class="feature-img img-dark"
+              loading="lazy" />
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer class="app-footer">
@@ -139,6 +212,20 @@
           <span id="currentYear">2026</span>
           BubbleFM.
         </span>
+        <span class="separator">|</span>
+        <span class="info-line-3">
+          by
+          <a href="https://github.com/snw-mint/" target="_blank" rel="noopener noreferrer">Snow Mint</a>
+        </span>
+      </div>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <span class="dot">•</span>
+        <a href="terms.html">Terms of Use</a>
+        <span class="dot">•</span>
+        <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+        <span class="dot">•</span>
+        <span class="versao">v1.0.0</span>
       </div>
     </footer>
 
@@ -159,13 +246,13 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      (() => {
         const snackbar = document.getElementById("migrationSnackbar");
         const closeBtn = document.getElementById("migrationCloseBtn");
         const snackbarKey = "bubblefm_migration_seen";
 
         if (localStorage.getItem(snackbarKey)) {
-          snackbar.classList.add("hidden");
+          snackbar.style.display = "none";
           return;
         }
 
@@ -179,7 +266,7 @@
         }
 
         setTimeout(dismissSnackbar, 60000); // 1 minuto
-      });
+      })();
     </script>
 
     <script type="module" src="/js/unified.js"></script>

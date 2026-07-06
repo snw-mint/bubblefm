@@ -263,13 +263,13 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      (() => {
         const snackbar = document.getElementById("migrationSnackbar");
         const closeBtn = document.getElementById("migrationCloseBtn");
         const snackbarKey = "bubblefm_migration_seen";
 
         if (localStorage.getItem(snackbarKey)) {
-          snackbar.classList.add("hidden");
+          snackbar.style.display = "none";
           return;
         }
 
@@ -283,7 +283,7 @@
         }
 
         setTimeout(dismissSnackbar, 60000); // 1 minuto
-      });
+      })();
     </script>
 
     <script type="module" src="/js/unified.js"></script>
