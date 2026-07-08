@@ -711,10 +711,25 @@ document.addEventListener("DOMContentLoaded", () => {
       storySubtitleEl.textContent = monthStr;
       storySubtitleEl.style.color = selectedColor || "#bb86fc";
       const minutes = Math.round(data.rawTracks.length * 3.5);
-      document.getElementById("storyScrobblesValue").textContent = minutes.toLocaleString("en-US");
-      document.getElementById("storyScrobblesLabel").textContent = "Total Minutes";
-      storyBody.innerHTML = "";
       const isSingle = selectedCharts.length === 1;
+      const scrobblesValueEl = document.getElementById("storyScrobblesValue");
+      const scrobblesLabelEl = document.getElementById("storyScrobblesLabel");
+      const statGroupEl = scrobblesValueEl.parentElement;
+
+      if (isSingle) {
+        scrobblesValueEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
+        scrobblesLabelEl.style.display = "none";
+        statGroupEl.style.flexDirection = "row";
+        scrobblesValueEl.style.fontSize = "4.5rem";
+      } else {
+        scrobblesValueEl.textContent = minutes.toLocaleString("en-US");
+        scrobblesLabelEl.textContent = "Total Minutes";
+        scrobblesLabelEl.style.display = "block";
+        statGroupEl.style.flexDirection = "column";
+        scrobblesValueEl.style.fontSize = "";
+      }
+
+      storyBody.innerHTML = "";
 
       const getTop5 = (list) => list.slice(0, 5);
       const fetchAssetImage = async (type, query) => {
