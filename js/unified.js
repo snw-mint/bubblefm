@@ -48,6 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const userInput = document.getElementById("userInput").value.trim();
       if (userInput) {
         sessionStorage.setItem("lastfm_user", userInput);
+        if (typeof umami !== 'undefined') {
+          umami.track('Search Initiated', { type: 'single' });
+        }
         window.location.href = "result.html";
       }
     });
@@ -62,6 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (userInput1 && userInput2) {
         sessionStorage.setItem("lastfm_user1", userInput1);
         sessionStorage.setItem("lastfm_user2", userInput2);
+        if (typeof umami !== 'undefined') {
+          umami.track('Search Initiated', { type: 'match' });
+        }
         window.location.href = "result.html";
       }
     });
@@ -816,6 +822,17 @@ document.addEventListener("DOMContentLoaded", () => {
             link.download = `bubblefm_report_${new Date().getTime()}.png`;
             link.href = imgData;
             link.click();
+
+            if (typeof umami !== 'undefined') {
+              const activeTimeBtn = document.querySelector('.time-toggle-btn.active');
+              umami.track('Card Generated', {
+                type: window.location.pathname.includes('match') ? 'match' : 'single',
+                period: activeTimeBtn ? activeTimeBtn.dataset.period : 'month',
+                charts: selectedCharts.join(','),
+                color: selectedColor || '#bb86fc',
+                cover: selectedBgType || 'default'
+              });
+            }
 
             confirmImageBtn.textContent = "Next";
             confirmImageBtn.disabled = false;
