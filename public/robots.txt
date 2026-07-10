@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /match/
+Allow: /privacy.html
+Allow: /terms.html
+Disallow: /result.html
+Disallow: /match/result.html
+
+Sitemap: https://bubblefm.vercel.app/sitemap.xml
