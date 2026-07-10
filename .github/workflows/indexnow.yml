@@ -1,0 +1,27 @@
+name: IndexNow Automation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar URLs para o IndexNow
+        uses: its some/indexnow-action@v1
+        run: |
+          curl -X POST "https://api.indexnow.org/indexnow" \
+          -H "Content-Type: application/json; charset=utf-8" \
+          -d '{
+            "host": "https://bubblefm.vercel.app/",
+            "key": "e02bd6bcfa7a4a229d4e8dcef1828e67",
+            "keyLocation": "https://bubblefm.vercel.app/e02bd6bcfa7a4a229d4e8dcef1828e67.txt",
+            "urlList": [
+              "https://bubblefm.vercel.app/",
+              "https://bubblefm.vercel.app/match/",
+              "https://bubblefm.vercel.app/privacy",
+              "https://bubblefm.vercel.app/terms"
+            ]
+          }'
