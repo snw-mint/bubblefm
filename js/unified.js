@@ -482,16 +482,52 @@ function renderData(username, data) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
+  
+  const formatPickerModal = document.getElementById("formatPickerModal");
+  const closeFormatPicker = document.getElementById("closeFormatPicker");
+  const formatOptions = document.querySelectorAll("#formatPickerModal .card-option");
+  const confirmFormatBtn = document.getElementById("confirmFormatBtn");
+  let selectedFormat = "9x16";
+
   const columnPickerModal = document.getElementById("columnPickerModal");
   const closeColumnPicker = document.getElementById("closeColumnPicker");
   const chartColOptions = document.querySelectorAll(".chart-col-option");
   const confirmColumnsBtn = document.getElementById("confirmColumnsBtn");
 
-  if (btnGerarRelatorio && columnPickerModal) {
+  if (btnGerarRelatorio && formatPickerModal) {
     btnGerarRelatorio.addEventListener("click", () => {
-      columnPickerModal.classList.add("show");
+      formatPickerModal.classList.add("show");
     });
 
+    if (closeFormatPicker) {
+      closeFormatPicker.addEventListener("click", () => {
+        formatPickerModal.classList.remove("show");
+      });
+    }
+
+    formatPickerModal.addEventListener("click", (e) => {
+      if (e.target === formatPickerModal) {
+        formatPickerModal.classList.remove("show");
+      }
+    });
+  }
+
+  if (formatOptions.length > 0) {
+    formatOptions.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        formatOptions.forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedFormat = btn.dataset.format;
+      });
+    });
+  }
+
+  if (confirmFormatBtn && columnPickerModal) {
+    confirmFormatBtn.addEventListener("click", () => {
+      formatPickerModal.classList.remove("show");
+      columnPickerModal.classList.add("show");
+    });
+    
     if (closeColumnPicker) {
       closeColumnPicker.addEventListener("click", () => {
         columnPickerModal.classList.remove("show");
@@ -619,7 +655,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (confirmColorBtn && imagePickerModal) {
     confirmColorBtn.addEventListener("click", () => {
       colorPickerModal.classList.remove("show");
-      imagePickerModal.classList.add("show");
+      if (selectedFormat === "1x1") {
+        if (confirmImageBtn) {
+          confirmImageBtn.disabled = false;
+          confirmImageBtn.click();
+        }
+      } else {
+        imagePickerModal.classList.add("show");
+      }
     });
 
     if (closeImagePicker) {
@@ -693,6 +736,12 @@ document.addEventListener("DOMContentLoaded", () => {
         gradient.style.opacity = "0.25";
       }
 
+      const cardElement = document.getElementById("storyCard");
+      if (cardElement) {
+        cardElement.classList.remove("format-9x16", "format-3x4", "format-1x1");
+        cardElement.classList.add(`format-${selectedFormat}`);
+      }
+
       const separator = document.querySelector(".story-separator");
       if (separator) {
         separator.style.backgroundColor = selectedColor || "#bb86fc";
@@ -747,17 +796,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const scrobblesLabelEl = document.getElementById("storyScrobblesLabel");
       const statGroupEl = scrobblesValueEl.parentElement;
 
-      if (isSingle) {
+      if (selectedFormat === "3x4" || selectedFormat === "1x1") {
         scrobblesValueEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
         scrobblesLabelEl.style.display = "none";
         statGroupEl.style.flexDirection = "row";
-        scrobblesValueEl.style.fontSize = "4.5rem";
+        scrobblesValueEl.style.fontSize = "3.5rem";
       } else {
-        scrobblesValueEl.textContent = minutes.toLocaleString("en-US");
-        scrobblesLabelEl.textContent = "Total Minutes";
-        scrobblesLabelEl.style.display = "block";
-        statGroupEl.style.flexDirection = "column";
-        scrobblesValueEl.style.fontSize = "";
+        if (isSingle) {
+          scrobblesValueEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
+          scrobblesLabelEl.style.display = "none";
+          statGroupEl.style.flexDirection = "row";
+          scrobblesValueEl.style.fontSize = "4.5rem";
+        } else {
+          scrobblesValueEl.textContent = minutes.toLocaleString("en-US");
+          scrobblesLabelEl.textContent = "Total Minutes";
+          scrobblesLabelEl.style.display = "block";
+          statGroupEl.style.flexDirection = "column";
+          scrobblesValueEl.style.fontSize = "";
+        }
       }
 
       storyBody.innerHTML = "";
@@ -809,10 +865,14 @@ document.addEventListener("DOMContentLoaded", () => {
           const item = items[j];
           const rank = j + 1;
           const itemDiv = document.createElement("div");
-          itemDiv.className = `story-item ${rank === 1 ? "top-1" : ""}`;
+          let isTop1 = rank === 1;
+          if (selectedFormat === "3x4" || selectedFormat === "1x1") {
+            isTop1 = false;
+          }
+          itemDiv.className = `story-item ${isTop1 ? "top-1" : ""}`;
 
           let imgHtml = "";
-          if (isSingle) {
+          if (isSingle && isTop1) {
             let q = chartType === "artists" ? item.name : `${item.name} ${item.artist?.name || ""}`;
             let t = chartType === "artists" ? "artist" : "album";
             const imgSrc = (await fetchAssetImage(t, q)) || "https://via.placeholder.com/150";

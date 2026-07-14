@@ -952,3 +952,78 @@
 .migration-snackbar-close svg {
   fill: currentColor;
 }
+
+#storyCard.format-3x4 {
+  height: 1350px;
+}
+#storyCard.format-1x1 {
+  height: 1080px;
+}
+
+#storyCard.format-3x4 .story-header {
+  height: 12%;
+}
+#storyCard.format-3x4 .story-column h3,
+#storyCard.format-1x1 .story-column h3 {
+  font-size: 3.2rem !important;
+  margin-bottom: 30px;
+}
+#storyCard.format-3x4 .story-list {
+  gap: 30px !important;
+}
+#storyCard.format-1x1 .story-list {
+  gap: 45px !important;
+}
+#storyCard.format-3x4 .story-text,
+#storyCard.format-1x1 .story-text {
+  font-size: 2.2rem !important;
+}
+#storyCard.format-3x4 .story-rank,
+#storyCard.format-1x1 .story-rank {
+  font-size: 3rem !important;
+  width: 70px !important;
+}
+
+#storyCard.format-3x4 .story-footer .footer-stat-group,
+#storyCard.format-1x1 .story-footer .footer-stat-group {
+  flex-direction: row !important;
+}
+#storyCard.format-3x4 #storyScrobblesLabel,
+#storyCard.format-1x1 #storyScrobblesLabel {
+  display: none !important;
+}
+
+/* 1:1 Adjustments */
+#storyCard.format-3x4 .story-column h3 {
+  margin-bottom: 45px !important;
+}
+
+#storyCard.format-1x1 .story-header,
+#storyCard.format-1x1 .story-separator,
+#storyCard.format-1x1 .story-avatar-container {
+  display: none !important;
+}
+#storyCard.format-1x1 .story-meta {
+  font-size: 1.1rem !important;
+  display: block;
+}
+#storyCard.format-1x1 .story-info-container {
+  padding-top: 15px !important;
+}
+#storyCard.format-1x1 .story-column h3 {
+  font-size: 2.1rem !important;
+  margin-bottom: 30px !important;
+}
+#storyCard.format-1x1 .story-text {
+  font-size: 1.8rem !important;
+}
+#storyCard.format-1x1 .story-rank {
+  font-size: 2.2rem !important;
+  width: 50px !important;
+}
+#storyCard.format-1x1 .story-list {
+  gap: 35px !important;
+}
+#storyCard.format-1x1 .story-brand {
+  font-size: 0.95rem !important;
+}
