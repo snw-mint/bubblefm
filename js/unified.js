@@ -465,6 +465,19 @@ function renderData(username, data) {
       removeSkeletonText(userDailyAvgEl);
     }
   }
+
+  const chartsTimeTextEl = document.getElementById("chartsTimeText");
+  if (chartsTimeTextEl) {
+    const activePeriodBtn = document.querySelector(".time-toggle-btn.active");
+    const currentP = activePeriodBtn ? activePeriodBtn.dataset.period : "month";
+    if (currentP === "week") {
+      chartsTimeTextEl.textContent = "Showing charts since last Monday";
+    } else {
+      const d = new Date();
+      const mStr = d.toLocaleString("en-US", { month: "long" });
+      chartsTimeTextEl.textContent = `Showing charts for ${mStr}`;
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -665,7 +678,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const selectedCharts = Array.from(chartColOptions)
         .filter((cb) => cb.checked)
         .map((cb) => cb.value);
-      const activePeriodBtn = document.querySelector(".period-toggle.active");
+      const activePeriodBtn = document.querySelector(".time-toggle-btn.active");
       const period = activePeriodBtn ? activePeriodBtn.dataset.period : "month";
       if (typeof periodCache === "undefined" || !periodCache[period]) {
         alert("Data not fully loaded yet. Please wait.");
@@ -706,10 +719,28 @@ document.addEventListener("DOMContentLoaded", () => {
         storyTitleEl.style.color = selectedColor || "#bb86fc";
       }
       const date = new Date();
-      const monthStr = date.toLocaleString("default", { month: "long" }).toUpperCase();
+      let subtitleText = "";
+      if (period === "week") {
+        const dayOfWeek = date.getDay();
+        const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+        const startOfWeek = new Date(date.getFullYear(), date.getMonth(), date.getDate() + diffToMonday);
+        
+        const startDay = startOfWeek.getDate().toString().padStart(2, '0');
+        const endDay = date.getDate().toString().padStart(2, '0');
+        const monthShort = date.toLocaleString("default", { month: "short" }).toLowerCase();
+        subtitleText = `${startDay}-${endDay} ${monthShort}`;
+      } else {
+        subtitleText = date.toLocaleString("default", { month: "long" }).toUpperCase();
+      }
+      
       const storySubtitleEl = document.getElementById("storySubtitle");
-      storySubtitleEl.textContent = monthStr;
+      storySubtitleEl.textContent = subtitleText;
       storySubtitleEl.style.color = selectedColor || "#bb86fc";
+      
+      const storyReviewLabel = document.getElementById("storyReviewLabel");
+      if (storyReviewLabel) {
+        storyReviewLabel.textContent = period === "week" ? "Week Review" : "Month Review";
+      }
       const minutes = Math.round(data.rawTracks.length * 3.5);
       const isSingle = selectedCharts.length === 1;
       const scrobblesValueEl = document.getElementById("storyScrobblesValue");

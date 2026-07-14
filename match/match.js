@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <img class="top1-image" id="${elementId}-img" alt="Top 1" style="display: none" />
               <div class="text-content">
                 <span style="font-weight: bold;">${item.name}</span>
-                <span style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.85);">${isCommon ? item.playcount + " plays together" : item.playcount + " scrobbles"}</span>
+                <span style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.85);">${isCommon ? item.playcount + " plays together" : item.playcount + " streams"}</span>
               </div>
             </div>
           `;
@@ -427,7 +427,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <span class="story-rank" style="color: ${selectedCardColor}">${rank}</span>
               <div class="story-item-content">
                 <span class="story-text">${item.name}</span>
-                <span class="story-meta">${item.playcount} scrobbles</span>
+                <span class="story-meta">${item.playcount} streams</span>
               </div>
             `;
             listDiv.appendChild(itemDiv);
@@ -436,8 +436,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           storyBody.appendChild(colDiv);
         };
 
-        renderChart(unique1, info1.user?.name || user1);
-        renderChart(unique2, info2.user?.name || user2);
+        renderChart(list1, info1.user?.name || user1);
+        renderChart(list2, info2.user?.name || user2);
 
         storyCardContainer.style.opacity = "0";
         storyCardContainer.style.zIndex = "-999";
