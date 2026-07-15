@@ -1,0 +1,22 @@
+name: Design Feedback
+description: Provide style and design feedback for the cards.
+title: "[Feedback]: "
+labels: ["feedback", "design", "ui"]
+body:
+  - type: markdown
+    attributes:
+      value: "We appreciate your feedback on the style and design of our cards."
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Your Feedback
+      description: What do you think about the current design? How can we improve it?
+    validations:
+      required: true
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Visual References
+      description: Please attach any images, mockups, or screenshots representing your suggested improvements by dragging and dropping them here.
+    validations:
+      required: false

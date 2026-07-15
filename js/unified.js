@@ -101,6 +101,39 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+function initGlobalTooltip() {
+  let globalTooltip = document.getElementById("globalTooltip");
+  if (!globalTooltip) {
+    globalTooltip = document.createElement("div");
+    globalTooltip.id = "globalTooltip";
+    globalTooltip.className = "global-tooltip";
+    document.body.appendChild(globalTooltip);
+  }
+
+  document.addEventListener("mouseover", (e) => {
+    const chartItem = e.target.closest(".chart-item");
+    if (chartItem && !chartItem.closest("#storyCardContainer")) {
+      const plays = chartItem.getAttribute("data-plays");
+      const minutes = chartItem.getAttribute("data-minutes");
+      if (plays && minutes) {
+        globalTooltip.textContent = `${plays} streams / ${minutes} min`;
+        globalTooltip.classList.add("show");
+        
+        const rect = chartItem.getBoundingClientRect();
+        
+        let top = rect.top + window.scrollY - 40;
+        let left = rect.left + window.scrollX + (rect.width / 2);
+        
+        globalTooltip.style.top = `${top}px`;
+        globalTooltip.style.left = `${left}px`;
+      }
+    } else {
+      globalTooltip.classList.remove("show");
+    }
+  });
+}
+initGlobalTooltip();
+
 function resetToSkeletons() {
   const textFields = ["userScrobbles", "userMinutes", "userDailyAvg"];
   textFields.forEach((id) => {
@@ -333,18 +366,20 @@ function renderData(username, data) {
     items.slice(0, 10).forEach((item, index) => {
       const rank = index + 1;
       const name = escapeHTML(item.name);
-      const playcount = parseInt(item.playcount || 0, 10).toLocaleString("en-US");
+      const playcountNum = parseInt(item.playcount || 0, 10);
+      const playcountStr = playcountNum.toLocaleString("en-US");
+      const minutesStr = Math.round(playcountNum * 3.5).toLocaleString("en-US");
 
       if (rank === 1) {
         let subText = "";
         if (type === "artist") {
-          subText = `${playcount} plays`;
+          subText = `${playcountStr} plays`;
         } else if (type === "track" || type === "album") {
-          subText = `${escapeHTML(item.artist.name)} - ${playcount} plays`;
+          subText = `${escapeHTML(item.artist.name)} - ${playcountStr} plays`;
         }
 
         html += `
-                    <div class="chart-item top-1">
+                    <div class="chart-item top-1" data-plays="${playcountStr}" data-minutes="${minutesStr}" style="cursor: pointer;">
                         <div class="top1-image skeleton skeleton-icon" id="${type}1Skeleton">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-300q75 0 127.5-52.5T660-480q0-75-52.5-127.5T480-660q-75 0-127.5 52.5T300-480q0 75 52.5 127.5T480-300Zm-28.5-151.5Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
                         </div>
@@ -363,7 +398,7 @@ function renderData(username, data) {
           text = `${name} - ${escapeHTML(item.artist.name)}`;
         }
         html += `
-                    <div class="chart-item">
+                    <div class="chart-item" data-plays="${playcountStr}" data-minutes="${minutesStr}" style="cursor: pointer;">
                         <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#${rank}</span> ${text}
                     </div>
                 `;
@@ -525,6 +560,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (confirmFormatBtn && columnPickerModal) {
     confirmFormatBtn.addEventListener("click", () => {
       formatPickerModal.classList.remove("show");
+      
+      const selectedCount = Array.from(chartColOptions).filter((cb) => cb.checked).length;
+      const subtitle = document.getElementById("columnPickerSubtitle");
+      if (selectedFormat === "3x4" || selectedFormat === "1x1") {
+        confirmColumnsBtn.disabled = selectedCount !== 2;
+        if (subtitle) subtitle.textContent = "Choose exactly 2 charts to display.";
+      } else {
+        confirmColumnsBtn.disabled = !(selectedCount > 0 && selectedCount <= 2);
+        if (subtitle) subtitle.textContent = "Choose 1 or 2 charts to display.";
+      }
+
       columnPickerModal.classList.add("show");
     });
     
@@ -567,10 +613,10 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
 
-        if (selectedCount > 0 && selectedCount <= 2) {
-          confirmColumnsBtn.disabled = false;
+        if (selectedFormat === "3x4" || selectedFormat === "1x1") {
+          confirmColumnsBtn.disabled = selectedCount !== 2;
         } else {
-          confirmColumnsBtn.disabled = true;
+          confirmColumnsBtn.disabled = !(selectedCount > 0 && selectedCount <= 2);
         }
       });
 
@@ -872,7 +918,7 @@ document.addEventListener("DOMContentLoaded", () => {
           itemDiv.className = `story-item ${isTop1 ? "top-1" : ""}`;
 
           let imgHtml = "";
-          if (isSingle && isTop1) {
+          if (isSingle) {
             let q = chartType === "artists" ? item.name : `${item.name} ${item.artist?.name || ""}`;
             let t = chartType === "artists" ? "artist" : "album";
             const imgSrc = (await fetchAssetImage(t, q)) || "https://via.placeholder.com/150";

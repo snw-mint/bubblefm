@@ -550,6 +550,81 @@
   margin: 0;
 }
 
+.format-options-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+
+.format-option-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-neutral-300);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-neutral-100);
+}
+
+.format-option-row:hover {
+  background-color: var(--color-neutral-200);
+}
+
+.format-option-row.selected {
+  border-color: var(--color-primary);
+  background-color: rgba(255, 68, 68, 0.05);
+}
+
+.format-option-row .radio-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  color: var(--color-neutral-400);
+}
+
+.format-option-row.selected .radio-icon.unselected {
+  display: none;
+}
+
+.format-option-row.selected .radio-icon.selected {
+  display: flex;
+  color: var(--color-primary);
+}
+
+.format-option-row .radio-icon.selected {
+  display: none;
+}
+
+.format-text {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  text-align: left;
+}
+
+.format-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
+.format-ratio {
+  font-size: 0.9rem;
+  color: var(--color-neutral-500);
+}
+
+.format-icon-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+}
+
 .hidden-card-container {
   position: fixed;
   left: 0;
@@ -855,40 +930,56 @@
 }
 
 .loader {
-  --color-1: var(--color-primary);
-  --size: 1px;
-
-  width: calc(48 * var(--size));
-  height: calc(48 * var(--size));
-  display: inline-block;
-  position: relative;
-}
-.loader::after,
-.loader::before {
-  content: "";
-  box-sizing: border-box;
-  width: calc(48 * var(--size));
-  height: calc(48 * var(--size));
+  width: 64px;
+  height: 64px;
+  border: 6px solid var(--color-neutral-200);
+  border-bottom-color: var(--color-primary);
   border-radius: 50%;
-  border: calc(2 * var(--size)) solid var(--color-1);
-  position: absolute;
-  left: 0;
-  top: 0;
-  animation: animloader 2s linear infinite;
-}
-.loader::after {
-  animation-delay: 1s;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
 
-@keyframes animloader {
+@keyframes rotation {
   0% {
-    transform: scale(0);
-    opacity: 1;
+    transform: rotate(0deg);
   }
   100% {
-    transform: scale(1);
-    opacity: 0;
+    transform: rotate(360deg);
   }
+}
+
+.global-tooltip {
+  position: absolute;
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 9999;
+  transform: translate(-50%, 10px);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.global-tooltip.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.global-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--color-text) transparent transparent transparent;
 }
 
 .migration-snackbar {

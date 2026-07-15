@@ -1,0 +1,15 @@
+name: General Question
+description: Ask general questions about usage or implementation.
+title: "[Question]: "
+labels: ["question", "support", "help-wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: "How can we help you? Please formulate your question clearly."
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+    validations:
+      required: true
