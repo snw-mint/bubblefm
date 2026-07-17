@@ -279,8 +279,9 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
     const assetPromises = [];
 
     if (topArtistName) {
+      const artistQuery = `artist:"${topArtistName}"`;
       assetPromises.push(
-        fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(topArtistName)}`)
+        fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(artistQuery)}`)
           .then((res) => res.json())
           .then((data) => {
             if (data.data && data.data.length > 0) {
@@ -293,7 +294,7 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
     }
 
     if (topAlbumName) {
-      const albumQuery = `${topAlbumName} ${topAlbumArtist || ""}`.trim();
+      const albumQuery = `album:"${topAlbumName}" artist:"${topAlbumArtist || ""}"`.trim();
       assetPromises.push(
         fetch(`${assetsBaseUrl}?type=album&query=${encodeURIComponent(albumQuery)}`)
           .then((res) => res.json())
@@ -307,13 +308,14 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
     }
 
     if (topTrackName) {
-      const trackQuery = `${topTrackName} ${topTrackArtist || ""}`.trim();
+      const trackQuery = `track:"${topTrackName}" artist:"${topTrackArtist || ""}"`.trim();
       assetPromises.push(
-        fetch(`${assetsBaseUrl}?type=album&query=${encodeURIComponent(trackQuery)}`)
+        fetch(`${assetsBaseUrl}?type=track&query=${encodeURIComponent(trackQuery)}`)
           .then((res) => res.json())
           .then((data) => {
             if (data.data && data.data.length > 0) {
-              trackImage = data.data[0].cover_medium || data.data[0].cover;
+              const item = data.data[0];
+              trackImage = item.album ? (item.album.cover_medium || item.album.cover) : (item.cover_medium || item.cover);
             }
           })
           .catch((err) => console.error(err)),
@@ -872,9 +874,14 @@ document.addEventListener("DOMContentLoaded", () => {
           );
           const json = await res.json();
           if (json.data && json.data.length > 0) {
-            return type === "artist"
-              ? json.data[0].picture_medium || json.data[0].picture
-              : json.data[0].cover_medium || json.data[0].cover;
+            const item = json.data[0];
+            if (type === "artist") {
+              return item.picture_medium || item.picture;
+            } else if (type === "track" && item.album) {
+              return item.album.cover_medium || item.album.cover;
+            } else {
+              return item.cover_medium || item.cover;
+            }
           }
         } catch (e) {}
         return null;
@@ -919,8 +926,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
           let imgHtml = "";
           if (isSingle) {
-            let q = chartType === "artists" ? item.name : `${item.name} ${item.artist?.name || ""}`;
-            let t = chartType === "artists" ? "artist" : "album";
+            let q = "";
+            let t = "";
+            if (chartType === "artists") {
+              q = `artist:"${item.name}"`;
+              t = "artist";
+            } else if (chartType === "albums") {
+              q = `album:"${item.name}" artist:"${item.artist?.name || ""}"`;
+              t = "album";
+            } else {
+              q = `track:"${item.name}" artist:"${item.artist?.name || ""}"`;
+              t = "track";
+            }
             const imgSrc = (await fetchAssetImage(t, q)) || "https://via.placeholder.com/150";
             imgHtml = `<img src="${imgSrc}" class="story-item-img" />`;
           }

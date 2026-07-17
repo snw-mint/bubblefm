@@ -207,7 +207,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           `;
           container.insertAdjacentHTML("beforeend", html);
           try {
-            const res = await fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(item.name)}`);
+            const artistQuery = `artist:"${item.name}"`;
+            const res = await fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(artistQuery)}`);
             const data = await res.json();
             if (data.data && data.data.length > 0) {
               top1Image = data.data[0];
