@@ -101,6 +101,35 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+function isPlaceholderImage(url) {
+  if (!url) return true;
+  return url.includes("d41d8cd98f00b204e9800998ecf8427e");
+}
+
+function selectBestArtist(items, targetName) {
+  if (!items || items.length === 0) return null;
+  const targetLower = (targetName || "").toLowerCase().trim();
+
+  const validMatches = items.filter(
+    (item) => item.name && item.name.toLowerCase().trim() === targetLower && !isPlaceholderImage(item.picture_medium || item.picture)
+  );
+
+  if (validMatches.length > 0) {
+    validMatches.sort((a, b) => (b.nb_fan || 0) - (a.nb_fan || 0));
+    return validMatches[0];
+  }
+
+  const anyValid = items.filter(
+    (item) => !isPlaceholderImage(item.picture_medium || item.picture)
+  );
+  if (anyValid.length > 0) {
+    anyValid.sort((a, b) => (b.nb_fan || 0) - (a.nb_fan || 0));
+    return anyValid[0];
+  }
+
+  return items[0];
+}
+
 function initGlobalTooltip() {
   let globalTooltip = document.getElementById("globalTooltip");
   if (!globalTooltip) {
@@ -279,14 +308,16 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
     const assetPromises = [];
 
     if (topArtistName) {
-      const artistQuery = `artist:"${topArtistName}"`;
       assetPromises.push(
-        fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(artistQuery)}`)
+        fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(topArtistName)}`)
           .then((res) => res.json())
           .then((data) => {
             if (data.data && data.data.length > 0) {
-              artistImage = data.data[0].picture_medium || data.data[0].picture;
-              artistCoverImage = data.data[0].picture_xl || data.data[0].picture_big || data.data[0].picture;
+              const bestArtist = selectBestArtist(data.data, topArtistName);
+              if (bestArtist) {
+                artistImage = bestArtist.picture_medium || bestArtist.picture;
+                artistCoverImage = bestArtist.picture_xl || bestArtist.picture_big || bestArtist.picture;
+              }
             }
           })
           .catch((err) => console.error(err)),
@@ -867,20 +898,20 @@ document.addEventListener("DOMContentLoaded", () => {
       storyBody.innerHTML = "";
 
       const getTop5 = (list) => list.slice(0, 5);
-      const fetchAssetImage = async (type, query) => {
+      const fetchAssetImage = async (type, query, targetName = "") => {
         try {
           const res = await fetch(
             `https://bubblefm.snw-mint.workers.dev/assets?type=${type}&query=${encodeURIComponent(query)}`,
           );
           const json = await res.json();
           if (json.data && json.data.length > 0) {
-            const item = json.data[0];
             if (type === "artist") {
-              return item.picture_medium || item.picture;
-            } else if (type === "track" && item.album) {
-              return item.album.cover_medium || item.album.cover;
+              const bestArtist = selectBestArtist(json.data, targetName || query);
+              return bestArtist ? (bestArtist.picture_medium || bestArtist.picture) : null;
+            } else if (type === "track" && json.data[0].album) {
+              return json.data[0].album.cover_medium || json.data[0].album.cover;
             } else {
-              return item.cover_medium || item.cover;
+              return json.data[0].cover_medium || json.data[0].cover;
             }
           }
         } catch (e) {}
@@ -929,7 +960,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let q = "";
             let t = "";
             if (chartType === "artists") {
-              q = `artist:"${item.name}"`;
+              q = item.name;
               t = "artist";
             } else if (chartType === "albums") {
               q = `album:"${item.name}" artist:"${item.artist?.name || ""}"`;
@@ -938,7 +969,7 @@ document.addEventListener("DOMContentLoaded", () => {
               q = `track:"${item.name}" artist:"${item.artist?.name || ""}"`;
               t = "track";
             }
-            const imgSrc = (await fetchAssetImage(t, q)) || "https://via.placeholder.com/150";
+            const imgSrc = (await fetchAssetImage(t, q, item.name)) || "https://via.placeholder.com/150";
             imgHtml = `<img src="${imgSrc}" class="story-item-img" />`;
           }
 

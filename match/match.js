@@ -12,6 +12,36 @@ const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox
 const lastfmBaseUrl = "https://bubblefm.snw-mint.workers.dev/data";
 const assetsBaseUrl = "https://bubblefm.snw-mint.workers.dev/assets";
 
+function isPlaceholderImage(url) {
+  if (!url) return true;
+  return url.includes("d41d8cd98f00b204e9800998ecf8427e");
+}
+
+function selectBestArtist(items, targetName) {
+  if (!items || items.length === 0) return null;
+  const targetLower = (targetName || "").toLowerCase().trim();
+
+  const validMatches = items.filter(
+    (item) => item.name && item.name.toLowerCase().trim() === targetLower && !isPlaceholderImage(item.picture_medium || item.picture)
+  );
+
+  if (validMatches.length > 0) {
+    validMatches.sort((a, b) => (b.nb_fan || 0) - (a.nb_fan || 0));
+    return validMatches[0];
+  }
+
+  const anyValid = items.filter(
+    (item) => !isPlaceholderImage(item.picture_medium || item.picture)
+  );
+  if (anyValid.length > 0) {
+    anyValid.sort((a, b) => (b.nb_fan || 0) - (a.nb_fan || 0));
+    return anyValid[0];
+  }
+
+  return items[0];
+}
+
+
 document.addEventListener("DOMContentLoaded", async () => {
   const themeToggle = document.getElementById("theme-toggle");
   const savedTheme = localStorage.getItem("theme");
@@ -207,15 +237,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           `;
           container.insertAdjacentHTML("beforeend", html);
           try {
-            const artistQuery = `artist:"${item.name}"`;
-            const res = await fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(artistQuery)}`);
+            const res = await fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(item.name)}`);
             const data = await res.json();
             if (data.data && data.data.length > 0) {
-              top1Image = data.data[0];
-              const imgEl = document.getElementById(`${elementId}-img`);
-              imgEl.src = data.data[0].picture_medium || data.data[0].picture;
-              imgEl.style.display = "block";
-              document.getElementById(`${elementId}-imgSkeleton`).style.display = "none";
+              const bestArtist = selectBestArtist(data.data, item.name);
+              if (bestArtist) {
+                top1Image = bestArtist;
+                const imgEl = document.getElementById(`${elementId}-img`);
+                imgEl.src = bestArtist.picture_medium || bestArtist.picture;
+                imgEl.style.display = "block";
+                document.getElementById(`${elementId}-imgSkeleton`).style.display = "none";
+              }
             }
           } catch (e) {
             console.error(e);
