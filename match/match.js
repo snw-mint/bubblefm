@@ -501,6 +501,16 @@ document.addEventListener("DOMContentLoaded", async () => {
               link.href = imgData;
               link.click();
 
+              if (typeof umami !== 'undefined') {
+                umami.track('Card Generated', {
+                  type: 'match',
+                  color: selectedCardColor || '#F44336',
+                  cover: selectedCardBg || 'default',
+                  format: '9x16',
+                  ratio: '9x16',
+                });
+              }
+
               storyCardContainer.style.opacity = "";
               storyCardContainer.style.zIndex = "";
               confirmImageBtn.textContent = "Next";

@@ -1030,7 +1030,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 period: activeTimeBtn ? activeTimeBtn.dataset.period : 'month',
                 charts: selectedCharts.join(','),
                 color: selectedColor || '#bb86fc',
-                cover: selectedBgType || 'default'
+                cover: selectedBgType || 'default',
+                format: selectedFormat || '9x16',
+                ratio: selectedFormat || '9x16',
               });
             }
 
