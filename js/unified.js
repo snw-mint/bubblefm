@@ -41,6 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  initFaqModal();
+
   const formUsername = document.getElementById("form-username");
   if (formUsername) {
     formUsername.addEventListener("submit", (e) => {
@@ -48,8 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const userInput = document.getElementById("userInput").value.trim();
       if (userInput) {
         sessionStorage.setItem("lastfm_user", userInput);
-        if (typeof umami !== 'undefined') {
-          umami.track('Search Initiated', { type: 'single' });
+        if (typeof umami !== "undefined") {
+          umami.track("Search Initiated", { type: "single" });
         }
         window.location.href = "result.html";
       }
@@ -65,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (userInput1 && userInput2) {
         sessionStorage.setItem("lastfm_user1", userInput1);
         sessionStorage.setItem("lastfm_user2", userInput2);
-        if (typeof umami !== 'undefined') {
-          umami.track('Search Initiated', { type: 'match' });
+        if (typeof umami !== "undefined") {
+          umami.track("Search Initiated", { type: "match" });
         }
         window.location.href = "result.html";
       }
@@ -111,7 +113,10 @@ function selectBestArtist(items, targetName) {
   const targetLower = (targetName || "").toLowerCase().trim();
 
   const validMatches = items.filter(
-    (item) => item.name && item.name.toLowerCase().trim() === targetLower && !isPlaceholderImage(item.picture_medium || item.picture)
+    (item) =>
+      item.name &&
+      item.name.toLowerCase().trim() === targetLower &&
+      !isPlaceholderImage(item.picture_medium || item.picture),
   );
 
   if (validMatches.length > 0) {
@@ -119,15 +124,219 @@ function selectBestArtist(items, targetName) {
     return validMatches[0];
   }
 
-  const anyValid = items.filter(
-    (item) => !isPlaceholderImage(item.picture_medium || item.picture)
-  );
+  const anyValid = items.filter((item) => !isPlaceholderImage(item.picture_medium || item.picture));
   if (anyValid.length > 0) {
     anyValid.sort((a, b) => (b.nb_fan || 0) - (a.nb_fan || 0));
     return anyValid[0];
   }
 
   return items[0];
+}
+
+function fetchDeezerJsonp(type, query) {
+  return new Promise((resolve) => {
+    const callbackName = "deezer_cb_" + Math.random().toString(36).substring(2);
+    const script = document.createElement("script");
+
+    const timer = setTimeout(() => {
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      resolve(null);
+    }, 5000);
+
+    window[callbackName] = (data) => {
+      clearTimeout(timer);
+      if (script.parentNode) script.parentNode.removeChild(script);
+      delete window[callbackName];
+      resolve(data);
+    };
+
+    const cleanQuery = (query || "").replace(/["']/g, "").trim();
+    script.src = `https://api.deezer.com/search/${type}?q=${encodeURIComponent(cleanQuery)}&output=jsonp&callback=${callbackName}`;
+    script.onerror = () => {
+      clearTimeout(timer);
+      if (script.parentNode) script.parentNode.removeChild(script);
+      delete window[callbackName];
+      resolve(null);
+    };
+    document.body.appendChild(script);
+  });
+}
+
+async function fetchAssetData(type, query) {
+  const cleanQuery = (query || "").replace(/["']/g, "").trim();
+  if (!cleanQuery) return null;
+  try {
+    const jsonpData = await fetchDeezerJsonp(type, cleanQuery);
+    if (jsonpData && jsonpData.data && jsonpData.data.length > 0) return jsonpData;
+  } catch (e) {
+    console.warn("Deezer JSONP fetch warning:", e);
+  }
+  return null;
+}
+
+function initFaqModal() {
+  const faqToggle = document.getElementById("faq-toggle");
+  if (!faqToggle) return;
+
+  const isMatchMode = window.location.pathname.includes("match");
+
+  let faqModal = document.getElementById("faqModal");
+  if (!faqModal) {
+    faqModal = document.createElement("div");
+    faqModal.id = "faqModal";
+    faqModal.className = "modal";
+    faqModal.setAttribute("aria-hidden", "true");
+
+    const singleFaqHtml = `
+      <div class="modal-content faq-modal-content">
+        <span class="close-button" id="faqCloseBtn">&times;</span>
+        <div class="faq-header">
+          <h2>Frequently Asked Questions</h2>
+          <p class="modal-info">Quick answers about BubbleFM features, calculations, and feedback.</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary class="faq-question">How are monthly and weekly charts calculated?</summary>
+            <div class="faq-answer">
+              <p><strong>Monthly charts</strong> count scrobbles starting from the 1st day of the current month. <strong>Weekly charts</strong> count from Monday of the current week. Once these timeframes end, counts automatically reset for the next period.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How can I view detailed stats for individual items?</summary>
+            <div class="faq-answer">
+              <p>Hover over (or tap on mobile) any artist, album, or song in your chart to view its total scrobble count and estimated listening time in minutes.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How do I generate and download a shareable story card?</summary>
+            <div class="faq-answer">
+              <p>Click the green floating button at the bottom right labeled <strong>Generate card</strong>. Follow the quick step-by-step setup to pick your layout, colors, and format, then download your image.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How do I switch my card's Light / Dark theme?</summary>
+            <div class="faq-answer">
+              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Are my personal data or Last.fm credentials saved?</summary>
+            <div class="faq-answer">
+              <p>No login or account creation is required! All stats and images are fetched live on your device using public APIs (Last.fm, Deezer, MusicBrainz). Your data is never saved on servers.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Feedback, Suggestions & Bug Reports</summary>
+            <div class="faq-answer">
+              <p>BubbleFM is open-source! We welcome community contributions and feedback on GitHub:</p>
+              <ul class="faq-links-list">
+                <li><strong>Design Feedback:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feedback.yml" target="_blank" rel="noopener noreferrer">Propose a design or UI improvement</a></li>
+                <li><strong>Feature Ideas:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feature.yml" target="_blank" rel="noopener noreferrer">Suggest a new feature</a></li>
+                <li><strong>Bug Reports:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=bug.yml" target="_blank" rel="noopener noreferrer">Report an issue or bug</a></li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    `;
+
+    const matchFaqHtml = `
+      <div class="modal-content faq-modal-content">
+        <span class="close-button" id="faqCloseBtn">&times;</span>
+        <div class="faq-header">
+          <h2>Match FAQ</h2>
+          <p class="modal-info">Quick answers about BubbleFM Match calculations, compatibility score, and charts.</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary class="faq-question">What timeframe is calculated for Match?</summary>
+            <div class="faq-answer">
+              <p>Match compatibility and top charts are calculated based on listening history from the <strong>last 30 days</strong> for both Last.fm users.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How is the compatibility percentage calculated?</summary>
+            <div class="faq-answer">
+              <p>Compatibility compares the top 100 artists of both users over the last 30 days. It measures shared artists relative to the maximum possible overlap:</p>
+              <p style="margin-top: 0.4rem; background: var(--color-neutral-100); padding: 0.5rem; border-radius: 6px; font-family: monospace; font-size: 0.82rem;">(Shared Artists ÷ Minimum Total Artists) × 100</p>
+              <p style="margin-top: 0.4rem;">For example, if both users have 100 top artists and share 45 of them, your match score is <strong>45%</strong>.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">What is the difference between User Vibe and Common Artists?</summary>
+            <div class="faq-answer">
+              <p><strong>User Vibe:</strong> Displays top individual artists listened to by each user over the last 30 days.</p>
+              <p><strong>Common Artists:</strong> Ranks top artists listened to by both users, combining their shared scrobble counts.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How do I switch the Match card's Light / Dark theme?</summary>
+            <div class="faq-answer">
+              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Are my personal data or Last.fm credentials saved?</summary>
+            <div class="faq-answer">
+              <p>No login or account creation is required! All stats and images are fetched live on your device using public APIs (Last.fm, Deezer, MusicBrainz). Your data is never saved on servers.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Feedback, Suggestions & Bug Reports</summary>
+            <div class="faq-answer">
+              <p>BubbleFM is open-source! We welcome community contributions and feedback on GitHub:</p>
+              <ul class="faq-links-list">
+                <li><strong>Design Feedback:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feedback.yml" target="_blank" rel="noopener noreferrer">Propose a design or UI improvement</a></li>
+                <li><strong>Feature Ideas:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feature.yml" target="_blank" rel="noopener noreferrer">Suggest a new feature</a></li>
+                <li><strong>Bug Reports:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=bug.yml" target="_blank" rel="noopener noreferrer">Report an issue or bug</a></li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    `;
+
+    faqModal.innerHTML = isMatchMode ? matchFaqHtml : singleFaqHtml;
+    document.body.appendChild(faqModal);
+  }
+
+  const faqCloseBtn = document.getElementById("faqCloseBtn");
+
+  const openFaq = () => {
+    faqModal.classList.add("show");
+    faqModal.setAttribute("aria-hidden", "false");
+
+    try {
+      if (typeof umami !== "undefined") {
+        umami.track("FAQ Opened");
+      }
+      const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
+      localStorage.setItem("bubblefm_faq_open_count", count.toString());
+      console.log(`[Analytics] FAQ Opened. Total local opens: ${count}`);
+    } catch (e) {}
+  };
+
+  const closeFaq = () => {
+    faqModal.classList.remove("show");
+    faqModal.setAttribute("aria-hidden", "true");
+  };
+
+  faqToggle.addEventListener("click", openFaq);
+  if (faqCloseBtn) faqCloseBtn.addEventListener("click", closeFaq);
+  faqModal.addEventListener("click", (e) => {
+    if (e.target === faqModal) closeFaq();
+  });
 }
 
 function initGlobalTooltip() {
@@ -147,12 +356,12 @@ function initGlobalTooltip() {
       if (plays && minutes) {
         globalTooltip.textContent = `${plays} streams / ${minutes} min`;
         globalTooltip.classList.add("show");
-        
+
         const rect = chartItem.getBoundingClientRect();
-        
+
         let top = rect.top + window.scrollY - 40;
-        let left = rect.left + window.scrollX + (rect.width / 2);
-        
+        let left = rect.left + window.scrollX + rect.width / 2;
+
         globalTooltip.style.top = `${top}px`;
         globalTooltip.style.left = `${left}px`;
       }
@@ -214,7 +423,6 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
   try {
     console.log(`Fetching data for ${username} (period: ${period})`);
     const lastfmBaseUrl = "https://bubblefm.snw-mint.workers.dev/data";
-    const assetsBaseUrl = "https://bubblefm.snw-mint.workers.dev/assets";
 
     let from, to;
     const now = new Date();
@@ -309,10 +517,9 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
 
     if (topArtistName) {
       assetPromises.push(
-        fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(topArtistName)}`)
-          .then((res) => res.json())
+        fetchAssetData("artist", topArtistName)
           .then((data) => {
-            if (data.data && data.data.length > 0) {
+            if (data && data.data && data.data.length > 0) {
               const bestArtist = selectBestArtist(data.data, topArtistName);
               if (bestArtist) {
                 artistImage = bestArtist.picture_medium || bestArtist.picture;
@@ -320,36 +527,34 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
               }
             }
           })
-          .catch((err) => console.error(err)),
+          .catch((err) => console.warn("Artist asset fetch warning:", err)),
       );
     }
 
     if (topAlbumName) {
-      const albumQuery = `album:"${topAlbumName}" artist:"${topAlbumArtist || ""}"`.trim();
+      const albumQuery = `${topAlbumName} ${topAlbumArtist || ""}`;
       assetPromises.push(
-        fetch(`${assetsBaseUrl}?type=album&query=${encodeURIComponent(albumQuery)}`)
-          .then((res) => res.json())
+        fetchAssetData("album", albumQuery)
           .then((data) => {
-            if (data.data && data.data.length > 0) {
+            if (data && data.data && data.data.length > 0) {
               albumImage = data.data[0].cover_medium || data.data[0].cover;
             }
           })
-          .catch((err) => console.error(err)),
+          .catch((err) => console.warn("Album asset fetch warning:", err)),
       );
     }
 
     if (topTrackName) {
-      const trackQuery = `track:"${topTrackName}" artist:"${topTrackArtist || ""}"`.trim();
+      const trackQuery = `${topTrackName} ${topTrackArtist || ""}`;
       assetPromises.push(
-        fetch(`${assetsBaseUrl}?type=track&query=${encodeURIComponent(trackQuery)}`)
-          .then((res) => res.json())
+        fetchAssetData("track", trackQuery)
           .then((data) => {
-            if (data.data && data.data.length > 0) {
+            if (data && data.data && data.data.length > 0) {
               const item = data.data[0];
-              trackImage = item.album ? (item.album.cover_medium || item.album.cover) : (item.cover_medium || item.cover);
+              trackImage = item.album ? item.album.cover_medium || item.album.cover : item.cover_medium || item.cover;
             }
           })
-          .catch((err) => console.error(err)),
+          .catch((err) => console.warn("Track asset fetch warning:", err)),
       );
     }
 
@@ -550,7 +755,7 @@ function renderData(username, data) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
-  
+
   const formatPickerModal = document.getElementById("formatPickerModal");
   const closeFormatPicker = document.getElementById("closeFormatPicker");
   const formatOptions = document.querySelectorAll("#formatPickerModal .card-option");
@@ -593,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (confirmFormatBtn && columnPickerModal) {
     confirmFormatBtn.addEventListener("click", () => {
       formatPickerModal.classList.remove("show");
-      
+
       const selectedCount = Array.from(chartColOptions).filter((cb) => cb.checked).length;
       const subtitle = document.getElementById("columnPickerSubtitle");
       if (selectedFormat === "3x4" || selectedFormat === "1x1") {
@@ -606,7 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       columnPickerModal.classList.add("show");
     });
-    
+
     if (closeColumnPicker) {
       closeColumnPicker.addEventListener("click", () => {
         columnPickerModal.classList.remove("show");
@@ -852,19 +1057,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const dayOfWeek = date.getDay();
         const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
         const startOfWeek = new Date(date.getFullYear(), date.getMonth(), date.getDate() + diffToMonday);
-        
-        const startDay = startOfWeek.getDate().toString().padStart(2, '0');
-        const endDay = date.getDate().toString().padStart(2, '0');
+
+        const startDay = startOfWeek.getDate().toString().padStart(2, "0");
+        const endDay = date.getDate().toString().padStart(2, "0");
         const monthShort = date.toLocaleString("default", { month: "short" }).toLowerCase();
         subtitleText = `${startDay}-${endDay} ${monthShort}`;
       } else {
         subtitleText = date.toLocaleString("default", { month: "long" }).toUpperCase();
       }
-      
+
       const storySubtitleEl = document.getElementById("storySubtitle");
       storySubtitleEl.textContent = subtitleText;
       storySubtitleEl.style.color = selectedColor || "#bb86fc";
-      
+
       const storyReviewLabel = document.getElementById("storyReviewLabel");
       if (storyReviewLabel) {
         storyReviewLabel.textContent = period === "week" ? "Week Review" : "Month Review";
@@ -900,21 +1105,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const getTop5 = (list) => list.slice(0, 5);
       const fetchAssetImage = async (type, query, targetName = "") => {
         try {
-          const res = await fetch(
-            `https://bubblefm.snw-mint.workers.dev/assets?type=${type}&query=${encodeURIComponent(query)}`,
-          );
-          const json = await res.json();
-          if (json.data && json.data.length > 0) {
+          const json = await fetchAssetData(type, query);
+          if (json && json.data && json.data.length > 0) {
             if (type === "artist") {
               const bestArtist = selectBestArtist(json.data, targetName || query);
-              return bestArtist ? (bestArtist.picture_medium || bestArtist.picture) : null;
+              return bestArtist ? bestArtist.picture_medium || bestArtist.picture : null;
             } else if (type === "track" && json.data[0].album) {
               return json.data[0].album.cover_medium || json.data[0].album.cover;
             } else {
               return json.data[0].cover_medium || json.data[0].cover;
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("fetchAssetImage warning:", e);
+        }
         return null;
       };
 
@@ -959,14 +1163,16 @@ document.addEventListener("DOMContentLoaded", () => {
           if (isSingle) {
             let q = "";
             let t = "";
+            const cleanItemName = (item.name || "").replace(/["']/g, "").trim();
+            const cleanArtistName = (item.artist?.name || "").replace(/["']/g, "").trim();
             if (chartType === "artists") {
-              q = item.name;
+              q = cleanItemName;
               t = "artist";
             } else if (chartType === "albums") {
-              q = `album:"${item.name}" artist:"${item.artist?.name || ""}"`;
+              q = `${cleanItemName} ${cleanArtistName}`.trim();
               t = "album";
             } else {
-              q = `track:"${item.name}" artist:"${item.artist?.name || ""}"`;
+              q = `${cleanItemName} ${cleanArtistName}`.trim();
               t = "track";
             }
             const imgSrc = (await fetchAssetImage(t, q, item.name)) || "https://via.placeholder.com/150";
@@ -1023,16 +1229,16 @@ document.addEventListener("DOMContentLoaded", () => {
             link.href = imgData;
             link.click();
 
-            if (typeof umami !== 'undefined') {
-              const activeTimeBtn = document.querySelector('.time-toggle-btn.active');
-              umami.track('Card Generated', {
-                type: window.location.pathname.includes('match') ? 'match' : 'single',
-                period: activeTimeBtn ? activeTimeBtn.dataset.period : 'month',
-                charts: selectedCharts.join(','),
-                color: selectedColor || '#bb86fc',
-                cover: selectedBgType || 'default',
-                format: selectedFormat || '9x16',
-                ratio: selectedFormat || '9x16',
+            if (typeof umami !== "undefined") {
+              const activeTimeBtn = document.querySelector(".time-toggle-btn.active");
+              umami.track("Card Generated", {
+                type: window.location.pathname.includes("match") ? "match" : "single",
+                period: activeTimeBtn ? activeTimeBtn.dataset.period : "month",
+                charts: selectedCharts.join(","),
+                color: selectedColor || "#bb86fc",
+                cover: selectedBgType || "default",
+                format: selectedFormat || "9x16",
+                ratio: selectedFormat || "9x16",
               });
             }
 

@@ -61,6 +61,7 @@
   gap: 0.5rem;
 }
 .theme-toggle-btn,
+.faq-toggle-btn,
 .github-link-btn {
   display: flex;
   align-items: center;
@@ -70,20 +71,25 @@
   border-radius: var(--radius-md);
   color: var(--color-text);
   background-color: transparent;
+  border: none;
+  cursor: pointer;
   transition:
     background-color 0.2s ease,
     color 0.2s ease,
     transform 0.2s ease;
 }
 .theme-toggle-btn:hover,
+.faq-toggle-btn:hover,
 .github-link-btn:hover {
   background-color: var(--color-neutral-100);
 }
 .theme-toggle-btn:active,
+.faq-toggle-btn:active,
 .github-link-btn:active {
   transform: scale(0.95);
 }
 .theme-toggle-btn svg,
+.faq-toggle-btn svg,
 .github-link-btn svg {
   width: 1.5rem;
   height: 1.5rem;
@@ -198,11 +204,13 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 .home-header.header-overlay .theme-toggle-btn,
+.home-header.header-overlay .faq-toggle-btn,
 .home-header.header-overlay .github-link-btn {
   color: #ffffff;
   drop-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 .home-header.header-overlay .theme-toggle-btn:hover,
+.home-header.header-overlay .faq-toggle-btn:hover,
 .home-header.header-overlay .github-link-btn:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }

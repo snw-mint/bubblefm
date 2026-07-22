@@ -10,7 +10,6 @@ const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0
 const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
 
 const lastfmBaseUrl = "https://bubblefm.snw-mint.workers.dev/data";
-const assetsBaseUrl = "https://bubblefm.snw-mint.workers.dev/assets";
 
 function isPlaceholderImage(url) {
   if (!url) return true;
@@ -22,7 +21,10 @@ function selectBestArtist(items, targetName) {
   const targetLower = (targetName || "").toLowerCase().trim();
 
   const validMatches = items.filter(
-    (item) => item.name && item.name.toLowerCase().trim() === targetLower && !isPlaceholderImage(item.picture_medium || item.picture)
+    (item) =>
+      item.name &&
+      item.name.toLowerCase().trim() === targetLower &&
+      !isPlaceholderImage(item.picture_medium || item.picture),
   );
 
   if (validMatches.length > 0) {
@@ -30,9 +32,7 @@ function selectBestArtist(items, targetName) {
     return validMatches[0];
   }
 
-  const anyValid = items.filter(
-    (item) => !isPlaceholderImage(item.picture_medium || item.picture)
-  );
+  const anyValid = items.filter((item) => !isPlaceholderImage(item.picture_medium || item.picture));
   if (anyValid.length > 0) {
     anyValid.sort((a, b) => (b.nb_fan || 0) - (a.nb_fan || 0));
     return anyValid[0];
@@ -41,6 +41,148 @@ function selectBestArtist(items, targetName) {
   return items[0];
 }
 
+function fetchDeezerJsonp(type, query) {
+  return new Promise((resolve) => {
+    const callbackName = "deezer_cb_" + Math.random().toString(36).substring(2);
+    const script = document.createElement("script");
+
+    const timer = setTimeout(() => {
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      resolve(null);
+    }, 5000);
+
+    window[callbackName] = (data) => {
+      clearTimeout(timer);
+      if (script.parentNode) script.parentNode.removeChild(script);
+      delete window[callbackName];
+      resolve(data);
+    };
+
+    const cleanQuery = (query || "").replace(/["']/g, "").trim();
+    script.src = `https://api.deezer.com/search/${type}?q=${encodeURIComponent(cleanQuery)}&output=jsonp&callback=${callbackName}`;
+    script.onerror = () => {
+      clearTimeout(timer);
+      if (script.parentNode) script.parentNode.removeChild(script);
+      delete window[callbackName];
+      resolve(null);
+    };
+    document.body.appendChild(script);
+  });
+}
+
+async function fetchAssetData(type, query) {
+  const cleanQuery = (query || "").replace(/["']/g, "").trim();
+  if (!cleanQuery) return null;
+  try {
+    const jsonpData = await fetchDeezerJsonp(type, cleanQuery);
+    if (jsonpData && jsonpData.data && jsonpData.data.length > 0) return jsonpData;
+  } catch (e) {
+    console.warn("Deezer JSONP fetch warning:", e);
+  }
+  return null;
+}
+
+function initFaqModal() {
+  const faqToggle = document.getElementById("faq-toggle");
+  if (!faqToggle) return;
+
+  let faqModal = document.getElementById("faqModal");
+  if (!faqModal) {
+    faqModal = document.createElement("div");
+    faqModal.id = "faqModal";
+    faqModal.className = "modal";
+    faqModal.setAttribute("aria-hidden", "true");
+    faqModal.innerHTML = `
+      <div class="modal-content faq-modal-content">
+        <span class="close-button" id="faqCloseBtn">&times;</span>
+        <div class="faq-header">
+          <h2>Match FAQ</h2>
+          <p class="modal-info">Quick answers about BubbleFM Match calculations, compatibility score, and charts.</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary class="faq-question">What timeframe is calculated for Match?</summary>
+            <div class="faq-answer">
+              <p>Match compatibility and top charts are calculated based on listening history from the <strong>last 30 days</strong> for both Last.fm users.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How is the compatibility percentage calculated?</summary>
+            <div class="faq-answer">
+              <p>Compatibility compares the top 100 artists of both users over the last 30 days. It measures shared artists relative to the maximum possible overlap:</p>
+              <p style="margin-top: 0.4rem; background: var(--color-neutral-100); padding: 0.5rem; border-radius: 6px; font-family: monospace; font-size: 0.82rem;">(Shared Artists ÷ Minimum Total Artists) × 100</p>
+              <p style="margin-top: 0.4rem;">For example, if both users have 100 top artists and share 45 of them, your match score is <strong>45%</strong>.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">What is the difference between User Vibe and Common Artists?</summary>
+            <div class="faq-answer">
+              <p><strong>User Vibe:</strong> Displays top individual artists listened to by each user over the last 30 days.</p>
+              <p><strong>Common Artists:</strong> Ranks top artists listened to by both users, combining their shared scrobble counts.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">How do I switch the Match card's Light / Dark theme?</summary>
+            <div class="faq-answer">
+              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Are my personal data or Last.fm credentials saved?</summary>
+            <div class="faq-answer">
+              <p>No login or account creation is required! All stats and images are fetched live on your device using public APIs (Last.fm, Deezer, MusicBrainz). Your data is never saved on servers.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Feedback, Suggestions & Bug Reports</summary>
+            <div class="faq-answer">
+              <p>BubbleFM is open-source! We welcome community contributions and feedback on GitHub:</p>
+              <ul class="faq-links-list">
+                <li>strong>Design Feedback:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feedback.yml" target="_blank" rel="noopener noreferrer">Propose a design or UI improvement</a></li>
+                <li><strong>Feature Ideas:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feature.yml" target="_blank" rel="noopener noreferrer">Suggest a new feature</a></li>
+                <li><strong>Bug Reports:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=bug.yml" target="_blank" rel="noopener noreferrer">Report an issue or bug</a></li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(faqModal);
+  }
+
+  const faqCloseBtn = document.getElementById("faqCloseBtn");
+
+  const openFaq = () => {
+    faqModal.classList.add("show");
+    faqModal.setAttribute("aria-hidden", "false");
+
+    try {
+      if (typeof umami !== "undefined") {
+        umami.track("FAQ Opened");
+      }
+      const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
+      localStorage.setItem("bubblefm_faq_open_count", count.toString());
+      console.log(`[Analytics] FAQ Opened. Total local opens: ${count}`);
+    } catch (e) {}
+  };
+
+  const closeFaq = () => {
+    faqModal.classList.remove("show");
+    faqModal.setAttribute("aria-hidden", "true");
+  };
+
+  faqToggle.addEventListener("click", openFaq);
+  if (faqCloseBtn) faqCloseBtn.addEventListener("click", closeFaq);
+  faqModal.addEventListener("click", (e) => {
+    if (e.target === faqModal) closeFaq();
+  });
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const themeToggle = document.getElementById("theme-toggle");
@@ -57,6 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   setTheme(currentTheme);
+  initFaqModal();
 
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
@@ -237,9 +380,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           `;
           container.insertAdjacentHTML("beforeend", html);
           try {
-            const res = await fetch(`${assetsBaseUrl}?type=artist&query=${encodeURIComponent(item.name)}`);
-            const data = await res.json();
-            if (data.data && data.data.length > 0) {
+            const data = await fetchAssetData("artist", item.name);
+            if (data && data.data && data.data.length > 0) {
               const bestArtist = selectBestArtist(data.data, item.name);
               if (bestArtist) {
                 top1Image = bestArtist;
@@ -250,7 +392,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
           } catch (e) {
-            console.error(e);
+            console.warn(e);
           }
         } else {
           const html = `
@@ -501,13 +643,13 @@ document.addEventListener("DOMContentLoaded", async () => {
               link.href = imgData;
               link.click();
 
-              if (typeof umami !== 'undefined') {
-                umami.track('Card Generated', {
-                  type: 'match',
-                  color: selectedCardColor || '#F44336',
-                  cover: selectedCardBg || 'default',
-                  format: '9x16',
-                  ratio: '9x16',
+              if (typeof umami !== "undefined") {
+                umami.track("Card Generated", {
+                  type: "match",
+                  color: selectedCardColor || "#F44336",
+                  cover: selectedCardBg || "default",
+                  format: "9x16",
+                  ratio: "9x16",
                 });
               }
 
