@@ -81,6 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "index.html";
     } else {
       let currentPeriod = "month";
+      let periodOffset = 0;
+      updatePeriodNavigation(currentPeriod, periodOffset);
 
       const toggleBtns = document.querySelectorAll(".time-toggle-btn");
       if (toggleBtns.length > 0) {
@@ -92,16 +94,122 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.classList.add("active");
 
             currentPeriod = btn.getAttribute("data-period");
+            periodOffset = 0;
+            updatePeriodNavigation(currentPeriod, periodOffset);
             resetToSkeletons();
-            fetchLastfmAndDeezerData(user, currentPeriod);
+            fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
           });
         });
       }
 
-      fetchLastfmAndDeezerData(user, currentPeriod);
+      const prevPeriodBtn = document.getElementById("prevPeriodBtn");
+      const nextPeriodBtn = document.getElementById("nextPeriodBtn");
+      let isNavigating = false;
+
+      const handlePeriodChange = async (newOffset) => {
+        if (isNavigating) return;
+        isNavigating = true;
+
+        if (prevPeriodBtn) prevPeriodBtn.disabled = true;
+        if (nextPeriodBtn) nextPeriodBtn.disabled = true;
+
+        periodOffset = newOffset;
+        updatePeriodNavigation(currentPeriod, periodOffset);
+        resetToSkeletons();
+
+        try {
+          await fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
+        } finally {
+          isNavigating = false;
+          updatePeriodNavigation(currentPeriod, periodOffset);
+        }
+      };
+
+      if (prevPeriodBtn) {
+        prevPeriodBtn.addEventListener("click", () => {
+          handlePeriodChange(periodOffset - 1);
+        });
+      }
+
+      if (nextPeriodBtn) {
+        nextPeriodBtn.addEventListener("click", () => {
+          if (periodOffset >= 0) return;
+          handlePeriodChange(periodOffset + 1);
+        });
+      }
+
+      fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
     }
   }
 });
+
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const periodCache = {};
+let currentActiveData = null;
+
+function getLocalStorageCache(key) {
+  try {
+    const raw = localStorage.getItem("bubblefm_cache_" + key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
+      return parsed.data;
+    } else {
+      localStorage.removeItem("bubblefm_cache_" + key);
+    }
+  } catch (e) {}
+  return null;
+}
+
+function setLocalStorageCache(key, data) {
+  try {
+    localStorage.setItem(
+      "bubblefm_cache_" + key,
+      JSON.stringify({
+        timestamp: Date.now(),
+        data: data,
+      })
+    );
+  } catch (e) {}
+}
+
+function updatePeriodNavigation(period, offset) {
+  const periodDisplayText = document.getElementById("periodDisplayText");
+  const prevPeriodBtn = document.getElementById("prevPeriodBtn");
+  const nextPeriodBtn = document.getElementById("nextPeriodBtn");
+
+  if (nextPeriodBtn) {
+    nextPeriodBtn.disabled = offset >= 0;
+  }
+  if (prevPeriodBtn) {
+    prevPeriodBtn.disabled = false;
+  }
+
+  if (!periodDisplayText) return;
+
+  const now = new Date();
+  if (period === "month") {
+    const targetMonthStart = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    periodDisplayText.textContent = targetMonthStart.toLocaleString("en-US", { month: "long" });
+  } else if (period === "week") {
+    const dayOfWeek = now.getDay();
+    const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+    currentMonday.setHours(0, 0, 0, 0);
+
+    const targetMonday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + offset * 7);
+    let targetEnd;
+    if (offset === 0) {
+      targetEnd = new Date(now);
+    } else {
+      targetEnd = new Date(targetMonday.getFullYear(), targetMonday.getMonth(), targetMonday.getDate() + 6);
+    }
+
+    const startDay = targetMonday.getDate().toString().padStart(2, "0");
+    const endDay = targetEnd.getDate().toString().padStart(2, "0");
+    periodDisplayText.textContent = `${startDay}-${endDay}`;
+  }
+}
 
 function isPlaceholderImage(url) {
   if (!url) return true;
@@ -373,6 +481,11 @@ function initGlobalTooltip() {
 initGlobalTooltip();
 
 function resetToSkeletons() {
+  const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
+  if (btnGerarRelatorio) {
+    btnGerarRelatorio.classList.add("hidden");
+  }
+
   const textFields = ["userScrobbles", "userMinutes", "userDailyAvg"];
   textFields.forEach((id) => {
     const el = document.getElementById(id);
@@ -411,32 +524,65 @@ function resetToSkeletons() {
   });
 }
 
-const periodCache = {};
+async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) {
+  const cacheKey = `${username}_${period}_${offset}`;
 
-async function fetchLastfmAndDeezerData(username, period = "month") {
-  if (periodCache[period]) {
-    console.log(`Using cached data for ${username} (period: ${period})`);
-    renderData(username, periodCache[period]);
+  if (periodCache[cacheKey]) {
+    currentActiveData = periodCache[cacheKey];
+    renderData(username, currentActiveData);
+    return;
+  }
+
+  const stored = getLocalStorageCache(cacheKey);
+  if (stored) {
+    periodCache[cacheKey] = stored;
+    currentActiveData = stored;
+    renderData(username, stored);
     return;
   }
 
   try {
-    console.log(`Fetching data for ${username} (period: ${period})`);
     const lastfmBaseUrl = "https://bubblefm.snw-mint.workers.dev/data";
 
     let from, to;
     const now = new Date();
-    to = Math.floor(now.getTime() / 1000);
+    let subtitleText = "";
+    let reviewLabel = "Month Review";
 
     if (period === "month") {
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      from = Math.floor(startOfMonth.getTime() / 1000);
+      const targetMonthStart = new Date(now.getFullYear(), now.getMonth() + offset, 1, 0, 0, 0);
+      from = Math.floor(targetMonthStart.getTime() / 1000);
+      if (offset === 0) {
+        to = Math.floor(now.getTime() / 1000);
+      } else {
+        const targetMonthEnd = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0, 23, 59, 59);
+        to = Math.floor(targetMonthEnd.getTime() / 1000);
+      }
+      subtitleText = targetMonthStart.toLocaleString("en-US", { month: "long" }).toUpperCase();
+      reviewLabel = "Month Review";
     } else if (period === "week") {
       const dayOfWeek = now.getDay();
       const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
-      startOfWeek.setHours(0, 0, 0, 0);
-      from = Math.floor(startOfWeek.getTime() / 1000);
+      const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+      currentMonday.setHours(0, 0, 0, 0);
+
+      const targetMonday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + offset * 7, 0, 0, 0);
+      from = Math.floor(targetMonday.getTime() / 1000);
+
+      let targetEnd;
+      if (offset === 0) {
+        targetEnd = new Date(now);
+        to = Math.floor(now.getTime() / 1000);
+      } else {
+        targetEnd = new Date(targetMonday.getFullYear(), targetMonday.getMonth(), targetMonday.getDate() + 6, 23, 59, 59);
+        to = Math.floor(targetEnd.getTime() / 1000);
+      }
+
+      const startDay = targetMonday.getDate().toString().padStart(2, "0");
+      const endDay = targetEnd.getDate().toString().padStart(2, "0");
+      const monthShort = targetEnd.toLocaleString("en-US", { month: "short" }).toLowerCase();
+      subtitleText = `${startDay}-${endDay} ${monthShort}`;
+      reviewLabel = "Week Review";
     }
 
     const [userInfoRes, firstPageRes] = await Promise.all([
@@ -572,9 +718,15 @@ async function fetchLastfmAndDeezerData(username, period = "month") {
       rawTracks,
       from,
       to,
+      period,
+      offset,
+      subtitleText,
+      reviewLabel,
     };
 
-    periodCache[period] = data;
+    periodCache[cacheKey] = data;
+    setLocalStorageCache(cacheKey, data);
+    currentActiveData = data;
     renderData(username, data);
   } catch (error) {
     console.error("Error fetching API data:", error);
@@ -748,8 +900,12 @@ function renderData(username, data) {
     } else {
       const d = new Date();
       const mStr = d.toLocaleString("en-US", { month: "long" });
-      chartsTimeTextEl.textContent = `Showing charts for ${mStr}`;
     }
+  }
+
+  const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
+  if (btnGerarRelatorio) {
+    btnGerarRelatorio.classList.remove("hidden");
   }
 }
 
@@ -1005,13 +1161,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const selectedCharts = Array.from(chartColOptions)
         .filter((cb) => cb.checked)
         .map((cb) => cb.value);
-      const activePeriodBtn = document.querySelector(".time-toggle-btn.active");
-      const period = activePeriodBtn ? activePeriodBtn.dataset.period : "month";
-      if (typeof periodCache === "undefined" || !periodCache[period]) {
+
+      if (!currentActiveData) {
         alert("Data not fully loaded yet. Please wait.");
         return;
       }
-      const data = periodCache[period];
+      const data = currentActiveData;
       const gradient = document.getElementById("storyCardGradient");
       if (gradient) {
         const c = selectedColor || "#bb86fc";
@@ -1051,28 +1206,16 @@ document.addEventListener("DOMContentLoaded", () => {
         storyTitleEl.textContent = data.userInfo.user.name;
         storyTitleEl.style.color = selectedColor || "#bb86fc";
       }
-      const date = new Date();
-      let subtitleText = "";
-      if (period === "week") {
-        const dayOfWeek = date.getDay();
-        const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-        const startOfWeek = new Date(date.getFullYear(), date.getMonth(), date.getDate() + diffToMonday);
-
-        const startDay = startOfWeek.getDate().toString().padStart(2, "0");
-        const endDay = date.getDate().toString().padStart(2, "0");
-        const monthShort = date.toLocaleString("default", { month: "short" }).toLowerCase();
-        subtitleText = `${startDay}-${endDay} ${monthShort}`;
-      } else {
-        subtitleText = date.toLocaleString("default", { month: "long" }).toUpperCase();
-      }
 
       const storySubtitleEl = document.getElementById("storySubtitle");
-      storySubtitleEl.textContent = subtitleText;
-      storySubtitleEl.style.color = selectedColor || "#bb86fc";
+      if (storySubtitleEl) {
+        storySubtitleEl.textContent = data.subtitleText || "";
+        storySubtitleEl.style.color = selectedColor || "#bb86fc";
+      }
 
       const storyReviewLabel = document.getElementById("storyReviewLabel");
       if (storyReviewLabel) {
-        storyReviewLabel.textContent = period === "week" ? "Week Review" : "Month Review";
+        storyReviewLabel.textContent = data.reviewLabel || "Month Review";
       }
       const minutes = Math.round(data.rawTracks.length * 3.5);
       const isSingle = selectedCharts.length === 1;

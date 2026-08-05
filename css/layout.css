@@ -281,16 +281,68 @@
   flex: 1;
 }
 
-.time-control-container {
+.header-controls-wrapper {
   margin-left: auto;
   align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: -3.5rem;
+}
+
+.time-control-container {
   display: flex;
   background-color: var(--color-bg);
   border-radius: 20px;
   padding: 4px;
   gap: 4px;
   border: 1px solid var(--color-neutral-200);
-  margin-top: -3.5rem;
+}
+
+.period-control-container {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-bg);
+    border-radius: 19.5px;
+    padding: 6.5px 8px;
+    gap: 4px;
+    border: 1px solid var(--color-neutral-200);
+}
+
+.period-nav-btn {
+  background: transparent;
+  color: var(--color-primary);
+  border: none;
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.period-nav-btn:hover:not(:disabled) {
+  background-color: var(--color-neutral-100);
+}
+
+.period-nav-btn:disabled {
+  opacity: 0.35;
+  color: var(--color-neutral-500);
+  cursor: not-allowed;
+}
+
+.period-nav-btn.next-period-btn svg {
+  transform: rotate(180deg);
+}
+
+.period-display-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  padding: 0 4px;
+  min-width: 48px;
+  text-align: center;
 }
 
 .time-toggle-btn {
@@ -380,10 +432,13 @@
   .stat-card {
     align-items: center;
   }
-  .time-control-container {
+  .header-controls-wrapper {
     margin-left: auto;
     margin-right: auto;
     margin-top: 1rem;
     align-self: center;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 0.75rem;
   }
 }

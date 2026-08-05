@@ -320,10 +320,20 @@
   gap: 8px;
   cursor: pointer;
   z-index: 1000;
+  opacity: 1;
+  visibility: visible;
   transition:
     transform 0.2s ease,
     background-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+}
+
+.fab-generate.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .fab-generate:hover {
@@ -1118,8 +1128,6 @@
 #storyCard.format-1x1 .story-brand {
   font-size: 0.95rem !important;
 }
-
-/* FAQ Modal Styling */
 .faq-modal-content {
   max-width: 580px;
   width: 92%;

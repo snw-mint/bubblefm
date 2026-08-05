@@ -119,9 +119,20 @@
                   style="width: 50px; height: 20px"></span>
             </div>
           </div>
-          <div class="time-control-container">
-            <button class="time-toggle-btn active" data-period="month">Month</button>
-            <button class="time-toggle-btn" data-period="week">Week</button>
+          <div class="header-controls-wrapper">
+            <div class="period-control-container">
+              <button class="period-nav-btn prev-period-btn" id="prevPeriodBtn" aria-label="Previous Period">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m314-440 114 114q12 12 11.5 28T428-270q-12 12-28.5 12.5T371-269L188-452q-12-12-12-28t12-28l183-183q12-12 28.5-11.5T428-690q11 12 11.5 28T428-634L314-520h446q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H314Z"/></svg>
+              </button>
+              <span class="period-display-text" id="periodDisplayText">July</span>
+              <button class="period-nav-btn next-period-btn" id="nextPeriodBtn" aria-label="Next Period" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m314-440 114 114q12 12 11.5 28T428-270q-12 12-28.5 12.5T371-269L188-452q-12-12-12-28t12-28l183-183q12-12 28.5-11.5T428-690q11 12 11.5 28T428-634L314-520h446q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H314Z"/></svg>
+              </button>
+            </div>
+            <div class="time-control-container">
+              <button class="time-toggle-btn active" data-period="month">Month</button>
+              <button class="time-toggle-btn" data-period="week">Week</button>
+            </div>
           </div>
         </div>
       </section>
@@ -336,7 +347,7 @@
       </div>
     </footer>
 
-    <button id="btnGerarRelatorio" class="fab-generate" title="Generate Card">
+    <button id="btnGerarRelatorio" class="fab-generate hidden" title="Generate Card">
       Generate Card
     </button>
 
@@ -521,7 +532,6 @@
       </div>
     </div>
 
-    <!-- Hidden Card Container for Rendering -->
     <div id="storyCardContainer" class="hidden-card-container">
       <div id="storyCard">
         <div id="storyCardGradient" style="position: absolute; inset: 0; opacity: 0.25; z-index: 0; pointer-events: none;"></div>
@@ -552,7 +562,6 @@
         </div>
         
         <div class="story-body" id="storyBody">
-          <!-- Dynamically populated by unified.js based on 1 or 2 columns -->
         </div>
         
         <div class="story-footer">
