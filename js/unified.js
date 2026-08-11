@@ -283,6 +283,81 @@ async function fetchAssetData(type, query) {
   return null;
 }
 
+const IGNORED_TAGS = new Set([
+  "seen live",
+  "favorites",
+  "favorite",
+  "spotify",
+  "albums i own",
+  "female vocalists",
+  "male vocalists",
+  "american",
+  "british",
+  "canadian",
+  "english",
+  "swedish",
+  "japanese",
+  "german",
+  "french",
+  "australian",
+  "under 2000 listeners",
+  "scrobble",
+  "all",
+  "loved",
+  "my favorites",
+  "favorite artists",
+  "check out",
+  "tracks i own"
+]);
+
+function formatVibeTag(tag) {
+  if (!tag) return "";
+  const lower = tag.toLowerCase().trim();
+  if (lower === "r&b" || lower === "rnb") return "R&B";
+  if (lower === "edm") return "EDM";
+  if (lower === "k-pop" || lower === "kpop") return "K-Pop";
+  if (lower === "j-pop" || lower === "jpop") return "J-Pop";
+  if (lower === "idm") return "IDM";
+  return lower
+    .split(/([\s\-])/)
+    .map((part) => (part.length > 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part))
+    .join("");
+}
+
+async function fetchTopVibeTag(artists, lastfmBaseUrl) {
+  if (!artists || artists.length === 0) return null;
+  const topArtists = artists.slice(0, 5);
+  const tagScores = {};
+
+  const promises = topArtists.map(async (artist) => {
+    try {
+      const res = await fetch(
+        `${lastfmBaseUrl}?method=artist.gettoptags&artist=${encodeURIComponent(artist.name)}&_t=${Date.now()}`
+      );
+      if (!res.ok) return;
+      const json = await res.json();
+      let rawTags = json.toptags?.tag || [];
+      if (!Array.isArray(rawTags)) rawTags = [rawTags];
+
+      rawTags.slice(0, 8).forEach((t) => {
+        const tagName = (t.name || "").toLowerCase().trim();
+        if (!tagName || IGNORED_TAGS.has(tagName)) return;
+        const count = parseInt(t.count || 0, 10) || 1;
+        const weight = count * (artist.playcount || 1);
+        tagScores[tagName] = (tagScores[tagName] || 0) + weight;
+      });
+    } catch (e) {}
+  });
+
+  await Promise.all(promises);
+
+  const sortedTags = Object.keys(tagScores).sort((a, b) => tagScores[b] - tagScores[a]);
+  if (sortedTags.length > 0) {
+    return formatVibeTag(sortedTags[0]);
+  }
+  return null;
+}
+
 function initFaqModal() {
   const faqToggle = document.getElementById("faq-toggle");
   if (!faqToggle) return;
@@ -486,7 +561,7 @@ function resetToSkeletons() {
     btnGerarRelatorio.classList.add("hidden");
   }
 
-  const textFields = ["userScrobbles", "userMinutes", "userDailyAvg"];
+  const textFields = ["userScrobbles", "userMinutes", "userDailyAvg", "userVibe"];
   textFields.forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -658,8 +733,19 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     let artistCoverImage = null;
     let albumImage = null;
     let trackImage = null;
+    let vibeTag = null;
 
     const assetPromises = [];
+
+    if (artists && artists.length > 0) {
+      assetPromises.push(
+        fetchTopVibeTag(artists, lastfmBaseUrl)
+          .then((v) => {
+            vibeTag = v;
+          })
+          .catch(() => {}),
+      );
+    }
 
     if (topArtistName) {
       assetPromises.push(
@@ -722,6 +808,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
       offset,
       subtitleText,
       reviewLabel,
+      vibeTag,
     };
 
     periodCache[cacheKey] = data;
@@ -746,6 +833,7 @@ function renderData(username, data) {
     rawTracks,
     from,
     to,
+    vibeTag,
   } = data;
 
   function renderList(listId, items, type) {
@@ -888,6 +976,12 @@ function renderData(username, data) {
       const dailyAvg = Math.round(playcount / daysElapsed);
       userDailyAvgEl.textContent = dailyAvg.toLocaleString("en-US");
       removeSkeletonText(userDailyAvgEl);
+    }
+
+    const userVibeEl = document.getElementById("userVibe");
+    if (userVibeEl) {
+      userVibeEl.textContent = vibeTag || "-";
+      removeSkeletonText(userVibeEl);
     }
   }
 

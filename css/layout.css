@@ -398,7 +398,7 @@
 }
 
 .stat-value {
-  font-family: var(--font-title);
+  font-family: var(--font-text);
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-primary);
@@ -431,6 +431,9 @@
   }
   .stat-card {
     align-items: center;
+  }
+  .stat-card-vibe {
+    display: none;
   }
   .header-controls-wrapper {
     margin-left: auto;
