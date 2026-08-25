@@ -992,65 +992,39 @@
   border-color: var(--color-text) transparent transparent transparent;
 }
 
-.migration-snackbar {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-neutral-300);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  color: var(--color-text);
-  padding: 12px 16px;
-  border-radius: 12px;
-  display: flex;
+.promo-banner {
+  display: none;
   align-items: center;
-  gap: 12px;
-  z-index: 9999;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-neutral-100);
+  border-bottom: 1px solid var(--color-neutral-200);
+  color: var(--color-text);
+  font-family: var(--font-text);
+  font-size: 0.875rem;
   font-weight: 500;
-  max-width: 90%;
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-.migration-snackbar.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 20px);
-}
-.migration-snackbar-icon {
-  display: flex;
-  color: var(--color-primary);
-  align-items: center;
-  justify-content: center;
-}
-.migration-snackbar-icon svg {
-  fill: currentColor;
-}
-.migration-snackbar-text {
-  flex: 1;
-}
-.migration-snackbar-close {
-  background: none;
-  border: none;
-  color: var(--color-neutral-500);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 50%;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
-}
-.migration-snackbar-close:hover {
+
+.promo-banner:hover {
   background-color: var(--color-neutral-200);
-  color: var(--color-text);
+  color: var(--color-primary);
 }
-.migration-snackbar-close svg {
+
+.promo-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.promo-banner-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
   fill: currentColor;
 }
 

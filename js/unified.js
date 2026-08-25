@@ -43,6 +43,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initFaqModal();
 
+  const pb = document.getElementById("promoBanner");
+  if (pb) {
+    const ua = navigator.userAgent || "";
+    const pl = navigator.userAgentData?.platform || navigator.platform || "";
+    const isWin = /Win/i.test(pl) || /Windows/i.test(ua);
+    const isMob = Boolean(navigator.userAgentData?.mobile) || /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua);
+    if (isWin && !isMob) {
+      pb.style.display = "flex";
+      pb.addEventListener("click", () => {
+        if (typeof umami !== "undefined") {
+          umami.track("Fluent Scrobbler Outbound Click");
+        }
+      });
+    }
+  }
+
   const formUsername = document.getElementById("form-username");
   if (formUsername) {
     formUsername.addEventListener("submit", (e) => {

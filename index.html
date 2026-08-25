@@ -66,6 +66,18 @@
     <link rel="stylesheet" href="/css/components.css" />
   </head>
   <body>
+    <a
+      href="https://snw-mint.github.io/fluent-scrobbler/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="promo-banner"
+      id="promoBanner"
+      data-umami-event="Fluent Scrobbler Outbound Click">
+      <span class="promo-banner-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 96git0" width="24" fill="#e3e3e3"><path d="m480-381 76 46q11 7 22-.5t8-20.5l-20-87 68-59q10-9 6-21.5T622-537l-89-7-35-82q-5-12-18-12t-18 12l-35 82-89 7q-14 1-18 13.5t6 21.5l68 59-20 87q-3 13 8 20.5t22 .5zM346-160H240q-33 0-56.5-23.5T160-240v-106l-77-78q-11-12-17-26.5T60-480t6-29.5T83-536l77-78v-106q0-33 23.5-56.5T240-800h106l78-77q12-11 26.5-17t29.5-6 29.5 6 26.5 17l78 77h106q33 0 56.5 23.5T800-720v106l77 78q11 12 17 26.5t6 29.5-6 29.5-17 26.5l-77 78v106q0 33-23.5 56.5T720-160H614l-78 77q-12 11-26.5 17T480-60t-29.5-6T424-83zm34-80 100 100 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140zm100-240"/></svg>
+      </span>
+      <span class="promo-banner-text">Do you scrobble on Windows? Check out the new Fluent Scrobbler for Last.fm!</span>
+    </a>
     <header class="home-header">
       <a href="index.html" class="logo-container">
         <img src="logo.webp" alt="BubbleFM Logo" class="logo-icon" />
@@ -255,47 +267,6 @@
         <span class="versao">v1.0.0</span>
       </div>
     </footer>
-
-    <div class="migration-snackbar" id="migrationSnackbar">
-      <div class="migration-snackbar-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-          <path
-            d="m326-90-58-98-110-24q-15-3-24-15.5t-7-27.5l11-113-75-86q-10-11-10-26t10-26l75-86-11-113q-2-15 7-27.5t24-15.5l110-24 58-98q8-13 22-17.5t28 1.5l104 44 104-44q14-6 28-1.5t22 17.5l58 98 110 24q15 3 24 15.5t7 27.5l-11 113 75 86q10 11 10 26t-10 26l-75 86 11 113q2 15-7 27.5T802-212l-110 24-58 98q-8 13-22 17.5T584-74l-104-44-104 44q-14 6-28 1.5T326-90Zm182.5-201.5Q520-303 520-320t-11.5-28.5Q497-360 480-360t-28.5 11.5Q440-337 440-320t11.5 28.5Q463-280 480-280t28.5-11.5Zm0-160Q520-463 520-480v-160q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640v160q0 17 11.5 28.5T480-440q17 0 28.5-11.5Z" />
-        </svg>
-      </div>
-      <div class="migration-snackbar-text">AuvlyFM is now BubbleFM.</div>
-      <button class="migration-snackbar-close" id="migrationCloseBtn">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-          <path
-            d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
-        </svg>
-      </button>
-    </div>
-
-    <script>
-      (() => {
-        const snackbar = document.getElementById("migrationSnackbar");
-        const closeBtn = document.getElementById("migrationCloseBtn");
-        const snackbarKey = "bubblefm_migration_seen";
-
-        if (localStorage.getItem(snackbarKey)) {
-          snackbar.style.display = "none";
-          return;
-        }
-
-        const dismissSnackbar = () => {
-          snackbar.classList.add("hidden");
-          localStorage.setItem(snackbarKey, "true");
-        };
-
-        if (closeBtn) {
-          closeBtn.addEventListener("click", dismissSnackbar);
-        }
-
-        setTimeout(dismissSnackbar, 60000);
-      })();
-    </script>
-
     <script type="module" src="/js/unified.js"></script>
   </body>
 </html>
