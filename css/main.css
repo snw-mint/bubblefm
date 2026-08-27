@@ -6,7 +6,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,100..1000&display=swap");
 
 :root {
   --color-primary: #b90000;
@@ -19,8 +19,9 @@
   --color-neutral-300: #d1d5db;
   --color-neutral-500: #6b7280;
   --color-neutral-800: #1f2937;
-  --font-title: "Archivo", sans-serif;
-  --font-text: "Poppins", sans-serif;
+  --font-title: "Google Sans Flex", sans-serif;
+  --font-text: "Google Sans Flex", sans-serif;
+  --font-body: "Google Sans Flex", sans-serif;
   --radius-sm: 0.3125rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.625rem;
@@ -125,34 +126,6 @@ button {
   background-color: var(--color-neutral-500);
 }
 
-.landing-card.matcher-cta-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 1rem 0.5rem;
-  text-decoration: none;
-  transition:
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    background-color 0.2s ease;
-}
-.landing-card.matcher-cta-card:hover {
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-  background-color: var(--color-neutral-200);
-}
-.matcher-icon {
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-}
-.matcher-text {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
 .landing-features {
   display: flex;
   flex-direction: column;

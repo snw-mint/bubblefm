@@ -6,8 +6,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920t28.5 11.5T520-880v80q0 17-11.5 28.5T480-760t-28.5-11.5M678-678q-11-11-11-27.5t11-28.5l56-57q12-12 28.5-12t28.5 12q11 11 11 28t-11 28l-57 57q-11 11-28 11t-28-11m122 238q-17 0-28.5-11.5T760-480t11.5-28.5T800-520h80q17 0 28.5 11.5T920-480t-11.5 28.5T880-440zM451.5-51.5Q440-63 440-80v-80q0-17 11.5-28.5T480-200t28.5 11.5T520-160v80q0 17-11.5 28.5T480-40t-28.5-11.5M226-678l-57-56q-12-12-12-29t12-28q11-11 28-11t28 11l57 57q11 11 11 28t-11 28q-12 11-28 11t-28-11m508 509-56-57q-11-12-11-28.5t11-27.5 27.5-11 28.5 11l57 56q12 11 11.5 28T791-169q-12 12-29 12t-28-12M80-440q-17 0-28.5-11.5T40-480t11.5-28.5T80-520h80q17 0 28.5 11.5T200-480t-11.5 28.5T160-440zm89 271q-11-11-11-28t11-28l57-57q11-11 27.5-11t28.5 11q12 12 12 28.5T282-225l-56 56q-12 12-29 12t-28-12m141-141q-70-70-70-170t70-170 170-70 170 70 70 170-70 170-170 70-170-70"/></svg>`;
-const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
+const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920t28.5 11.5T520-880v80q0 17-11.5 28.5T480-760t-28.5-11.5M678-678q-11-11-11-27.5t11-28.5l56-57q12-12 28.5-12t28.5 12q11 11 11 28t-11 28l-57 57q-11 11-28 11t-28-11m122 238q-17 0-28.5-11.5T760-480t11.5-28.5T800-520h80q17 0 28.5 11.5T920-480t-11.5 28.5T880-440zM451.5-51.5Q440-63 440-80v-80q0-17 11.5-28.5T480-200t28.5 11.5T520-160v80q0 17-11.5 28.5T480-40t-28.5-11.5M226-678l-57-56q-12-12-12-29t12-28q11-11 28-11t28 11l57 57q11 11 11 28t-11 28q-12 11-28 11t-28-11m508 509-56-57q-11-12-11-28.5t11-27.5 27.5-11 28.5 11l57 56q12 11 11.5 28T791-169q-12 12-29 12t-28-12M80-440q-17 0-28.5-11.5T40-480t11.5-28.5T80-520h80q17 0 28.5 11.5T200-480t-11.5 28.5T160-440zm89 271q-11-11-11-28t11-28l57-57q11-11 27.5-11t28.5 11q12 12 12 28.5T282-225l-56 56q-12 12-29 12t-28-12m141-141q-70-70-70-170t70-170 170-70 170 70 70 170-70 170-170 70-170-70m283-57q47-47 47-113t-47-113-113-47-113 47-47 113 47 113 113 47 113-47M480-480"/></svg>`;
+const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColo"><path d="M484-80q-84 0-157.5-32t-128-86.5-86.5-128T80-484q0-128 72-232t193-146q22-8 41 5.5t18 36.5q-3 85 27 162t90 137 137 90 162 27q26-1 38.5 17.5T863-345q-44 120-147.5 192.5T484-80m0-80q88 0 163-44t118-121q-86-8-163-43.5T464-465t-97-138-43-163q-77 43-120.5 118.5T160-484q0 135 94.5 229.5T484-160m-20-305"/></svg>`;
 
 function escapeHTML(str) {
   if (!str) return "";
@@ -601,15 +601,15 @@ function resetToSkeletons() {
                 <span class="skeleton skeleton-text" style="width: 80px; height: 14px; margin-top: 4px;"></span>
             </div>
         </div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#2</span> <span class="skeleton skeleton-text" style="width: 150px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#3</span> <span class="skeleton skeleton-text" style="width: 130px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#4</span> <span class="skeleton skeleton-text" style="width: 160px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#5</span> <span class="skeleton skeleton-text" style="width: 140px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#6</span> <span class="skeleton skeleton-text" style="width: 170px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#7</span> <span class="skeleton skeleton-text" style="width: 120px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#8</span> <span class="skeleton skeleton-text" style="width: 145px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#9</span> <span class="skeleton skeleton-text" style="width: 155px; height: 16px;"></span></div>
-        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#10</span> <span class="skeleton skeleton-text" style="width: 135px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#2</span> <span class="skeleton skeleton-text" style="width: 150px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#3</span> <span class="skeleton skeleton-text" style="width: 130px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#4</span> <span class="skeleton skeleton-text" style="width: 160px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#5</span> <span class="skeleton skeleton-text" style="width: 140px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#6</span> <span class="skeleton skeleton-text" style="width: 170px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#7</span> <span class="skeleton skeleton-text" style="width: 120px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#8</span> <span class="skeleton skeleton-text" style="width: 145px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#9</span> <span class="skeleton skeleton-text" style="width: 155px; height: 16px;"></span></div>
+        <div class="chart-item"><span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#10</span> <span class="skeleton skeleton-text" style="width: 135px; height: 16px;"></span></div>
       `;
     }
   });
@@ -893,7 +893,7 @@ function renderData(username, data) {
         }
         html += `
                     <div class="chart-item" data-plays="${playcountStr}" data-minutes="${minutesStr}" style="cursor: pointer;">
-                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary);">#${rank}</span> ${text}
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#${rank}</span> ${text}
                     </div>
                 `;
       }

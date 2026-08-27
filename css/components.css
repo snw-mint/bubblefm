@@ -115,7 +115,6 @@
   background-color: var(--color-neutral-100);
   border-radius: 20px;
   padding: 25px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.1);
   overflow: hidden;
   min-width: 0;
   opacity: 0;
@@ -123,9 +122,6 @@
   animation: zoomInFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   display: flex;
   flex-direction: column;
-}
-[data-theme="dark"] .chart-card {
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
 }
 
 #cardArtists {
@@ -139,7 +135,7 @@
 }
 
 .chart-card h2 {
-  color: var(--color-primary);
+  color: var(--color-text);
   margin-bottom: 25px;
   padding-bottom: 15px;
   border-bottom: 2px solid var(--color-neutral-200);
@@ -184,17 +180,16 @@
 }
 .chart-item.top-1 {
   position: relative;
-  background-color: var(--color-primary);
-  color: #fff;
+  background-color: var(--color-bg);
+  color: var(--color-text);
   font-weight: 700;
   padding: 15px 40px 15px 15px;
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-neutral-200);
   min-height: 85px;
   margin-bottom: 15px;
   display: flex;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 5px 15px rgb(185 0 0 / 0.2);
 }
 .chart-item.top-1::after {
   content: "";
@@ -203,7 +198,7 @@
   right: 0;
   width: 40px;
   height: 100%;
-  background: linear-gradient(to right, transparent, var(--color-primary));
+  background: linear-gradient(to right, transparent, var(--color-bg));
   pointer-events: none;
   border-radius: 0 12px 12px 0;
 }
@@ -217,6 +212,9 @@
   font-size: 1.2rem;
   margin-bottom: 4px;
 }
+.chart-item.top-1 .text-content span:last-child {
+  color: var(--color-neutral-500);
+}
 .chart-item.top-1 .rank-number {
   display: none;
 }
@@ -226,7 +224,7 @@
   border-radius: 8px;
   flex-shrink: 0;
   object-fit: cover;
-  border: 2px solid var(--color-bg);
+  border: 2px solid var(--color-neutral-200);
 }
 .skeleton {
   background: linear-gradient(
@@ -241,7 +239,6 @@
   border-color: transparent !important;
   cursor: default;
   user-select: none;
-  box-shadow: none !important;
 }
 .skeleton-text {
   display: inline-block;
@@ -325,7 +322,6 @@
   transition:
     transform 0.2s ease,
     background-color 0.2s ease,
-    box-shadow 0.2s ease,
     opacity 0.3s ease,
     visibility 0.3s ease;
 }
@@ -339,7 +335,6 @@
 .fab-generate:hover {
   transform: translateY(-3px);
   filter: brightness(1.1);
-  box-shadow: 0 6px 6px rgba(36, 144, 52, 0.2);
 }
 
 .fab-generate:active {
@@ -379,7 +374,6 @@
   max-width: 400px;
   position: relative;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   border: 1px solid var(--color-neutral-200);
 }
 .close-button {
@@ -493,7 +487,7 @@
   cursor: pointer;
   transition:
     transform 0.2s,
-    box-shadow 0.2s;
+    outline 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -504,9 +498,8 @@
 }
 .color-option.selected {
   transform: scale(1.1);
-  box-shadow:
-    0 0 0 4px var(--color-bg),
-    0 0 0 6px var(--color-primary);
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
 }
 .custom-color-btn {
   background-color: #333333;
@@ -514,9 +507,8 @@
   border: 2px solid transparent;
 }
 .custom-color-btn.selected {
-  box-shadow:
-    0 0 0 4px var(--color-bg),
-    0 0 0 6px var(--color-text);
+  outline: 3px solid var(--color-text);
+  outline-offset: 3px;
 }
 
 .card-options-grid {
@@ -693,7 +685,6 @@
   border: 10px solid var(--color-bg);
   object-fit: cover;
   margin-top: -140px;
-  box-shadow: 0 15px 60px rgba(0, 0, 0, 0.8);
   background-color: var(--color-neutral-200);
 }
 .story-info-container {
@@ -973,7 +964,6 @@
   z-index: 9999;
   transform: translate(-50%, 10px);
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .global-tooltip.show {

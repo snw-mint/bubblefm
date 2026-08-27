@@ -44,6 +44,36 @@
 .brand-fm {
   color: var(--color-primary);
 }
+.header-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.header-divider {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--color-neutral-300);
+}
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.nav-link {
+  color: var(--color-neutral-500);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.nav-link:hover {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.nav-link.active {
+  color: var(--color-text);
+  font-weight: 600;
+}
 @keyframes slideOutText {
   0% {
     opacity: 0;
@@ -201,13 +231,11 @@
 }
 .home-header.header-overlay .brand-bubble {
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 .home-header.header-overlay .theme-toggle-btn,
 .home-header.header-overlay .faq-toggle-btn,
 .home-header.header-overlay .github-link-btn {
   color: #ffffff;
-  drop-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 .home-header.header-overlay .theme-toggle-btn:hover,
 .home-header.header-overlay .faq-toggle-btn:hover,
@@ -371,7 +399,6 @@
   font-size: 2rem;
   font-weight: 700;
   color: #ffffff !important;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
   text-align: left;
 }
 
@@ -421,7 +448,6 @@
     margin-top: 0.75rem;
     font-size: 1.5rem;
     color: var(--color-text) !important;
-    text-shadow: none;
     text-align: center;
   }
   .stats-cards-container {

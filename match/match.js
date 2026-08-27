@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <img class="top1-image" id="${elementId}-img" alt="Top 1" style="display: none" />
               <div class="text-content">
                 <span style="font-weight: bold;">${item.name}</span>
-                <span style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.85);">${isCommon ? item.playcount + " plays together" : item.playcount + " streams"}</span>
+                <span style="font-size: 0.85rem; color: var(--color-neutral-500);">${isCommon ? item.playcount + " plays together" : item.playcount + " streams"}</span>
               </div>
             </div>
           `;
@@ -397,7 +397,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else {
           const html = `
             <div class="chart-item">
-              <span style="font-weight: bold; margin-right: 15px; color: var(--color-primary)">#${i + 1}</span>
+              <span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500)">#${i + 1}</span>
               <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">${item.name}</span>
             </div>
           `;
