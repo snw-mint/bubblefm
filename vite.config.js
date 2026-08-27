@@ -18,7 +18,7 @@ export default defineConfig({
     },
   ],
   build: {
-    minify: "esbuild",
+    minify: true,
     cssMinify: true,
     rollupOptions: {
       input: {
