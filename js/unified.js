@@ -770,7 +770,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
             if (data && data.data && data.data.length > 0) {
               const bestArtist = selectBestArtist(data.data, topArtistName);
               if (bestArtist) {
-                artistImage = bestArtist.picture_medium || bestArtist.picture;
+                artistImage = bestArtist.picture_xl || bestArtist.picture;
                 artistCoverImage = bestArtist.picture_xl || bestArtist.picture_big || bestArtist.picture;
               }
             }
@@ -785,7 +785,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
         fetchAssetData("album", albumQuery)
           .then((data) => {
             if (data && data.data && data.data.length > 0) {
-              albumImage = data.data[0].cover_medium || data.data[0].cover;
+              albumImage = data.data[0].cover_xl || data.data[0].cover;
             }
           })
           .catch((err) => console.warn("Album asset fetch warning:", err)),
@@ -799,7 +799,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
           .then((data) => {
             if (data && data.data && data.data.length > 0) {
               const item = data.data[0];
-              trackImage = item.album ? item.album.cover_medium || item.album.cover : item.cover_medium || item.cover;
+              trackImage = item.album ? item.album.cover_xl || item.album.cover : item.cover_xl || item.cover;
             }
           })
           .catch((err) => console.warn("Track asset fetch warning:", err)),
@@ -879,8 +879,8 @@ function renderData(username, data) {
                         </div>
                         <img class="top1-image" id="${type}1Img" alt="Top ${type}" style="display: none;" />
                         <div class="text-content">
-                            <span>${name}</span>
-                            <span style="font-size: 0.9rem; opacity: 0.8;">${subText}</span>
+                            <span title="${name}">${name}</span>
+                            <span style="font-size: 0.9rem; opacity: 0.8;" title="${subText}">${subText}</span>
                         </div>
                     </div>
                 `;
@@ -893,7 +893,8 @@ function renderData(username, data) {
         }
         html += `
                     <div class="chart-item" data-plays="${playcountStr}" data-minutes="${minutesStr}" style="cursor: pointer;">
-                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500);">#${rank}</span> ${text}
+                        <span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500); flex-shrink: 0;">#${rank}</span>
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;" title="${text}">${text}</span>
                     </div>
                 `;
       }
@@ -1021,352 +1022,148 @@ function renderData(username, data) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
+  const settingsModal = document.getElementById("generationSettingsModal");
+  const closeSettings = document.getElementById("closeSettingsModal");
+  const confirmSettings = document.getElementById("confirmSettingsBtn");
 
-  const formatPickerModal = document.getElementById("formatPickerModal");
-  const closeFormatPicker = document.getElementById("closeFormatPicker");
-  const formatOptions = document.querySelectorAll("#formatPickerModal .card-option");
-  const confirmFormatBtn = document.getElementById("confirmFormatBtn");
-  let selectedFormat = "9x16";
+  const bgOptions = document.querySelectorAll(".bg-option");
+  bgOptions.forEach(option => {
+    option.addEventListener("click", () => {
+      bgOptions.forEach(opt => opt.classList.remove("selected"));
+      option.classList.add("selected");
+    });
+  });
 
-  const columnPickerModal = document.getElementById("columnPickerModal");
-  const closeColumnPicker = document.getElementById("closeColumnPicker");
-  const chartColOptions = document.querySelectorAll(".chart-col-option");
-  const confirmColumnsBtn = document.getElementById("confirmColumnsBtn");
 
-  if (btnGerarRelatorio && formatPickerModal) {
+
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+  const nextStepBtn = document.getElementById("nextStepBtn");
+  const backStepBtn = document.getElementById("backStepBtn");
+
+  if (nextStepBtn) {
+    nextStepBtn.addEventListener("click", () => {
+      if(step1 && step2) {
+        step1.style.display = "none";
+        step2.style.display = "block";
+      }
+    });
+  }
+
+  if (backStepBtn) {
+    backStepBtn.addEventListener("click", () => {
+      if(step1 && step2) {
+        step2.style.display = "none";
+        step1.style.display = "block";
+      }
+    });
+  }
+
+  if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
-      formatPickerModal.classList.add("show");
+      if(step1 && step2) {
+        step1.style.display = "block";
+        step2.style.display = "none";
+      }
+      settingsModal.classList.add("show");
     });
 
-    if (closeFormatPicker) {
-      closeFormatPicker.addEventListener("click", () => {
-        formatPickerModal.classList.remove("show");
+    if (closeSettings) {
+      closeSettings.addEventListener("click", () => {
+        settingsModal.classList.remove("show");
       });
     }
 
-    formatPickerModal.addEventListener("click", (e) => {
-      if (e.target === formatPickerModal) {
-        formatPickerModal.classList.remove("show");
-      }
-    });
-  }
-
-  if (formatOptions.length > 0) {
-    formatOptions.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        formatOptions.forEach((b) => b.classList.remove("selected"));
-        btn.classList.add("selected");
-        selectedFormat = btn.dataset.format;
-      });
-    });
-  }
-
-  if (confirmFormatBtn && columnPickerModal) {
-    confirmFormatBtn.addEventListener("click", () => {
-      formatPickerModal.classList.remove("show");
-
-      const selectedCount = Array.from(chartColOptions).filter((cb) => cb.checked).length;
-      const subtitle = document.getElementById("columnPickerSubtitle");
-      if (selectedFormat === "3x4" || selectedFormat === "1x1") {
-        confirmColumnsBtn.disabled = selectedCount !== 2;
-        if (subtitle) subtitle.textContent = "Choose exactly 2 charts to display.";
-      } else {
-        confirmColumnsBtn.disabled = !(selectedCount > 0 && selectedCount <= 2);
-        if (subtitle) subtitle.textContent = "Choose 1 or 2 charts to display.";
-      }
-
-      columnPickerModal.classList.add("show");
-    });
-
-    if (closeColumnPicker) {
-      closeColumnPicker.addEventListener("click", () => {
-        columnPickerModal.classList.remove("show");
-      });
-    }
-
-    columnPickerModal.addEventListener("click", (e) => {
-      if (e.target === columnPickerModal) {
-        columnPickerModal.classList.remove("show");
-      }
-    });
-  }
-
-  if (chartColOptions.length > 0) {
-    chartColOptions.forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        const row = checkbox.closest(".custom-checkbox-row");
-        if (checkbox.checked) {
-          row.classList.add("checked");
-        } else {
-          row.classList.remove("checked");
-        }
-
-        const selectedCount = Array.from(chartColOptions).filter((cb) => cb.checked).length;
-
-        if (selectedCount >= 2) {
-          chartColOptions.forEach((cb) => {
-            if (!cb.checked) {
-              cb.disabled = true;
-              cb.closest(".custom-checkbox-row").classList.add("disabled");
-            }
-          });
-        } else {
-          chartColOptions.forEach((cb) => {
-            cb.disabled = false;
-            cb.closest(".custom-checkbox-row").classList.remove("disabled");
-          });
-        }
-
-        if (selectedFormat === "3x4" || selectedFormat === "1x1") {
-          confirmColumnsBtn.disabled = selectedCount !== 2;
-        } else {
-          confirmColumnsBtn.disabled = !(selectedCount > 0 && selectedCount <= 2);
-        }
-      });
-
-      const row = checkbox.closest(".custom-checkbox-row");
-      row.addEventListener("click", (e) => {
-        if (e.target !== checkbox && !checkbox.disabled) {
-          checkbox.checked = !checkbox.checked;
-          checkbox.dispatchEvent(new Event("change"));
-        }
-      });
-    });
-  }
-
-  const colorPickerModal = document.getElementById("colorPickerModal");
-  const closeColorPicker = document.getElementById("closeColorPicker");
-  const colorOptions = document.querySelectorAll(".color-option");
-  const customColorBtn = document.getElementById("customColorBtn");
-  const customColorPicker = document.getElementById("customColorPicker");
-  const confirmColorBtn = document.getElementById("confirmColorBtn");
-
-  let selectedColor = null;
-
-  if (confirmColumnsBtn && colorPickerModal) {
-    confirmColumnsBtn.addEventListener("click", () => {
-      columnPickerModal.classList.remove("show");
-      colorPickerModal.classList.add("show");
-    });
-
-    if (closeColorPicker) {
-      closeColorPicker.addEventListener("click", () => {
-        colorPickerModal.classList.remove("show");
-      });
-    }
-
-    colorPickerModal.addEventListener("click", (e) => {
-      if (e.target === colorPickerModal) {
-        colorPickerModal.classList.remove("show");
-      }
-    });
-  }
-
-  if (colorOptions.length > 0) {
-    colorOptions.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (btn.id === "customColorBtn") {
-          customColorPicker.click();
-          return;
-        }
-
-        colorOptions.forEach((b) => b.classList.remove("selected"));
-        btn.classList.add("selected");
-        selectedColor = btn.dataset.color;
-
-        if (confirmColorBtn) confirmColorBtn.disabled = false;
-      });
-    });
-  }
-
-  if (customColorPicker) {
-    customColorPicker.addEventListener("input", (e) => {
-      const hexColor = e.target.value;
-      customColorBtn.style.backgroundColor = hexColor;
-
-      colorOptions.forEach((b) => b.classList.remove("selected"));
-      customColorBtn.classList.add("selected");
-      selectedColor = hexColor;
-
-      if (confirmColorBtn) confirmColorBtn.disabled = false;
-    });
-  }
-
-  const imagePickerModal = document.getElementById("imagePickerModal");
-  const closeImagePicker = document.getElementById("closeImagePicker");
-  const defaultBgCard = document.getElementById("defaultBgCard");
-  const customBgCard = document.getElementById("customBgCard");
-  const customBgInput = document.getElementById("customBgInput");
-  const confirmImageBtn = document.getElementById("confirmImageBtn");
-
-  let selectedBgType = null;
-  let customBgDataUrl = null;
-
-  if (confirmColorBtn && imagePickerModal) {
-    confirmColorBtn.addEventListener("click", () => {
-      colorPickerModal.classList.remove("show");
-      if (selectedFormat === "1x1") {
-        if (confirmImageBtn) {
-          confirmImageBtn.disabled = false;
-          confirmImageBtn.click();
-        }
-      } else {
-        imagePickerModal.classList.add("show");
-      }
-    });
-
-    if (closeImagePicker) {
-      closeImagePicker.addEventListener("click", () => {
-        imagePickerModal.classList.remove("show");
-      });
-    }
-
-    imagePickerModal.addEventListener("click", (e) => {
-      if (e.target === imagePickerModal) {
-        imagePickerModal.classList.remove("show");
-      }
-    });
-  }
-
-  if (defaultBgCard && customBgCard) {
-    defaultBgCard.addEventListener("click", () => {
-      defaultBgCard.classList.add("selected");
-      customBgCard.classList.remove("selected");
-      selectedBgType = "default";
-      if (confirmImageBtn) confirmImageBtn.disabled = false;
-    });
-
-    customBgCard.addEventListener("click", (e) => {
-      if (e.target.tagName.toLowerCase() !== "input") {
-        customBgInput.click();
-      }
-    });
-  }
-
-  if (customBgInput) {
-    customBgInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          customBgDataUrl = event.target.result;
-          selectedBgType = "custom";
-
-          customBgCard.classList.add("selected");
-          defaultBgCard.classList.remove("selected");
-          if (confirmImageBtn) confirmImageBtn.disabled = false;
-        };
-        reader.readAsDataURL(file);
+    settingsModal.addEventListener("click", (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.remove("show");
       }
     });
   }
 
   const storyCardContainer = document.getElementById("storyCardContainer");
-  const storyBody = document.getElementById("storyBody");
+  const cardElement = document.getElementById("storyCard");
+  const themeToggleCheckbox = document.getElementById("themeToggleCheckbox");
 
-  if (confirmImageBtn && storyCardContainer) {
-    confirmImageBtn.addEventListener("click", async () => {
-      imagePickerModal.classList.remove("show");
-      const chartColOptions = document.querySelectorAll(".chart-col-option");
-      const selectedCharts = Array.from(chartColOptions)
-        .filter((cb) => cb.checked)
-        .map((cb) => cb.value);
+  if (themeToggleCheckbox && cardElement) {
+    const updateCardTheme = () => {
+      cardElement.className = themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
+    };
+    themeToggleCheckbox.addEventListener("change", updateCardTheme);
+    updateCardTheme();
+  }
 
+  if (confirmSettings && storyCardContainer) {
+    confirmSettings.addEventListener("click", async () => {
       if (!currentActiveData) {
         alert("Data not fully loaded yet. Please wait.");
         return;
       }
+
+      settingsModal.classList.remove("show");
       const data = currentActiveData;
-      const gradient = document.getElementById("storyCardGradient");
-      if (gradient) {
-        const c = selectedColor || "#bb86fc";
-        gradient.style.background = `radial-gradient(circle at 100% 100%, ${c} 0%, transparent 55%)`;
-        gradient.style.filter = "none";
-        gradient.style.opacity = "0.25";
-      }
+
+      const serviceSelectElem = document.getElementById("serviceSelect");
+      const serviceSelect = serviceSelectElem ? serviceSelectElem.value : "none";
+      
+      const selectedBgOption = document.querySelector(".bg-option.selected");
+      const selectedBg = selectedBgOption ? selectedBgOption.dataset.bg : "candy";
+      const isLight = document.getElementById("themeToggleCheckbox").checked;
 
       const cardElement = document.getElementById("storyCard");
       if (cardElement) {
-        cardElement.classList.remove("format-9x16", "format-3x4", "format-1x1");
-        cardElement.classList.add(`format-${selectedFormat}`);
+        cardElement.className = isLight ? "theme-light" : "theme-dark";
       }
 
-      const separator = document.querySelector(".story-separator");
-      if (separator) {
-        separator.style.backgroundColor = selectedColor || "#bb86fc";
-      }
-      const customStoryBg = document.getElementById("customStoryBg");
-      const userImg = document.getElementById("storyUserImg");
-
-      if (selectedBgType === "custom" && customBgDataUrl) {
-        customStoryBg.style.backgroundImage = `url(${customBgDataUrl})`;
-        customStoryBg.style.display = "block";
-      } else {
-        customStoryBg.style.display = "none";
-        if (data.artistCoverImage) {
-          customStoryBg.style.backgroundImage = `url(${data.artistCoverImage})`;
-          customStoryBg.style.display = "block";
-        }
-      }
-      if (data.userInfo && data.userInfo.user) {
-        userImg.src =
-          data.userInfo.user.image.find((img) => img.size === "extralarge")?.["#text"] ||
-          data.userInfo.user.image[0]?.["#text"];
-        const storyTitleEl = document.getElementById("storyTitle");
-        storyTitleEl.textContent = data.userInfo.user.name;
-        storyTitleEl.style.color = selectedColor || "#bb86fc";
+      const cardBgImg = document.getElementById("storyCardBackgroundImg");
+      if (cardBgImg) {
+        cardBgImg.src = `/assets/bg/${selectedBg}.webp`;
       }
 
-      const storySubtitleEl = document.getElementById("storySubtitle");
-      if (storySubtitleEl) {
-        storySubtitleEl.textContent = data.subtitleText || "";
-        storySubtitleEl.style.color = selectedColor || "#bb86fc";
+      document.getElementById("storyCardTitle").textContent = "Recap";
+
+      const logoContainer = document.getElementById("storyServiceLogo");
+      logoContainer.innerHTML = "";
+      if (serviceSelect === "applemusic") {
+        logoContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" xml:space="preserve" viewBox="0 0 84.3 20.7"><path d="M35.4 20.1V6.6h-.1l-5.4 13.5h-2.1L22.4 6.6h-.1v13.5h-2.5V1.8H23l5.8 14.6h.1l5.8-14.6H38v18.3zm16.7 0h-2.6v-2.3h-.1c-.7 1.6-2.1 2.5-4.1 2.5-2.9 0-4.6-1.9-4.6-5V6.7h2.7v8.1c0 2 1 3.1 2.8 3.1 2 0 3.1-1.4 3.1-3.5V6.7H52zm7.4-13.6c3.1 0 5 1.7 5.1 4.2h-2.5c-.2-1.3-1.1-2.1-2.6-2.1s-2.5.7-2.5 1.8c0 .8.6 1.4 2 1.7l2.1.5c2.7.6 3.7 1.7 3.7 3.6 0 2.4-2.2 4.1-5.3 4.1-3.3 0-5.3-1.6-5.5-4.2h2.7c.2 1.4 1.2 2.1 2.8 2.1s2.6-.7 2.6-1.8c0-.9-.5-1.4-1.9-1.7l-2.1-.5c-2.5-.6-3.7-1.8-3.7-3.8 0-2.3 2-3.9 5.1-3.9m7.3-3.3c0-.9.7-1.6 1.6-1.6s1.6.7 1.6 1.6-.7 1.6-1.6 1.6-1.6-.7-1.6-1.6m.2 3.5h2.7v13.4H67zm14.1 4.6c-.3-1.4-1.3-2.6-3.1-2.6-2.1 0-3.5 1.8-3.5 4.6 0 2.9 1.4 4.6 3.5 4.6 1.7 0 2.7-.9 3.1-2.5h2.6c-.3 2.8-2.5 4.8-5.7 4.8-3.8 0-6.2-2.6-6.2-6.9 0-4.2 2.4-6.9 6.2-6.9 3.4 0 5.4 2.2 5.7 4.8zM11.5 3.6c-.7.8-1.8 1.5-2.9 1.4-.2-1.2.4-2.4 1-3.1.7-.9 1.9-1.5 2.9-1.5.1 1.1-.3 2.3-1 3.2m1 1.6c.6 0 2.4.2 3.6 2C16 7.3 14 8.5 14 11c0 3 2.6 4 2.6 4 0 .1-.4 1.4-1.3 2.8-.8 1.2-1.7 2.4-3 2.4s-1.7-.8-3.2-.8-2 .8-3.2.8c-1.3 0-2.3-1.3-3.1-2.5-1.7-2.5-3-7-1.2-10 .8-1.5 2.4-2.5 4-2.5 1.3 0 2.5.9 3.2.9s2.1-1 3.7-.9"/></svg>`;
+      } else if (serviceSelect === "spotify") {
+        logoContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 160"><path fill="currentColor" d="M79.655 0C35.664 0 0 35.663 0 79.654c0 43.993 35.664 79.653 79.655 79.653 43.996 0 79.656-35.66 79.656-79.653 0-43.988-35.66-79.65-79.657-79.65zm36.53 114.884a4.963 4.963 0 0 1-6.83 1.646c-18.702-11.424-42.246-14.011-69.973-7.676a4.967 4.967 0 0 1-5.944-3.738 4.96 4.96 0 0 1 3.734-5.945c30.343-6.933 56.37-3.948 77.367 8.884a4.965 4.965 0 0 1 1.645 6.83m9.75-21.689c-1.799 2.922-5.622 3.845-8.543 2.047-21.41-13.16-54.049-16.972-79.374-9.284a6.22 6.22 0 0 1-7.75-4.138 6.22 6.22 0 0 1 4.141-7.745c28.929-8.778 64.892-4.526 89.48 10.583 2.92 1.798 3.843 5.622 2.045 8.538m.836-22.585C101.1 55.362 58.742 53.96 34.231 61.4c-3.936 1.194-8.098-1.028-9.29-4.964a7.453 7.453 0 0 1 4.965-9.294c28.137-8.542 74.912-6.892 104.469 10.655a7.44 7.44 0 0 1 2.606 10.209c-2.092 3.54-6.677 4.707-10.206 2.605zm89.944 2.922c-13.754-3.28-16.198-5.581-16.198-10.418 0-4.57 4.299-7.645 10.7-7.645 6.202 0 12.347 2.336 18.796 7.143.19.145.437.203.675.165a.9.9 0 0 0 .6-.367l6.715-9.466a.903.903 0 0 0-.171-1.225c-7.676-6.157-16.313-9.15-26.415-9.15-14.848 0-25.225 8.911-25.225 21.662 0 13.673 8.95 18.515 24.417 22.252 13.155 3.031 15.38 5.57 15.38 10.11 0 5.032-4.49 8.161-11.718 8.161-8.028 0-14.582-2.71-21.906-9.046a.93.93 0 0 0-.656-.218.9.9 0 0 0-.619.313l-7.533 8.96a.906.906 0 0 0 .086 1.256c8.522 7.61 19.004 11.624 30.323 11.624 16 0 26.339-8.742 26.339-22.277.028-11.421-6.81-17.746-23.561-21.821zm59.792-13.564c-6.934 0-12.622 2.732-17.321 8.33V62c0-.498-.4-.903-.894-.903h-12.318a.9.9 0 0 0-.894.902v70.009c0 .494.4.903.894.903h12.318a.9.9 0 0 0 .894-.903v-22.097c4.699 5.26 10.387 7.838 17.32 7.838 12.89 0 25.94-9.92 25.94-28.886.019-18.97-13.032-28.894-25.93-28.894zm11.614 28.893c0 9.653-5.945 16.397-14.468 16.397-8.418 0-14.772-7.048-14.772-16.397 0-9.35 6.354-16.397 14.772-16.397 8.38 0 14.468 6.893 14.468 16.396m47.759-28.893c-16.598 0-29.601 12.78-29.601 29.1 0 16.143 12.917 28.784 29.401 28.784 16.655 0 29.696-12.736 29.696-28.991 0-16.2-12.955-28.89-29.496-28.89zm0 45.385c-8.827 0-15.485-7.096-15.485-16.497 0-9.444 6.43-16.298 15.285-16.298 8.884 0 15.58 7.093 15.58 16.504 0 9.443-6.468 16.291-15.38 16.291m64.937-44.258h-13.554V47.24c0-.497-.4-.902-.894-.902H374.05a.906.906 0 0 0-.904.902v13.855h-5.916a.9.9 0 0 0-.894.902v10.584a.9.9 0 0 0 .894.903h5.916v27.39c0 11.062 5.508 16.674 16.38 16.674 4.413 0 8.075-.914 11.528-2.873a.88.88 0 0 0 .457-.78v-10.083a.9.9 0 0 0-.428-.76.87.87 0 0 0-.876-.039c-2.368 1.19-4.66 1.741-7.229 1.741-3.947 0-5.716-1.798-5.716-5.812V73.49h13.554a.9.9 0 0 0 .894-.903V62.003a.873.873 0 0 0-.884-.903zm47.217.054v-1.702c0-5.006 1.921-7.238 6.22-7.238 2.57 0 4.633.51 6.945 1.28a.895.895 0 0 0 1.18-.858l-.001-10.377a.89.89 0 0 0-.637-.865c-2.435-.726-5.555-1.47-10.235-1.47-11.367 0-17.388 6.405-17.388 18.516v2.606H428.2a.906.906 0 0 0-.904.902v10.638c0 .497.41.903.904.903h5.916v42.237c0 .504.41.904.904.904h12.308c.504 0 .904-.4.904-.904V73.487h11.5l17.616 42.234c-1.998 4.433-3.967 5.317-6.65 5.317-2.168 0-4.46-.646-6.79-1.93a.98.98 0 0 0-.714-.067.9.9 0 0 0-.533.485l-4.175 9.16a.9.9 0 0 0 .39 1.17c4.356 2.359 8.284 3.367 13.145 3.367 9.093 0 14.125-4.242 18.548-15.637l21.364-55.204a.88.88 0 0 0-.095-.838.88.88 0 0 0-.733-.392h-12.822a.9.9 0 0 0-.856.605l-13.136 37.509-14.382-37.534a.9.9 0 0 0-.837-.58h-21.04zm-27.375-.054h-12.318a.907.907 0 0 0-.903.902v53.724c0 .504.409.904.903.904h12.318c.495 0 .904-.4.904-.904v-53.72a.9.9 0 0 0-.904-.903zm-6.088-24.464c-4.88 0-8.836 3.95-8.836 8.828a8.835 8.835 0 0 0 8.836 8.836c4.88 0 8.827-3.954 8.827-8.836a8.83 8.83 0 0 0-8.827-8.828"/></svg>`;
+      } else if (serviceSelect === "youtubemusic") {
+        logoContainer.innerHTML = `<svg height="760" viewBox="0.264 0.264 914.755 277.094" width="2500" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fill-rule="evenodd" d="M281.514 138.811q0 57.388-41.188 97.967t-99.437 40.58q-58.248 0-99.437-40.58Q.265 196.199.264 138.811c-.001-57.388 13.73-70.914 41.188-97.967Q82.642.264 140.89.264c58.248 0 71.978 13.527 99.437 40.58s41.188 59.708 41.188 97.967z M112.764 179.74l73.049-40.917l-73.049-40.941zm319.685-68.153c-6.685 32.939-11.765 73.152-14.432 89.755h-1.882c-2.159-17.11-7.239-57.058-14.166-89.478l-17.122-80.692H332.66v217.633h32.362V69.388l3.198 16.752 32.905 162.63H433.5l32.362-162.63 3.463-16.845v179.499H501.7V31.16h-52.682zM589.203 216.12c-2.956 5.969-9.352 10.114-15.794 10.114-7.482 0-10.438-5.704-10.438-19.697V89.79H526.05v118.803c0 29.326 9.883 42.788 31.842 42.788 14.963 0 26.994-6.489 35.307-22.04h.808l3.198 19.442h28.887V89.8h-36.923v126.308h.035zm108.32-63.57C685.481 143.983 678 138.28 678 125.834c0-8.81 4.272-13.74 14.432-13.74 10.448 0 13.924 6.986 14.166 30.873l31.046-1.281c2.401-38.632-10.714-54.726-44.681-54.726-31.554 0-47.083 13.74-47.083 42.003 0 25.677 12.85 37.35 33.713 52.67 17.93 13.497 28.367 21.013 28.367 31.912 0 8.313-5.357 14.005-14.72 14.005-10.968 0-17.4-10.125-15.76-27.767l-31.288.508c-4.838 32.928 8.844 52.128 45.2 52.128 31.843 0 48.434-14.27 48.434-42.788-.034-25.942-13.393-36.333-42.303-57.08zm97.907-62.76h-35.318v158.98h35.33V89.8zm-17.4-62.785c-13.623 0-20.066 4.93-20.066 22.063 0 17.642 6.396 22.04 20.078 22.04 13.912 0 20.066-4.421 20.066-22.04 0-16.325-6.154-22.063-20.078-22.063M914.187 191.46l-32.362-1.559c0 28.01-3.198 37.084-14.155 37.084-10.968 0-12.85-10.125-12.85-43.065v-30.826c0-31.924 2.159-42.014 13.127-42.014 10.16 0 12.839 9.582 12.839 39.174l32.073-2.056c2.16-24.638-1.073-41.506-10.956-51.089-7.24-7.02-18.196-10.356-33.436-10.356-35.838 0-50.558 18.68-50.558 71.051v22.306c0 53.953 12.561 71.329 49.23 71.329 15.517 0 26.208-3.117 33.436-9.86 10.414-9.398 14.42-25.458 13.624-50.12z" /><path fill="none" stroke="var(--sc-bg)" stroke-width="18.42" d="M225.264 138.811q0 34.433-24.713 58.78-24.712 24.348-59.662 24.348c-34.95 0-43.187-8.116-59.662-24.348q-24.713-24.347-24.713-58.78c0-34.433 8.238-42.549 24.713-58.78q24.713-24.348 59.662-24.348 34.95 0 59.662 24.348 24.713 24.347 24.713 58.78z" /></svg>`;
+      } else if (serviceSelect === "deezer") {
+        logoContainer.innerHTML = `<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1559 436" width="1559" height="436"><path fill-rule="evenodd" d="M885.4 278.4H743.5V106.3h141.9v46.5h-75v19.9h70.5v38h-70.5v21.2h75zm158 0H901.5V106.3h141.9v46.5h-75v19.9h70.5v38h-70.5v21.2h75zm439.3 0c-7.2-22.4-18.2-46.1-33.1-71.2v71.2h-67.1V106.3h94c45.6 0 74.5 14.7 74.5 46 0 20.6-12.7 34-34 40.2 18.2 31.5 31.7 59.6 41.4 85.9zm-9.9-95.2c9.9 0 15.5-5.4 15.5-15.2 0-9.9-5.6-15.2-15.5-15.2h-23.2v30.4zm-106.6 95.2h-141.9V106.3h141.9v46.5h-75v19.9h70.5v38h-70.5v21.2h75zm-306.8-172.1h151.1v46.5c-34.4 28.5-58.8 53.7-76.2 79.1h76.2v46.5H1058v-46.5c18.3-29 41.9-55.6 70.7-79.1h-69.3zm-504 0h86.4c53.5 0 91.3 35.5 91.3 86 0 50.6-37.8 86.1-91.3 86.1h-86.4zM622.5 232h15.7c16.8 0 25.7-11.2 25.7-39.6s-8.9-39.6-25.7-39.6h-15.7zm-256-165.4c4.1-23.4 10-38.1 16.5-38.1h.1c12.2 0 22.1 51 22.1 114 0 62.9-9.9 114-22.2 114-5 0-9.6-8.7-13.4-23.2-5.9 53.1-18.1 89.7-32.3 89.7-10.9 0-20.8-22-27.4-56.6-4.5 65.8-15.8 112.5-29.1 112.5-8.3 0-15.9-18.5-21.5-48.6-6.8 62.2-22.4 105.8-40.6 105.8s-33.8-43.6-40.6-105.8c-5.5 30.1-13.1 48.6-21.5 48.6-13.3 0-24.6-46.7-29.1-112.5-6.6 34.6-16.4 56.6-27.4 56.6-14.2 0-26.4-36.5-32.3-89.7-3.7 14.5-8.4 23.2-13.4 23.2-12.3 0-22.2-51.1-22.2-114 0-63 9.9-114 22.2-114 6.6 0 12.4 14.8 16.5 38.1C77.4 26.3 88.1.1 100.1.1c14.2 0 26.6 37.1 32.4 90.9 5.7-39.2 14.4-64.2 24.1-64.2 13.6 0 25.2 49.1 29.5 117.6 8-35.1 19.7-57.1 32.6-57.1 13 0 24.6 22 32.7 57.1 4.3-68.5 15.8-117.6 29.4-117.6 9.7 0 18.4 25 24.1 64.2C310.8 37.2 323.1.1 337.4.1c11.9 0 22.6 26.2 29.1 66.5M13.1 182.2c-7 0-12.6-22.7-12.6-50.9s5.6-51 12.6-51c6.9 0 12.6 22.8 12.6 51s-5.7 50.9-12.6 50.9m411.2 0c-6.9 0-12.6-22.7-12.6-50.9s5.7-51 12.6-51c7 0 12.6 22.8 12.6 51s-5.6 50.9-12.6 50.9" style="fill:currentColor"/></svg>`;
+      } else if (serviceSelect === "lastfm") {
+        logoContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="708.767" height="179.332" viewBox="0 0 708.767 179.332"><path fill="currentColor" d="m158.431 165.498-8.354-22.708s-13.575 15.14-33.932 15.14c-18.013 0-30.802-15.662-30.802-40.721 0-32.106 16.182-43.591 32.107-43.591 22.969 0 30.277 14.878 36.543 33.934l8.354 26.103c8.351 25.318 24.013 45.678 69.17 45.678 32.37 0 54.295-9.918 54.295-36.02 0-21.143-12.009-32.107-34.458-37.328l-16.705-3.654c-11.484-2.61-14.877-7.309-14.877-15.14 0-8.875 7.046-14.096 18.533-14.096 12.529 0 19.315 4.699 20.36 15.923l26.102-3.133c-2.088-23.492-18.271-33.15-44.896-33.15-23.491 0-46.462 8.875-46.462 37.327 0 17.75 8.614 28.975 30.277 34.195l17.752 4.175c13.312 3.133 17.748 8.614 17.748 16.185 0 9.656-9.396 13.572-27.146 13.572-26.364 0-37.325-13.834-43.591-32.89l-8.614-26.101c-10.961-33.934-28.452-46.463-63.169-46.463-38.37 0-58.731 24.275-58.731 65.517 0 39.677 20.361 61.08 56.906 61.08 29.492 0 43.59-13.834 43.59-13.834M46.726 153.229c-2.61.784-5.221 1.306-8.614 1.306-6.265 0-10.703-2.87-10.703-10.442V1.827H0v148.792c0 19.577 13.575 27.672 29.497 27.672 5.221 0 10.181-.785 16.446-2.349zm330.185-4.176c-6.787 4.701-12.529 7.051-20.36 7.051-9.92 0-15.401-5.221-15.401-18.012V77.006h36.023V55.603H341.41V26.625l-27.669 3.394v25.583h-17.49v21.403h17.49v66.826c0 24.02 13.834 35.5 36.284 35.5 12.269 0 23.232-2.346 31.847-7.305zm23.807 9.396c0 10.705 8.354 19.318 19.056 19.318 11.226 0 19.578-8.613 19.578-19.318 0-10.963-8.353-19.313-19.578-19.313-10.702 0-19.056 8.35-19.056 19.313m67.009-81.443v99.195h27.409V77.006h30.803V55.603h-30.803V44.638c0-16.444 7.049-21.665 18.534-21.665 8.092 0 13.574 1.825 19.839 5.221l4.437-22.974C530.638 1.827 522.023 0 511.582 0c-22.973 0-43.855 10.963-43.855 43.593v12.01h-17.489v21.403zm167.427 2.352c-3.133-19.578-15.923-26.629-32.63-26.629-16.706 0-31.062 7.571-37.329 26.104l-3.393-23.23h-22.188v120.598h27.409v-68.129c0-23.235 12.008-32.11 24.799-32.11 13.312 0 18.795 8.875 18.795 23.232V176.2h27.147v-68.39c0-22.974 12.269-31.849 25.061-31.849 13.052 0 18.532 8.875 18.532 23.232v77.006h27.409v-86.66c0-25.843-15.14-36.81-35.24-36.81-16.965 0-32.107 7.571-38.372 26.629"/></svg>`;
       }
 
-      const storyReviewLabel = document.getElementById("storyReviewLabel");
-      if (storyReviewLabel) {
-        storyReviewLabel.textContent = data.reviewLabel || "Month Review";
-      }
-      const minutes = Math.round(data.rawTracks.length * 3.5);
-      const isSingle = selectedCharts.length === 1;
-      const scrobblesValueEl = document.getElementById("storyScrobblesValue");
-      const scrobblesLabelEl = document.getElementById("storyScrobblesLabel");
-      const statGroupEl = scrobblesValueEl.parentElement;
-
-      if (selectedFormat === "3x4" || selectedFormat === "1x1") {
-        scrobblesValueEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
-        scrobblesLabelEl.style.display = "none";
-        statGroupEl.style.flexDirection = "row";
-        scrobblesValueEl.style.fontSize = "3.5rem";
-      } else {
-        if (isSingle) {
-          scrobblesValueEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
-          scrobblesLabelEl.style.display = "none";
-          statGroupEl.style.flexDirection = "row";
-          scrobblesValueEl.style.fontSize = "4.5rem";
+      const monthYearEl = document.getElementById("storyMonthYear");
+      if (monthYearEl) {
+        const d = new Date(data.from * 1000);
+        const mStr = d.toLocaleString("en-US", { month: "long" }).toUpperCase();
+        if (data.period === "week") {
+          monthYearEl.textContent = `${mStr} WEEK`;
         } else {
-          scrobblesValueEl.textContent = minutes.toLocaleString("en-US");
-          scrobblesLabelEl.textContent = "Total Minutes";
-          scrobblesLabelEl.style.display = "block";
-          statGroupEl.style.flexDirection = "column";
-          scrobblesValueEl.style.fontSize = "";
+          monthYearEl.textContent = `${mStr} ${d.getFullYear()}`;
         }
       }
 
-      storyBody.innerHTML = "";
+      const minutes = Math.round(data.rawTracks.length * 3.5);
+      const minutesEl = document.getElementById("storyTotalMinutes");
+      if (minutesEl) {
+        minutesEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
+      }
 
-      const getTop5 = (list) => list.slice(0, 5);
       const fetchAssetImage = async (type, query, targetName = "") => {
         try {
           const json = await fetchAssetData(type, query);
           if (json && json.data && json.data.length > 0) {
             if (type === "artist") {
               const bestArtist = selectBestArtist(json.data, targetName || query);
-              return bestArtist ? bestArtist.picture_medium || bestArtist.picture : null;
+              return bestArtist ? bestArtist.picture_xl || bestArtist.picture : null;
             } else if (type === "track" && json.data[0].album) {
-              return json.data[0].album.cover_medium || json.data[0].album.cover;
+              return json.data[0].album.cover_xl || json.data[0].album.cover;
             } else {
-              return json.data[0].cover_medium || json.data[0].cover;
+              return json.data[0].cover_xl || json.data[0].cover;
             }
           }
         } catch (e) {
@@ -1375,100 +1172,72 @@ document.addEventListener("DOMContentLoaded", () => {
         return null;
       };
 
-      for (let i = 0; i < selectedCharts.length; i++) {
-        const chartType = selectedCharts[i];
-        let items = [];
-        let title = "";
-        let searchType = "";
+      const truncateWithEllipsis = (str, maxLength = 22) => {
+        if (!str) return "";
+        const s = String(str).trim();
+        if (s.length <= maxLength) return s;
+        return s.slice(0, maxLength).trimEnd() + "...";
+      };
 
-        if (chartType === "artists") {
-          items = getTop5(data.artists);
-          title = "Top Artists";
-          searchType = "artist";
-        } else if (chartType === "tracks") {
-          items = getTop5(data.tracks);
-          title = "Top Songs";
-          searchType = "track";
-        } else if (chartType === "albums") {
-          items = getTop5(data.albums);
-          title = "Top Albums";
-          searchType = "album";
-        }
-
-        const colDiv = document.createElement("div");
-        colDiv.className = "story-column" + (isSingle ? " single-col" : "");
-        colDiv.innerHTML = `<h3 style="border-left-color: ${selectedColor || "#bb86fc"}">${title}</h3>`;
-
-        const listDiv = document.createElement("div");
-        listDiv.className = "story-list";
-
-        for (let j = 0; j < items.length; j++) {
-          const item = items[j];
-          const rank = j + 1;
-          const itemDiv = document.createElement("div");
-          let isTop1 = rank === 1;
-          if (selectedFormat === "3x4" || selectedFormat === "1x1") {
-            isTop1 = false;
-          }
-          itemDiv.className = `story-item ${isTop1 ? "top-1" : ""}`;
-
-          let imgHtml = "";
-          if (isSingle) {
-            let q = "";
-            let t = "";
-            const cleanItemName = (item.name || "").replace(/["']/g, "").trim();
-            const cleanArtistName = (item.artist?.name || "").replace(/["']/g, "").trim();
-            if (chartType === "artists") {
-              q = cleanItemName;
-              t = "artist";
-            } else if (chartType === "albums") {
-              q = `${cleanItemName} ${cleanArtistName}`.trim();
-              t = "album";
-            } else {
-              q = `${cleanItemName} ${cleanArtistName}`.trim();
-              t = "track";
-            }
-            const imgSrc = (await fetchAssetImage(t, q, item.name)) || "https://via.placeholder.com/150";
-            imgHtml = `<img src="${imgSrc}" class="story-item-img" />`;
-          }
-
-          let metaHtml = "";
-          if (chartType === "tracks" || chartType === "albums") {
-            metaHtml = `<span class="story-meta">${item.artist.name}</span>`;
-          } else {
-            metaHtml = `<span class="story-meta">${item.playcount} streams</span>`;
-          }
-
-          itemDiv.innerHTML = `
-            <span class="story-rank" style="color: ${selectedColor || "#bb86fc"}">${rank}</span>
-            ${imgHtml}
-            <div class="story-item-content">
-              <span class="story-text">${item.name}</span>
-              ${metaHtml}
+      const populateList = (containerId, items) => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        const top3 = items.slice(0, 3);
+        top3.forEach((item, index) => {
+          const rank = index + 1;
+          const rawSubText = item.artist ? item.artist.name : `${item.playcount} streams`;
+          const displayName = truncateWithEllipsis(item.name, 22);
+          const displaySub = truncateWithEllipsis(rawSubText, 28);
+          container.innerHTML += `
+            <div class="story-item-row">
+              <span class="story-item-rank">${rank}</span>
+              <div class="story-item-details">
+                <span class="story-item-name" title="${escapeHTML(item.name)}">${escapeHTML(displayName)}</span>
+                <span class="story-item-sub" title="${escapeHTML(rawSubText)}">${escapeHTML(displaySub)}</span>
+              </div>
             </div>
           `;
-          listDiv.appendChild(itemDiv);
-        }
+        });
+      };
 
-        colDiv.appendChild(listDiv);
-        storyBody.appendChild(colDiv);
+      populateList("storyListArtists", data.artists);
+      populateList("storyListSongs", data.tracks);
+      populateList("storyListAlbums", data.albums);
+
+      const topArtist = data.artists[0];
+      const topSong = data.tracks[0];
+      const topAlbum = data.albums[0];
+
+      if (topArtist) {
+        const src = (await fetchAssetImage("artist", topArtist.name, topArtist.name)) || "https://via.placeholder.com/320";
+        document.getElementById("storyImageArtist").src = src;
       }
+      if (topSong) {
+        const query = `${topSong.name} ${topSong.artist?.name || ""}`.trim();
+        const src = (await fetchAssetImage("track", query, topSong.name)) || "https://via.placeholder.com/320";
+        document.getElementById("storyImageSong").src = src;
+      }
+      if (topAlbum) {
+        const query = `${topAlbum.name} ${topAlbum.artist?.name || ""}`.trim();
+        const src = (await fetchAssetImage("album", query, topAlbum.name)) || "https://via.placeholder.com/320";
+        document.getElementById("storyImageAlbum").src = src;
+      }
+
       storyCardContainer.style.opacity = "0";
       storyCardContainer.style.zIndex = "-999";
-      confirmImageBtn.textContent = "Generating...";
+      confirmSettings.textContent = "Generating...";
 
       const generationModal = document.getElementById("generationModal");
       const stateLoading = document.getElementById("generationStateLoading");
       const stateComplete = document.getElementById("generationStateComplete");
 
       if (generationModal) {
-        generationModal.style.display = "flex";
         stateLoading.style.display = "flex";
         stateComplete.style.display = "none";
+        generationModal.classList.add("show");
       }
 
       setTimeout(() => {
-        const cardElement = document.getElementById("storyCard");
         html2canvas(cardElement, {
           useCORS: true,
           allowTaint: true,
@@ -1483,37 +1252,53 @@ document.addEventListener("DOMContentLoaded", () => {
             link.click();
 
             if (typeof umami !== "undefined") {
-              const activeTimeBtn = document.querySelector(".time-toggle-btn.active");
               umami.track("Card Generated", {
-                type: window.location.pathname.includes("match") ? "match" : "single",
-                period: activeTimeBtn ? activeTimeBtn.dataset.period : "month",
-                charts: selectedCharts.join(","),
-                color: selectedColor || "#bb86fc",
-                cover: selectedBgType || "default",
-                format: selectedFormat || "9x16",
-                ratio: selectedFormat || "9x16",
+                type: "single",
+                service: serviceSelect,
+                theme: isLight ? "light" : "dark"
               });
             }
 
-            confirmImageBtn.textContent = "Next";
-            confirmImageBtn.disabled = false;
+            confirmSettings.textContent = "Generate";
 
             if (generationModal) {
               stateLoading.style.display = "none";
               stateComplete.style.display = "flex";
               setTimeout(() => {
-                generationModal.style.display = "none";
-              }, 3000);
+                generationModal.classList.remove("show");
+              }, 2500);
             }
           })
           .catch((err) => {
             console.error("Error generating canvas", err);
-            confirmImageBtn.textContent = "Error";
+            confirmSettings.textContent = "Error";
             if (generationModal) {
-              generationModal.style.display = "none";
+              generationModal.classList.remove("show");
             }
           });
       }, 1000);
+    });
+  }
+
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+  const homeHeader = document.querySelector(".home-header");
+  if (mobileMenuBtn && homeHeader) {
+    mobileMenuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      homeHeader.classList.toggle("menu-open");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!homeHeader.contains(e.target)) {
+        homeHeader.classList.remove("menu-open");
+      }
+    });
+
+    const navLinks = homeHeader.querySelectorAll(".nav-link");
+    navLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        homeHeader.classList.remove("menu-open");
+      });
     });
   }
 });
