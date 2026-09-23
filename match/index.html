@@ -47,32 +47,15 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,100..1000&display=swap"
-      rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/layout.css" />
-    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <a
-      href="https://snw-mint.github.io/fluent-scrobbler/"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="promo-banner"
-      id="promoBanner"
-      data-umami-event="Fluent Scrobbler Outbound Click">
-      <span class="promo-banner-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="#e3e3e3"><path d="m480-381 76 46q11 7 22-.5t8-20.5l-20-87 68-59q10-9 6-21.5T622-537l-89-7-35-82q-5-12-18-12t-18 12l-35 82-89 7q-14 1-18 13.5t6 21.5l68 59-20 87q-3 13 8 20.5t22 .5zM346-160H240q-33 0-56.5-23.5T160-240v-106l-77-78q-11-12-17-26.5T60-480t6-29.5T83-536l77-78v-106q0-33 23.5-56.5T240-800h106l78-77q12-11 26.5-17t29.5-6 29.5 6 26.5 17l78 77h106q33 0 56.5 23.5T800-720v106l77 78q11 12 17 26.5t6 29.5-6 29.5-17 26.5l-77 78v106q0 33-23.5 56.5T720-160H614l-78 77q-12 11-26.5 17T480-60t-29.5-6T424-83zm34-80 100 100 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140zm100-240"/></svg>
-      </span>
-      <span class="promo-banner-text">Do you scrobble on Windows? Check out the new Fluent Scrobbler for Last.fm!</span>
-    </a>
+
     <header class="home-header">
       <div class="header-brand-group">
-        <a href="/" class="logo-container">
+        <a href="/index.html" class="logo-container">
           <img src="/logo.webp" alt="BubbleFM Logo" class="logo-icon" />
           <span class="logo-text">
             <span class="brand-bubble">Bubble</span>
@@ -81,14 +64,16 @@
         </a>
         <div class="header-divider"></div>
         <nav class="header-nav">
-          <a href="/" class="nav-link">Charts</a>
+          <a href="/index.html" class="nav-link">Charts</a>
           <a href="/match/" class="nav-link active">Match</a>
         </nav>
       </div>
       <div class="header-actions">
         <button id="theme-toggle" class="theme-toggle-btn" aria-label="Alternar tema"></button>
         <button id="faq-toggle" class="faq-toggle-btn" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path d="M0 0h24v24H0z" stroke="none"/><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0m9-3h.01"/><path d="M11 12h1v4h1"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+            <path d="M513.5-254.5Q528-269 528-290t-14.5-35.5Q499-340 478-340t-35.5 14.5Q428-311 428-290t14.5 35.5Q457-240 478-240t35.5-14.5ZM442-394h74q0-33 7.5-52t42.5-52q26-26 41-49.5t15-56.5q0-56-41-86t-97-30q-57 0-92.5 30T342-618l66 26q5-18 22.5-39t53.5-21q32 0 48 17.5t16 38.5q0 20-12 37.5T506-526q-44 39-54 59t-10 73Zm38 314q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
+          </svg>
         </button>
         <a
           href="https://github.com/snw-mint/bubblefm"
@@ -101,6 +86,9 @@
               d="M12 2.247a10 10 0 0 0-3.162 19.487c.5.088.687-.212.687-.475 0-.237-.012-1.025-.012-1.862-2.513.462-3.163-.613-3.363-1.175a3.64 3.64 0 0 0-1.025-1.413c-.35-.187-.85-.65-.013-.662a2 2 0 0 1 1.538 1.025 2.137 2.137 0 0 0 2.912.825 2.1 2.1 0 0 1 .638-1.338c-2.225-.25-4.55-1.112-4.55-4.937a3.9 3.9 0 0 1 1.025-2.688 3.6 3.6 0 0 1 .1-2.65s.837-.262 2.75 1.025a9.43 9.43 0 0 1 5 0c1.912-1.3 2.75-1.025 2.75-1.025a3.6 3.6 0 0 1 .1 2.65 3.87 3.87 0 0 1 1.025 2.688c0 3.837-2.338 4.687-4.562 4.937a2.37 2.37 0 0 1 .674 1.85c0 1.338-.012 2.413-.012 2.75 0 .263.187.575.687.475A10.005 10.005 0 0 0 12 2.247" />
           </svg>
         </a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61zM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61z"/></svg>
+        </button>
       </div>
     </header>
 
@@ -147,81 +135,19 @@
             </div>
           </div>
 
-          <button type="submit" id="btnTasteMatch" class="btn-primary">TasteMatch</button>
+          <button type="submit" id="btnTasteMatch" class="btn-primary" style="margin-top: 1.5rem;">TasteMatch</button>
         </form>
 
         <p id="mensagemErro" class="error-message"></p>
       </section>
 
-      <div class="landing-features">
-        <section class="feature-section">
-          <div class="feature-content">
+      <div class="landing-features" style="gap: 2rem; padding-top: 2rem;">
+        <section class="feature-section centered">
+          <div class="feature-content" style="max-width: 600px; margin: 0 auto;">
             <h2>See How You Match Up</h2>
             <p>
-              Compare your Last.fm data directly with a friend. Discover shared artists, tracks, and see who listens
-              more all in one beautiful interface.
+              Compare your Last.fm data directly with a friend. Discover shared artists, tracks, and generate stunning compatibility cards. It's completely free and takes seconds.
             </p>
-          </div>
-          <div class="feature-image-container">
-            <img
-              src="/assets/leading-m/screen-light(match).webp"
-              alt="Match interface light"
-              class="feature-img img-light"
-              loading="lazy" />
-            <img
-              src="/assets/leading-m/screen-dark(match).webp"
-              alt="Match interface dark"
-              class="feature-img img-dark"
-              loading="lazy" />
-          </div>
-        </section>
-
-        <section class="feature-section reverse">
-          <div class="feature-content">
-            <h2>Share Your Compatibility</h2>
-            <p>
-              Generate stunning, customizable compatibility cards. Perfect for sharing on Instagram, Twitter, and
-              showing off your music connection.
-            </p>
-          </div>
-          <div class="feature-image-container">
-            <img
-              src="/assets/leading-m/mockup(light).webp"
-              alt="Shareable match cards light"
-              class="feature-img img-light"
-              loading="lazy" />
-            <img
-              src="/assets/leading-m/mockup(dark).webp"
-              alt="Shareable match cards dark"
-              class="feature-img img-dark"
-              loading="lazy" />
-          </div>
-        </section>
-
-        <section class="feature-section centered">
-          <div class="feature-content">
-            <h2>Ready to Find Your Match?</h2>
-            <p>
-              Join thousands of Last.fm users discovering their music compatibility. It's completely free and takes
-              seconds.
-            </p>
-            <a
-              href="#"
-              onclick="
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return false;
-              "
-              class="btn-primary"
-              style="
-                width: max-content;
-                padding: 1rem 2rem;
-                font-size: 1.1rem;
-                margin-top: 1.5rem;
-                text-decoration: none;
-                border-radius: 30px;
-              ">
-              Compare Now
-            </a>
           </div>
           <div class="feature-image-container" style="background: transparent">
             <img
@@ -253,9 +179,9 @@
         </span>
       </div>
       <div class="footer-links">
-        <a href="privacy.html">Privacy Policy</a>
+        <a href="/privacy.html">Privacy Policy</a>
         <span class="dot">•</span>
-        <a href="terms.html">Terms of Use</a>
+        <a href="/terms.html">Terms of Use</a>
         <span class="dot">•</span>
         <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
         <span class="dot">•</span>

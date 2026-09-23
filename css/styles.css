@@ -721,7 +721,7 @@ button {
 .chart-item.top-1::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -20px;
   z-index: 2;
   pointer-events: none;
   background: transparent;
@@ -2151,3 +2151,6 @@ input:checked + .slider:before {
     transform: translateY(0);
   }
 }
+
+
+

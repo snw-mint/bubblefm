@@ -6,8 +6,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920t28.5 11.5T520-880v80q0 17-11.5 28.5T480-760t-28.5-11.5M678-678q-11-11-11-27.5t11-28.5l56-57q12-12 28.5-12t28.5 12q11 11 11 28t-11 28l-57 57q-11 11-28 11t-28-11m122 238q-17 0-28.5-11.5T760-480t11.5-28.5T800-520h80q17 0 28.5 11.5T920-480t-11.5 28.5T880-440zM451.5-51.5Q440-63 440-80v-80q0-17 11.5-28.5T480-200t28.5 11.5T520-160v80q0 17-11.5 28.5T480-40t-28.5-11.5M226-678l-57-56q-12-12-12-29t12-28q11-11 28-11t28 11l57 57q11 11 11 28t-11 28q-12 11-28 11t-28-11m508 509-56-57q-11-12-11-28.5t11-27.5 27.5-11 28.5 11l57 56q12 11 11.5 28T791-169q-12 12-29 12t-28-12M80-440q-17 0-28.5-11.5T40-480t11.5-28.5T80-520h80q17 0 28.5 11.5T200-480t-11.5 28.5T160-440zm89 271q-11-11-11-28t11-28l57-57q11-11 27.5-11t28.5 11q12 12 12 28.5T282-225l-56 56q-12 12-29 12t-28-12m141-141q-70-70-70-170t70-170 170-70 170 70 70 170-70 170-170 70-170-70"/></svg>`;
-const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
+const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920t28.5 11.5T520-880v80q0 17-11.5 28.5T480-760t-28.5-11.5M678-678q-11-11-11-27.5t11-28.5l56-57q12-12 28.5-12t28.5 12q11 11 11 28t-11 28l-57 57q-11 11-28 11t-28-11m122 238q-17 0-28.5-11.5T760-480t11.5-28.5T800-520h80q17 0 28.5 11.5T920-480t-11.5 28.5T880-440zM451.5-51.5Q440-63 440-80v-80q0-17 11.5-28.5T480-200t28.5 11.5T520-160v80q0 17-11.5 28.5T480-40t-28.5-11.5M226-678l-57-56q-12-12-12-29t12-28q11-11 28-11t28 11l57 57q11 11 11 28t-11 28q-12 11-28 11t-28-11m508 509-56-57q-11-12-11-28.5t11-27.5 27.5-11 28.5 11l57 56q12 11 11.5 28T791-169q-12 12-29 12t-28-12M80-440q-17 0-28.5-11.5T40-480t11.5-28.5T80-520h80q17 0 28.5 11.5T200-480t-11.5 28.5T160-440zm89 271q-11-11-11-28t11-28l57-57q11-11 27.5-11t28.5 11q12 12 12 28.5T282-225l-56 56q-12 12-29 12t-28-12m141-141q-70-70-70-170t70-170 170-70 170 70 70 170-70 170-170 70-170-70m283-57q47-47 47-113t-47-113-113-47-113 47-47 113 47 113 113 47 113-47M480-480"/></svg>`;
+const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M484-80q-84 0-157.5-32t-128-86.5-86.5-128T80-484q0-128 72-232t193-146q22-8 41 5.5t18 36.5q-3 85 27 162t90 137 137 90 162 27q26-1 38.5 17.5T863-345q-44 120-147.5 192.5T484-80m0-80q88 0 163-44t118-121q-86-8-163-43.5T464-465t-97-138-43-163q-77 43-120.5 118.5T160-484q0 135 94.5 229.5T484-160m-20-305"/></svg>`;
 
 const lastfmBaseUrl = "https://bubblefm.snw-mint.workers.dev/data";
 
@@ -72,7 +72,10 @@ function fetchDeezerJsonp(type, query) {
 }
 
 async function fetchAssetData(type, query) {
-  const cleanQuery = (query || "").replace(/["']/g, "").trim();
+  let cleanQuery = (query || "").replace(/["']/g, "").trim();
+  if (type === "artist" && cleanQuery.includes(",")) {
+    cleanQuery = cleanQuery.split(",")[0].trim();
+  }
   if (!cleanQuery) return null;
   try {
     const jsonpData = await fetchDeezerJsonp(type, cleanQuery);
@@ -220,7 +223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${user1}&_t=${Date.now()}`),
       fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${user2}&_t=${Date.now()}`),
       fetch(`${lastfmBaseUrl}?method=user.gettopartists&user=${user1}&period=1month&limit=100&_t=${Date.now()}`),
-      fetch(`${lastfmBaseUrl}?method=user.gettopartists&user=${user2}&period=1month&limit=100&_t=${Date.now()}`),
+      fetch(`${lastfmBaseUrl}?method=user.gettopartists&user=${user2}&period=1month&limit=100&_t=${Date.now()}`)
     ]);
 
     const info1 = await info1Res.json();
@@ -230,6 +233,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (info1.user) {
       document.getElementById("userDisplayName1").textContent = info1.user.name;
+      const titleEl1 = document.getElementById("titleUser1Vibe");
+      if (titleEl1) titleEl1.textContent = `${info1.user.name}'s vibe`;
       document.getElementById("userDisplayName1").classList.remove("skeleton", "skeleton-text");
       document.getElementById("userDisplayName1").removeAttribute("style");
 
@@ -256,6 +261,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (info2.user) {
       document.getElementById("userDisplayName2").textContent = info2.user.name;
+      const titleEl2 = document.getElementById("titleUser2Vibe");
+      if (titleEl2) titleEl2.textContent = `${info2.user.name}'s vibe`;
       document.getElementById("userDisplayName2").classList.remove("skeleton", "skeleton-text");
       document.getElementById("userDisplayName2").removeAttribute("style");
 
@@ -364,17 +371,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       for (let i = 0; i < top10.length; i++) {
         const item = top10[i];
+        let displayName = item.name;
+        if (displayName.includes(",")) {
+          displayName = displayName.split(",")[0].trim();
+        }
 
         if (i === 0) {
           const html = `
             <div class="chart-item top-1">
               <div class="top1-image skeleton skeleton-icon" id="${elementId}-imgSkeleton">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-300q75 0 127.5-52.5T660-480q0-75-52.5-127.5T480-660q-75 0-127.5 52.5T300-480q0 75 52.5 127.5T480-300Zm-28.5-151.5Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-300q75 0 127.5-52.5T660-480q0-75-52.5-127.5T480-660q-75 0-127.5 52.5T300-480q0 75 52.5 127.5T480-300Zm-28.5-151.5Q440-463 440-480t11.5-28.5Q463-520 480-520t28.5 11.5Q520-497 520-480t-11.5 28.5Q497-440 480-440t-28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"/></svg>
               </div>
               <img class="top1-image" id="${elementId}-img" alt="Top 1" style="display: none" />
               <div class="text-content">
-                <span style="font-weight: bold;">${item.name}</span>
-                <span style="font-size: 0.85rem; color: var(--color-neutral-500);">${isCommon ? item.playcount + " plays together" : item.playcount + " streams"}</span>
+                <span style="font-weight: bold; color: #ffffff !important;">${displayName}</span>
+                <span style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.8) !important;">${isCommon ? item.playcount + " plays together" : item.playcount + " streams"}</span>
               </div>
             </div>
           `;
@@ -398,7 +409,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const html = `
             <div class="chart-item">
               <span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500)">#${i + 1}</span>
-              <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">${item.name}</span>
+              <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">${displayName}</span>
             </div>
           `;
           container.insertAdjacentHTML("beforeend", html);
@@ -430,256 +441,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("coverSkeletonIcon").style.display = "none";
     }
 
-    const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
-    const colorPickerModal = document.getElementById("colorPickerModal");
-    const imagePickerModal = document.getElementById("imagePickerModal");
-    const closeColorPicker = document.getElementById("closeColorPicker");
-    const closeImagePicker = document.getElementById("closeImagePicker");
-    const confirmColorBtn = document.getElementById("confirmColorBtn");
-    const confirmImageBtn = document.getElementById("confirmImageBtn");
 
-    let selectedCardColor = "#F44336";
-    let selectedCardBg = "default";
-    let customBgUrl = null;
-
-    if (btnGerarRelatorio) {
-      btnGerarRelatorio.addEventListener("click", () => {
-        document.querySelectorAll(".color-option").forEach((btn) => btn.classList.remove("selected"));
-        confirmColorBtn.disabled = true;
-        colorPickerModal.style.display = "flex";
-      });
-    }
-
-    if (closeColorPicker) {
-      closeColorPicker.addEventListener("click", () => {
-        colorPickerModal.style.display = "none";
-      });
-    }
-
-    const colorOptions = document.querySelectorAll(".color-option:not(.custom-color-btn)");
-    colorOptions.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".color-option").forEach((b) => b.classList.remove("selected"));
-        btn.classList.add("selected");
-        selectedCardColor = btn.getAttribute("data-color");
-        confirmColorBtn.disabled = false;
-      });
-    });
-
-    const customColorBtn = document.getElementById("customColorBtn");
-    const customColorPicker = document.getElementById("customColorPicker");
-    if (customColorBtn && customColorPicker) {
-      customColorBtn.addEventListener("click", () => {
-        customColorPicker.click();
-      });
-      customColorPicker.addEventListener("input", (e) => {
-        document.querySelectorAll(".color-option").forEach((b) => b.classList.remove("selected"));
-        customColorBtn.classList.add("selected");
-        customColorBtn.style.backgroundColor = e.target.value;
-        selectedCardColor = e.target.value;
-        confirmColorBtn.disabled = false;
-      });
-    }
-
-    if (confirmColorBtn) {
-      confirmColorBtn.addEventListener("click", () => {
-        colorPickerModal.style.display = "none";
-        document.querySelectorAll(".card-option").forEach((opt) => opt.classList.remove("selected"));
-        confirmImageBtn.disabled = true;
-        imagePickerModal.style.display = "flex";
-      });
-    }
-
-    if (closeImagePicker) {
-      closeImagePicker.addEventListener("click", () => {
-        imagePickerModal.style.display = "none";
-      });
-    }
-
-    const cardOptions = document.querySelectorAll(".card-option");
-    cardOptions.forEach((opt) => {
-      opt.addEventListener("click", (e) => {
-        if (e.target.tagName.toLowerCase() === "input") return;
-
-        document.querySelectorAll(".card-option").forEach((o) => o.classList.remove("selected"));
-        opt.classList.add("selected");
-        selectedCardBg = opt.getAttribute("data-bg");
-
-        if (selectedCardBg === "custom") {
-          document.getElementById("customBgInput").click();
-        } else {
-          confirmImageBtn.disabled = false;
-        }
-      });
-    });
-
-    const customBgInput = document.getElementById("customBgInput");
-    if (customBgInput) {
-      customBgInput.addEventListener("change", (e) => {
-        if (e.target.files && e.target.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function (event) {
-            customBgUrl = event.target.result;
-            confirmImageBtn.disabled = false;
-          };
-          reader.readAsDataURL(e.target.files[0]);
-        } else {
-          document.querySelectorAll(".card-option").forEach((o) => o.classList.remove("selected"));
-          confirmImageBtn.disabled = true;
-        }
-      });
-    }
-
-    if (confirmImageBtn) {
-      confirmImageBtn.addEventListener("click", async () => {
-        imagePickerModal.style.display = "none";
-
-        const storyCardContainer = document.getElementById("storyCardContainer");
-        const storyBody = document.getElementById("storyBody");
-        const gradient = document.getElementById("storyCardGradient");
-        if (gradient) {
-          gradient.style.background = `radial-gradient(circle at 100% 100%, ${selectedCardColor} 0%, transparent 55%)`;
-          gradient.style.filter = "none";
-          gradient.style.opacity = "0.25";
-        }
-
-        const separator = document.querySelector(".story-separator");
-        if (separator) {
-          separator.style.backgroundColor = selectedCardColor;
-        }
-
-        const customStoryBg = document.getElementById("customStoryBg");
-        if (selectedCardBg === "custom" && customBgUrl) {
-          customStoryBg.style.backgroundImage = `url(${customBgUrl})`;
-          customStoryBg.style.display = "block";
-        } else {
-          customStoryBg.style.display = "none";
-          if (coverSource) {
-            const coverUrl = coverSource.picture_xl || coverSource.picture_big || coverSource.picture;
-            customStoryBg.style.backgroundImage = `url(${coverUrl})`;
-            customStoryBg.style.display = "block";
-          }
-        }
-
-        const img1 = document.getElementById("storyUserImg1");
-        const img2 = document.getElementById("storyUserImg2");
-        if (info1.user?.image) {
-          img1.src =
-            info1.user.image.find((img) => img.size === "extralarge")?.["#text"] ||
-            info1.user.image[0]?.["#text"] ||
-            "/assets/default_avatar.png";
-        } else {
-          img1.src = "/assets/default_avatar.png";
-        }
-        if (info2.user?.image) {
-          img2.src =
-            info2.user.image.find((img) => img.size === "extralarge")?.["#text"] ||
-            info2.user.image[0]?.["#text"] ||
-            "/assets/default_avatar.png";
-        } else {
-          img2.src = "/assets/default_avatar.png";
-        }
-
-        document.getElementById("storyMatchValue").textContent = `${matchPercentage}%`;
-
-        storyBody.innerHTML = "";
-
-        const renderChart = (items, title) => {
-          const top5 = items.slice(0, 5);
-          const colDiv = document.createElement("div");
-          colDiv.className = "story-column";
-          colDiv.innerHTML = `<h3 style="border-left-color: ${selectedCardColor}">${title}</h3>`;
-          const listDiv = document.createElement("div");
-          listDiv.className = "story-list";
-
-          for (let j = 0; j < top5.length; j++) {
-            const item = top5[j];
-            const rank = j + 1;
-            const itemDiv = document.createElement("div");
-            itemDiv.className = `story-item ${rank === 1 ? "top-1" : ""}`;
-
-            itemDiv.innerHTML = `
-              <span class="story-rank" style="color: ${selectedCardColor}">${rank}</span>
-              <div class="story-item-content">
-                <span class="story-text">${item.name}</span>
-                <span class="story-meta">${item.playcount} streams</span>
-              </div>
-            `;
-            listDiv.appendChild(itemDiv);
-          }
-          colDiv.appendChild(listDiv);
-          storyBody.appendChild(colDiv);
-        };
-
-        renderChart(list1, info1.user?.name || user1);
-        renderChart(list2, info2.user?.name || user2);
-
-        storyCardContainer.style.opacity = "0";
-        storyCardContainer.style.zIndex = "-999";
-        confirmImageBtn.textContent = "Generating...";
-
-        const generationModal = document.getElementById("generationModal");
-        const stateLoading = document.getElementById("generationStateLoading");
-        const stateComplete = document.getElementById("generationStateComplete");
-
-        if (generationModal) {
-          generationModal.style.display = "flex";
-          stateLoading.style.display = "flex";
-          stateComplete.style.display = "none";
-        }
-
-        setTimeout(() => {
-          const cardElement = document.getElementById("storyCard");
-          html2canvas(cardElement, {
-            useCORS: true,
-            allowTaint: true,
-            scale: 2,
-            backgroundColor: null,
-          })
-            .then((canvas) => {
-              const imgData = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.download = `bubblefm_match_${user1}_${user2}.png`;
-              link.href = imgData;
-              link.click();
-
-              if (typeof umami !== "undefined") {
-                umami.track("Card Generated", {
-                  type: "match",
-                  color: selectedCardColor || "#F44336",
-                  cover: selectedCardBg || "default",
-                  format: "9x16",
-                  ratio: "9x16",
-                });
-              }
-
-              storyCardContainer.style.opacity = "";
-              storyCardContainer.style.zIndex = "";
-              confirmImageBtn.textContent = "Next";
-
-              if (generationModal) {
-                stateLoading.style.display = "none";
-                stateComplete.style.display = "flex";
-                setTimeout(() => {
-                  generationModal.style.display = "none";
-                }, 3000);
-              }
-            })
-            .catch((err) => {
-              console.error("Error generating canvas:", err);
-              confirmImageBtn.textContent = "Next";
-              if (generationModal) {
-                generationModal.style.display = "none";
-              }
-            });
-        }, 500);
-      });
-    }
-
-    window.addEventListener("click", (event) => {
-      if (event.target === colorPickerModal) colorPickerModal.style.display = "none";
-      if (event.target === imagePickerModal) imagePickerModal.style.display = "none";
-    });
   } catch (error) {
     console.error("Error fetching match data:", error);
   }

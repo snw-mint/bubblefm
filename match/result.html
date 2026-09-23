@@ -20,17 +20,13 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,100..1000&display=swap"
-      rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <script
       defer
       src="https://cloud.umami.is/script.js"
       data-website-id="9fef3880-f9cb-4b34-9863-c5709690fb6d"></script>
 
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/layout.css" />
-    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/styles.css" />
     <style>
       .match-headers-wrapper {
         display: flex;
@@ -40,10 +36,11 @@
       .match-headers-wrapper {
         display: flex;
         width: 100%;
-        margin-bottom: 2rem;
+        max-width: 1200px;
+        margin: -70px auto 0.5rem auto;
+        padding: 0 1rem;
         position: relative;
         z-index: 2;
-        margin-top: -70px;
       }
       .match-user-profile {
         flex: 1;
@@ -97,7 +94,7 @@
         stroke: var(--color-neutral-700);
       }
       .tastometer-container circle.progress {
-        stroke: var(--color-primary);
+        stroke: #3b82f6;
         stroke-linecap: round;
         stroke-dasharray: 282.74;
         stroke-dashoffset: 282.74;
@@ -112,30 +109,54 @@
 
       @media (max-width: 768px) {
         .match-headers-wrapper {
-          align-items: flex-start;
+          flex-direction: column;
+          align-items: center;
+          margin-top: -50px;
+          gap: 1.5rem;
         }
-        .match-user-profile.user1 .user-profile-container,
-        .match-user-profile.user2 .user-profile-container {
-          flex-direction: column !important;
+        .match-user-profile {
+          width: 100%;
+        }
+        .match-user-profile.user1 .user-profile-container {
+          flex-direction: row !important;
           align-items: center !important;
+          justify-content: flex-start !important;
+          padding: 0 10px;
+        }
+        .match-user-profile.user2 .user-profile-container {
+          flex-direction: row-reverse !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          text-align: right !important;
           padding: 0 10px;
         }
         .match-user-profile .user-profile-image {
-          width: 90px;
-          height: 90px;
-          margin-top: 10px;
+          width: 80px;
+          height: 80px;
+          margin-top: 0;
+          flex-shrink: 0;
         }
         .tastometer-container {
-          width: 90px;
-          height: 90px;
-          top: 10px;
+          position: relative;
+          left: auto;
+          top: auto;
+          transform: none;
+          width: 120px;
+          height: 120px;
+          margin: 0.5rem 0;
         }
         .tastometer-container .percentage-text {
-          font-size: 1.2rem;
+          font-size: 1.5rem;
         }
         .match-user-profile .user-info-details {
-          width: 100%;
-          margin-top: 10px;
+          width: auto;
+          margin-top: 0;
+          margin-left: 15px;
+          flex: 1;
+        }
+        .match-user-profile.user2 .user-info-details {
+          margin-left: 0;
+          margin-right: 15px;
         }
         .match-user-profile.user1 .user-info-details {
           align-items: flex-start !important;
@@ -144,34 +165,39 @@
           align-items: flex-end !important;
         }
         .match-user-profile .user-display-name {
-          font-size: 1.2rem;
+          font-size: 1.3rem;
           margin-top: 0;
           word-break: break-word;
         }
         .match-user-profile .stats-cards-container {
-          flex-direction: column !important;
-          gap: 10px;
-          margin-top: 15px;
+          flex-direction: row !important;
+          gap: 15px;
+          margin-top: 8px;
           width: 100%;
         }
         .match-user-profile.user1 .stats-cards-container {
-          align-items: flex-start !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
         }
         .match-user-profile.user2 .stats-cards-container {
-          align-items: flex-end !important;
+          align-items: center !important;
+          justify-content: flex-end !important;
         }
       }
     </style>
   </head>
   <body>
     <header class="home-header header-overlay">
-      <a href="index.html" class="logo-container">
-        <img src="/logo.webp" alt="BubbleFM Logo" class="logo-icon" />
-        <span class="logo-text">
-          <span class="brand-bubble">Bubble</span>
-          <span class="brand-fm">FM</span>
-        </span>
-      </a>
+      <div class="header-brand-group">
+        <a href="/index.html" class="logo-container">
+          <img src="/logo.webp" alt="BubbleFM Logo" class="logo-icon" />
+          <span class="logo-text">
+            <span class="brand-bubble">Bubble</span>
+            <span class="brand-fm">FM</span>
+          </span>
+        </a>
+
+      </div>
       <div class="header-actions">
         <button id="theme-toggle" class="theme-toggle-btn" aria-label="Alternar tema"></button>
         <button id="faq-toggle" class="faq-toggle-btn" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
@@ -190,6 +216,9 @@
               d="M12 2.247a10 10 0 0 0-3.162 19.487c.5.088.687-.212.687-.475 0-.237-.012-1.025-.012-1.862-2.513.462-3.163-.613-3.363-1.175a3.64 3.64 0 0 0-1.025-1.413c-.35-.187-.85-.65-.013-.662a2 2 0 0 1 1.538 1.025 2.137 2.137 0 0 0 2.912.825 2.1 2.1 0 0 1 .638-1.338c-2.225-.25-4.55-1.112-4.55-4.937a3.9 3.9 0 0 1 1.025-2.688 3.6 3.6 0 0 1 .1-2.65s.837-.262 2.75 1.025a9.43 9.43 0 0 1 5 0c1.912-1.3 2.75-1.025 2.75-1.025a3.6 3.6 0 0 1 .1 2.65 3.87 3.87 0 0 1 1.025 2.688c0 3.837-2.338 4.687-4.562 4.937a2.37 2.37 0 0 1 .674 1.85c0 1.338-.012 2.413-.012 2.75 0 .263.187.575.687.475A10.005 10.005 0 0 0 12 2.247" />
           </svg>
         </a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61zM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61z"/></svg>
+        </button>
       </div>
     </header>
 
@@ -309,7 +338,7 @@
       <section class="charts-section">
         <div class="charts-grid">
           <section class="chart-card" id="cardUser1Vibe">
-            <h2>User 1 Vibe</h2>
+            <h2 id="titleUser1Vibe" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">User 1 Vibe</h2>
             <div class="lista-top" id="listUser1Vibe">
               <div
                 id="msgUser1Vibe"
@@ -433,7 +462,7 @@
             </div>
           </section>
           <section class="chart-card" id="cardUser2Vibe">
-            <h2>User 2 Vibe</h2>
+            <h2 id="titleUser2Vibe" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">User 2 Vibe</h2>
             <div class="lista-top" id="listUser2Vibe">
               <div
                 id="msgUser2Vibe"
@@ -498,178 +527,7 @@
       </section>
     </main>
 
-    <button id="btnGerarRelatorio" class="fab-generate" title="Generate Card">Generate Card</button>
 
-    <div id="colorPickerModal" class="modal">
-      <div class="modal-content">
-        <span class="close-button" id="closeColorPicker">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="currentcolor">
-            <path
-              d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
-          </svg>
-        </span>
-        <h2>Choose your accent color!</h2>
-        <p class="modal-info">Select a color to personalize your card.</p>
-
-        <div class="color-palette">
-          <button class="color-option" data-color="#F44336" style="background-color: #f44336" title="Red"></button>
-          <button class="color-option" data-color="#FF5733" style="background-color: #ff5733" title="Orange"></button>
-          <button class="color-option" data-color="#FFD700" style="background-color: #ffd700" title="Yellow"></button>
-          <button class="color-option" data-color="#28A745" style="background-color: #28a745" title="Green"></button>
-          <button class="color-option" data-color="#39CCCC" style="background-color: #39cccc" title="Cyan"></button>
-          <button class="color-option" data-color="#337AFF" style="background-color: #337aff" title="Blue"></button>
-          <button class="color-option" data-color="#BB86FC" style="background-color: #bb86fc" title="Purple"></button>
-          <div style="position: relative; display: inline-block">
-            <button class="color-option custom-color-btn" id="customColorBtn" title="Custom Color">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24"
-                viewBox="0 -960 960 960"
-                width="24"
-                fill="currentColor">
-                <path
-                  d="M346-140 100-386q-10-10-15-22t-5-25 5-25 15-22l230-229-75-75q-13-13-13.5-31t12.5-32 32-14 33 14l367 367q10 10 14.5 22t4.5 25-4.5 25-14.5 22L440-140q-10 10-22 15t-25 5-25-5-22-15m47-506L179-432h428zm399 526q-36 0-61-25.5T706-208q0-27 13.5-51t30.5-47l19-24q9-11 23.5-11.5T816-331l20 25q16 23 30 47t14 51q0 37-26 62.5T792-120" />
-              </svg>
-            </button>
-            <input
-              type="color"
-              id="customColorPicker"
-              style="position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none"
-              value="#ffffff" />
-          </div>
-        </div>
-
-        <button id="confirmColorBtn" class="btn-proceed" disabled>Next</button>
-      </div>
-    </div>
-
-    <div id="imagePickerModal" class="modal">
-      <div class="modal-content">
-        <span class="close-button" id="closeImagePicker">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="currentcolor">
-            <path
-              d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
-          </svg>
-        </span>
-        <h2>Card Background</h2>
-        <p class="modal-info">Choose the background style for your report.</p>
-
-        <div class="card-options-grid">
-          <div class="card-option" data-bg="default" id="defaultBgCard">
-            <div class="card-option-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="32"
-                viewBox="0 -960 960 960"
-                width="32"
-                fill="currentColor">
-                <path
-                  d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm0 0v-560zm80-80h400q12 0 18-11t-2-21L586-459q-6-8-16-8t-16 8L450-320l-74-99q-6-8-16-8t-16 8l-80 107q-8 10-2 21t18 11" />
-              </svg>
-            </div>
-            <h3>Original</h3>
-            <p>Use the same background as the site</p>
-          </div>
-
-          <div class="card-option" data-bg="custom" id="customBgCard">
-            <div class="card-option-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="32"
-                viewBox="0 -960 960 960"
-                width="32"
-                fill="currentColor">
-                <path
-                  d="M480-480ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280q17 0 28.5 11.5T520-800q0 17-11.5 28.5T480-760H200v560h560v-280q0-17 11.5-28.5T800-520q17 0 28.5 11.5T840-480v280q0 33-23.5 56.5T760-120H200Zm40-160h480L570-480 450-320l-90-120-120 160Zm440-400h-40q-17 0-28.5-11.5T600-720q0-17 11.5-28.5T640-760h40v-40q0-17 11.5-28.5T720-840q17 0 28.5 11.5T760-800v40h40q17 0 28.5 11.5T840-720q0 17-11.5 28.5T800-680h-40v40q0 17-11.5 28.5T720-600q-17 0-28.5-11.5T680-640v-40Z" />
-              </svg>
-            </div>
-            <h3>Custom</h3>
-            <p>Upload your own background image</p>
-            <input type="file" id="customBgInput" accept="image/png, image/jpeg, image/webp" style="display: none" />
-          </div>
-        </div>
-
-        <button id="confirmImageBtn" class="btn-proceed" disabled>Next</button>
-      </div>
-    </div>
-
-    <div id="generationModal" class="modal">
-      <div class="modal-content modal-no-close">
-        <div id="generationStateLoading" class="loading-content">
-          <h2>Generating</h2>
-          <span class="loader"></span>
-        </div>
-        <div id="generationStateComplete" class="loading-content" style="display: none">
-          <h2>Download Complete!</h2>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="64px"
-            viewBox="0 -960 960 960"
-            width="64px"
-            fill="var(--color-primary)">
-            <path
-              d="m424-408-86-86q-11-11-28-11t-28 11q-11 11-11 28t11 28l114 114q12 12 28 12t28-12l226-226q11-11 11-28t-11-28q-11-11-28-11t-28 11L424-408Zm56 328q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <div id="storyCardContainer" class="hidden-card-container">
-      <div id="storyCard">
-        <div
-          id="storyCardGradient"
-          style="position: absolute; inset: 0; opacity: 0.25; z-index: 0; pointer-events: none"></div>
-
-        <div class="story-header">
-          <div
-            id="customStoryBg"
-            style="
-              display: none;
-              width: 100%;
-              height: 100%;
-              background-size: cover;
-              background-position: center;
-              position: absolute;
-              top: 0;
-              left: 0;
-              z-index: 1;
-            "></div>
-          <div
-            id="storyGradientOverlay"
-            style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 2"></div>
-          <div class="story-header-overlay" style="position: relative; z-index: 3"></div>
-        </div>
-
-        <div class="story-separator"></div>
-
-        <div
-          class="story-avatar-container"
-          style="display: flex; gap: 15px; justify-content: center; align-items: center">
-          <img id="storyUserImg1" src="" alt="" class="story-avatar-img" style="margin-top: -30px" />
-          <img id="storyUserImg2" src="" alt="" class="story-avatar-img" style="margin-top: -30px" />
-        </div>
-
-        <div class="story-body" id="storyBody" style="margin-top: 130px"></div>
-
-        <div class="story-footer">
-          <div class="footer-stat-group">
-            <span id="storyMatchValue" class="footer-stat-value">0%</span>
-            <span id="storyMatchLabel" class="footer-stat-label">TasteMatch</span>
-          </div>
-          <div class="story-brand">Find your match at bubblefm.vercel.app</div>
-        </div>
-      </div>
-    </div>
 
     <footer class="app-footer">
       <div class="footer-info">
@@ -685,9 +543,9 @@
         </span>
       </div>
       <div class="footer-links">
-        <a href="privacy.html">Privacy Policy</a>
+        <a href="/privacy.html">Privacy Policy</a>
         <span class="dot">•</span>
-        <a href="terms.html">Terms of Use</a>
+        <a href="/terms.html">Terms of Use</a>
         <span class="dot">•</span>
         <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
         <span class="dot">•</span>
@@ -695,7 +553,7 @@
       </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <script type="module" src="/match/match.js"></script>
     <style>
       @keyframes spin {
