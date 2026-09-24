@@ -103,8 +103,8 @@ button {
   padding: 1rem 2rem;
   margin-bottom: 3rem;
   background-color: rgba(245, 245, 247, 0.72);
-  backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -119,8 +119,8 @@ button {
   right: 0;
   width: 100%;
   background: transparent;
-  backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   border-bottom: none;
 }
 
@@ -213,6 +213,7 @@ button {
 .home-header.header-overlay .github-link-btn {
   color: #ffffff;
   background-color: rgba(0,0,0,0.3);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -490,7 +491,7 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(20px);
+  filter: blur(10px);
   transform: scale(1.1);
 }
 
@@ -725,8 +726,8 @@ button {
   z-index: 2;
   pointer-events: none;
   background: transparent;
-  backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
@@ -939,6 +940,7 @@ button {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   align-items: center;
   justify-content: center;
@@ -1179,15 +1181,17 @@ input:checked + .slider:before {
   letter-spacing: -1px;
 }
 
-.story-service-logo {
+.story-service-logo, #storyServiceLogo {
   height: 40px;
   display: flex;
   align-items: center;
 }
 
-.story-service-logo svg {
-  height: 100%;
-  width: auto;
+.story-service-logo svg, #storyServiceLogo svg {
+  height: 100% !important;
+  width: auto !important;
+  max-width: 100%;
+  display: block;
   fill: var(--sc-text);
   color: var(--sc-text);
 }
@@ -1655,8 +1659,8 @@ input:checked + .slider:before {
   gap: 10px !important;
   cursor: pointer !important;
   z-index: 1000 !important;
-  backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(20px) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease !important;
 }
@@ -1684,9 +1688,7 @@ input:checked + .slider:before {
 
 /* Modals */
 .settings-sheet {
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  background: rgba(255, 255, 255) !important;
   border-radius: 24px !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   padding: 1.5rem 2rem !important;
@@ -1695,7 +1697,7 @@ input:checked + .slider:before {
 }
 
 [data-theme='dark'] .settings-sheet {
-  background: rgba(30, 30, 30, 0.8) !important;
+  background: rgba(30, 30, 30) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
@@ -1769,31 +1771,95 @@ input:checked + .slider:before {
 .bg-palette.circular {
   display: flex;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
 }
 
 .bg-palette.circular .bg-option {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  position: relative;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.bg-palette.circular .bg-check-icon {
+.bg-palette.circular .bg-option:hover {
+  transform: scale(1.08);
+}
+
+.bg-palette.circular .bg-option:active {
+  transform: scale(0.94);
+}
+
+/* O círculo colorido (SVG inativo) permanece sempre visível como base */
+.bg-palette.circular .bg-option .bg-circle-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  flex-shrink: 0;
+  opacity: 0.95;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.bg-palette.circular .bg-option:hover .bg-circle-icon {
+  opacity: 1;
+}
+
+.bg-palette.circular .bg-option.selected .bg-circle-icon {
+  opacity: 1;
+}
+
+/* O ícone de check branco sobreposto no centro */
+.bg-palette.circular .bg-option .bg-check-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  display: block;
+  pointer-events: none;
   opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translate(-50%, -50%) scale(0.5);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .bg-palette.circular .bg-option.selected .bg-check-icon {
   opacity: 1;
-  transform: scale(1.3);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+@media (max-width: 420px) {
+  .settings-sheet {
+    padding: 1.5rem 1.25rem !important;
+  }
+  .bg-palette.circular {
+    gap: 0.35rem;
+  }
+  .bg-palette.circular .bg-option {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+  .bg-palette.circular .bg-option .bg-check-icon {
+    width: 26px;
+    height: 26px;
+  }
 }
 
 .apple-toggle {
@@ -1821,8 +1887,8 @@ input:checked + .slider:before {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -1842,8 +1908,8 @@ input:checked + .slider:before {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   padding: 0 !important;
   width: auto !important;
   max-width: none !important;
@@ -1856,8 +1922,8 @@ input:checked + .slider:before {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 #generationModal.show .apple-alert {
@@ -1897,8 +1963,8 @@ input:checked + .slider:before {
 
 .apple-alert {
   background: rgba(255,255,255,0.9) !important;
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-radius: 20px !important;
   text-align: center;
   padding: 2.5rem 2rem !important;
@@ -1944,7 +2010,7 @@ input:checked + .slider:before {
   margin-top: 0.5rem;
   width: 100%;
   border-radius: 12px;
-  background: rgba(0,0,0,0.05);
+  background: #eaeaea;
   padding: 12px;
   padding-right: 2.5rem;
   border: 1px solid var(--color-border);
@@ -2069,8 +2135,8 @@ input:checked + .slider:before {
     gap: 0.25rem;
     padding: 0.75rem 1rem;
     background-color: rgba(245, 245, 247, 0.96);
-    backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
     z-index: 1000;
