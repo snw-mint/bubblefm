@@ -39,5 +39,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/deezer/, ""),
       },
     },
+    port: 5173,
+    strictPort: true,
   },
 });
