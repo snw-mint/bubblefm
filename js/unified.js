@@ -61,6 +61,97 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // --- CUSTOM SELECTS LOGIC ---
+  // --- CALENDAR POPOVER LOGIC ---
+  const calendarTrigger = document.getElementById("calendarTrigger");
+  const calendarPopover = document.getElementById("calendarPopover");
+  const calendarTooltip = document.getElementById("calendarTooltip");
+  const popoverOptions = document.getElementById("popoverOptions");
+  const popoverTabs = document.querySelectorAll(".popover-tab");
+  
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  let currentPeriodType = "month";
+  let currentTimeframeValue = "0";
+
+  function populatePopover(type) {
+    if (!popoverOptions) return;
+    popoverOptions.innerHTML = "";
+    
+    if (type === "month") {
+      const currentMonth = new Date().getMonth();
+      for (let i = 0; i <= currentMonth; i++) {
+        const offset = (i - currentMonth).toString();
+        const div = document.createElement("div");
+        div.className = "popover-option";
+        if (currentPeriodType === "month" && currentTimeframeValue === offset) div.classList.add("active");
+        div.setAttribute("data-value", offset);
+        div.textContent = monthNames[i];
+        
+        div.addEventListener("click", (e) => {
+          e.stopPropagation();
+          currentPeriodType = "month";
+          currentTimeframeValue = offset;
+          if (calendarTooltip) calendarTooltip.textContent = `Current: ${monthNames[i]}`;
+          calendarPopover.classList.remove("active");
+        });
+        popoverOptions.appendChild(div);
+      }
+    } else if (type === "week") {
+      const options = [
+        { label: "This week", value: "0" },
+        { label: "Last week", value: "-1" }
+      ];
+      options.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "popover-option";
+        if (currentPeriodType === "week" && currentTimeframeValue === opt.value) div.classList.add("active");
+        div.setAttribute("data-value", opt.value);
+        div.textContent = opt.label;
+        
+        div.addEventListener("click", (e) => {
+          e.stopPropagation();
+          currentPeriodType = "week";
+          currentTimeframeValue = opt.value;
+          if (calendarTooltip) calendarTooltip.textContent = `Current: ${opt.label}`;
+          calendarPopover.classList.remove("active");
+        });
+        popoverOptions.appendChild(div);
+      });
+    }
+  }
+
+  if (calendarTrigger && calendarPopover) {
+    const currentMonthIndex = new Date().getMonth();
+    if (calendarTooltip) calendarTooltip.textContent = `Current: ${monthNames[currentMonthIndex]}`;
+    
+    calendarTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      calendarPopover.classList.toggle("active");
+      if (calendarPopover.classList.contains("active")) {
+        // Find which tab is active currently to show correct list
+        const activeTab = document.querySelector(".popover-tab.active");
+        populatePopover(activeTab ? activeTab.getAttribute("data-tab") : currentPeriodType);
+      }
+    });
+
+    popoverTabs.forEach(tab => {
+      tab.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popoverTabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        const type = tab.getAttribute("data-tab");
+        populatePopover(type);
+      });
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!calendarPopover.contains(e.target) && !calendarTrigger.contains(e.target)) {
+        calendarPopover.classList.remove("active");
+      }
+    });
+  }
+
   const formUsername = document.getElementById("form-username");
   if (formUsername) {
     formUsername.addEventListener("submit", (e) => {
@@ -68,10 +159,75 @@ document.addEventListener("DOMContentLoaded", () => {
       const userInput = document.getElementById("userInput").value.trim();
       if (userInput) {
         sessionStorage.setItem("lastfm_user", userInput);
+        
+        const periodType = currentPeriodType;
+        const timeframeOffset = currentTimeframeValue;
+        
+        sessionStorage.setItem("lastfm_period", periodType);
+        sessionStorage.setItem("lastfm_offset", timeframeOffset);
+
         if (typeof umami !== "undefined") {
           umami.track("Search Initiated", { type: "single" });
         }
-        window.location.href = "result.html";
+        
+        const calendarTriggerContainer = document.querySelector(".calendar-trigger-container");
+        const loadingContainer = document.getElementById("loading-container");
+        const btnIr = document.getElementById("btnIr");
+        const loadingProgress = document.getElementById("loading-progress");
+        const loadingStatus = document.getElementById("loading-status");
+        
+        if (calendarTriggerContainer) calendarTriggerContainer.style.display = "none";
+        if (btnIr) {
+          btnIr.disabled = true;
+          btnIr.textContent = "Fetching...";
+        }
+        if (loadingContainer) loadingContainer.style.display = "block";
+        
+        let progress = 0;
+        let page = 1;
+        
+        function updateLoadingStatus(text) {
+          if (!loadingStatus) return;
+          if (loadingStatus.textContent !== text) {
+            loadingStatus.classList.remove("animate-fade-down");
+            void loadingStatus.offsetWidth; // trigger reflow
+            loadingStatus.textContent = text;
+            loadingStatus.classList.add("animate-fade-down");
+          }
+        }
+        
+        updateLoadingStatus("Initializing...");
+
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 15;
+          
+          if (progress < 30) {
+            updateLoadingStatus("Fetching user profile...");
+          } else if (progress < 80) {
+            if (Math.random() > 0.5) page++;
+            updateLoadingStatus(`Extracting scrobbles (page ${page}/5)...`);
+          } else if (progress < 99) {
+            updateLoadingStatus("Calculating final charts...");
+          }
+
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(progressInterval);
+            updateLoadingStatus("Done! (Test completed)");
+            
+            setTimeout(() => {
+              if (calendarTriggerContainer) calendarTriggerContainer.style.display = "flex";
+              if (loadingContainer) loadingContainer.style.display = "none";
+              if (btnIr) {
+                btnIr.disabled = false;
+                btnIr.textContent = "View Stats";
+              }
+              if (loadingProgress) loadingProgress.style.width = "0%";
+              updateLoadingStatus("Initializing...");
+            }, 3000);
+          }
+          if (loadingProgress) loadingProgress.style.width = `${progress}%`;
+        }, 500);
       }
     });
   }

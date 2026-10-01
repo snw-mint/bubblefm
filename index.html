@@ -7,183 +7,330 @@
  - If not, see <https://www.gnu.org/licenses/>.
  -->
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>BubbleFM - Last.fm Charts & Milestone Counter Visualizer</title>
-    <meta name="title" content="BubbleFM - Last.fm Charts & Milestone Counter Visualizer" />
-    <meta
-      name="description"
-      content="Generate aesthetic, shareable cards of your Last.fm scrobbles, top artists, tracks, and track your listening milestones." />
-    <meta
-      name="keywords"
-      content="last.fm, lastfm stats, music charts, scrobble card, lastfm counter, milestone tracker, instagram stories music, top artists generator, bubblefm" />
-    <meta name="author" content="Snow Mint" />
-    <meta name="robots" content="index, follow" />
-    <meta name="google-site-verification" content="INRnzFb4AbVj1mSMq1vreNU8lQLwzkFZxYyoBZaA-uM" />
-    <script
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id="9fef3880-f9cb-4b34-9863-c5709690fb6d"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://bubblefm.vercel.app/" />
-    <meta property="og:title" content="BubbleFM - Last.fm Stats & Milestone Visualizer" />
-    <meta
-      property="og:description"
-      content="Generate aesthetic, shareable cards of your Last.fm scrobbles, top artists, tracks, and track your listening milestones." />
-    <meta property="og:image" content="https://bubblefm.vercel.app/assets/images/og-image.jpg" />
+  <title>BubbleFM - Last.fm Charts & Milestone Counter Visualizer</title>
+  <meta name="title" content="BubbleFM - Last.fm Charts & Milestone Counter Visualizer" />
+  <meta name="description"
+    content="Generate aesthetic, shareable cards of your Last.fm scrobbles, top artists, tracks, and track your listening milestones." />
+  <meta name="keywords"
+    content="last.fm, lastfm stats, music charts, scrobble card, lastfm counter, milestone tracker, instagram stories music, top artists generator, bubblefm" />
+  <meta name="author" content="Snow Mint" />
+  <meta name="robots" content="index, follow" />
+  <meta name="google-site-verification" content="INRnzFb4AbVj1mSMq1vreNU8lQLwzkFZxYyoBZaA-uM" />
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="9fef3880-f9cb-4b34-9863-c5709690fb6d"></script>
 
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://bubblefm.vercel.app/" />
-    <meta property="twitter:title" content="BubbleFM - Last.fm Stats & Milestone Visualizer" />
-    <meta
-      property="twitter:description"
-      content="Generate aesthetic, shareable cards of your Last.fm scrobbles, top artists, tracks, and track your listening milestones." />
-    <meta property="twitter:image" content="https://bubblefm.vercel.app/assets/images/og-image.jpg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bubblefm.vercel.app/" />
+  <meta property="og:title" content="BubbleFM - Last.fm Stats & Milestone Visualizer" />
+  <meta property="og:description"
+    content="Generate aesthetic, shareable cards of your Last.fm scrobbles, top artists, tracks, and track your listening milestones." />
+  <meta property="og:image" content="https://bubblefm.vercel.app/assets/images/og-image.jpg" />
 
-    <meta name="theme-color" content="#B90000" />
-    <meta name="application-name" content="BubbleFM" />
-    <meta name="apple-mobile-web-app-title" content="BubbleFM" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://bubblefm.vercel.app/" />
+  <meta property="twitter:title" content="BubbleFM - Last.fm Stats & Milestone Visualizer" />
+  <meta property="twitter:description"
+    content="Generate aesthetic, shareable cards of your Last.fm scrobbles, top artists, tracks, and track your listening milestones." />
+  <meta property="twitter:image" content="https://bubblefm.vercel.app/assets/images/og-image.jpg" />
 
-    <link rel="canonical" href="https://bubblefm.vercel.app/" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#B90000" />
+  <meta name="application-name" content="BubbleFM" />
+  <meta name="apple-mobile-web-app-title" content="BubbleFM" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="canonical" href="https://bubblefm.vercel.app/" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 
-    <link rel="stylesheet" href="/css/styles.css" />
-  </head>
-  <body>
-    <header class="home-header">
-      <div class="header-brand-group">
-        <a href="index.html" class="logo-container">
-          <img src="logo.webp" alt="BubbleFM Logo" class="logo-icon" />
-          <span class="logo-text">
-            <span class="brand-bubble">Bubble</span>
-            <span class="brand-fm">FM</span>
-          </span>
-        </a>
-        <div class="header-divider"></div>
-        <nav class="header-nav">
-          <a href="index.html" class="nav-link active">Charts</a>
-          <a href="match/" class="nav-link">Match</a>
-        </nav>
-      </div>
-      <div class="header-actions">
-        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Alternar tema"></button>
-        <button id="faq-toggle" class="faq-toggle-btn" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-            <path d="M513.5-254.5Q528-269 528-290t-14.5-35.5Q499-340 478-340t-35.5 14.5Q428-311 428-290t14.5 35.5Q457-240 478-240t35.5-14.5ZM442-394h74q0-33 7.5-52t42.5-52q26-26 41-49.5t15-56.5q0-56-41-86t-97-30q-57 0-92.5 30T342-618l66 26q5-18 22.5-39t53.5-21q32 0 48 17.5t16 38.5q0 20-12 37.5T506-526q-44 39-54 59t-10 73Zm38 314q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/>
-          </svg>
-        </button>
-        <a
-          href="https://github.com/snw-mint/bubblefm"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="github-link-btn"
-          aria-label="Repositório do GitHub">
-          <svg width="800" height="800" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
-            <path
-              d="M12 2.247a10 10 0 0 0-3.162 19.487c.5.088.687-.212.687-.475 0-.237-.012-1.025-.012-1.862-2.513.462-3.163-.613-3.363-1.175a3.64 3.64 0 0 0-1.025-1.413c-.35-.187-.85-.65-.013-.662a2 2 0 0 1 1.538 1.025 2.137 2.137 0 0 0 2.912.825 2.1 2.1 0 0 1 .638-1.338c-2.225-.25-4.55-1.112-4.55-4.937a3.9 3.9 0 0 1 1.025-2.688 3.6 3.6 0 0 1 .1-2.65s.837-.262 2.75 1.025a9.43 9.43 0 0 1 5 0c1.912-1.3 2.75-1.025 2.75-1.025a3.6 3.6 0 0 1 .1 2.65 3.87 3.87 0 0 1 1.025 2.688c0 3.837-2.338 4.687-4.562 4.937a2.37 2.37 0 0 1 .674 1.85c0 1.338-.012 2.413-.012 2.75 0 .263.187.575.687.475A10.005 10.005 0 0 0 12 2.247" />
-          </svg>
-        </a>
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61zM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61z"/></svg>
-        </button>
-      </div>
-    </header>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-    <main class="main-container">
-      <section class="landing-card">
-        <h1 class="landing-title">Visualize your Last.fm scrobbles & minutes</h1>
-        <p class="landing-subtitle">
-          Enter your Last.fm username to generate aesthetic charts of your top artists, tracks, and total listening
-          time.
-        </p>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .selection-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      /* No margin-top needed as it sits inside .input-group */
+    }
 
-        <form id="form-username" class="username-form">
-          <div class="input-group">
-            <div class="input-with-icon">
-              <span class="input-icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="20px"
-                  viewBox="0 -960 960 960"
-                  width="20px"
+    .custom-select {
+      position: relative;
+      width: 150px;
+      text-align: left;
+      user-select: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+    }
+
+    .select-selected {
+      background-color: var(--color-card, #ffffff);
+      color: var(--color-text, #1d1d1f);
+      padding: 10px 16px;
+      border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .select-selected:hover {
+      border-color: var(--color-accent, #0071e3);
+    }
+
+    .select-selected::after {
+      content: "";
+      border: 5px solid transparent;
+      border-color: var(--color-text-muted, #86868b) transparent transparent transparent;
+      margin-top: 5px;
+    }
+
+    .custom-select.active .select-selected::after {
+      border-color: transparent transparent var(--color-text-muted, #86868b) transparent;
+      margin-top: -5px;
+    }
+
+    .select-items {
+      position: absolute;
+      background-color: var(--color-card, #ffffff);
+      border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+      border-radius: 8px;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 99;
+      overflow-y: auto;
+      max-height: 250px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .select-items.select-up {
+      top: auto;
+      bottom: 110%;
+    }
+
+    .select-hide {
+      display: none;
+    }
+
+    .select-items div {
+      color: var(--color-text, #1d1d1f);
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .select-items div:hover,
+    .same-as-selected {
+      background-color: var(--color-bg, #f5f5f7);
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-down {
+      animation: fadeDown 0.4s ease forwards;
+    }
+
+    .loading-container {
+      margin: 15px auto 0;
+      width: 80%;
+      max-width: 300px;
+      text-align: left;
+    }
+
+    .loading-status {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--color-text-muted, #86868b);
+      font-size: 0.85rem;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: var(--color-border, rgba(0, 0, 0, 0.08));
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background-color: var(--color-accent, #0071e3);
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="home-header">
+    <div class="header-brand-group">
+      <a href="index.html" class="logo-container">
+        <img src="logo.webp" alt="BubbleFM Logo" class="logo-icon" />
+        <span class="logo-text">
+          <span class="brand-bubble">Bubble</span>
+          <span class="brand-fm">FM</span>
+        </span>
+      </a>
+      <div class="header-divider"></div>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link active">Charts</a>
+        <a href="match/" class="nav-link">Match</a>
+      </nav>
+    </div>
+    <div class="header-actions">
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Alternar tema"></button>
+      <button id="faq-toggle" class="faq-toggle-btn" aria-label="Frequently Asked Questions"
+        title="Frequently Asked Questions">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+          <path
+            d="M513.5-254.5Q528-269 528-290t-14.5-35.5Q499-340 478-340t-35.5 14.5Q428-311 428-290t14.5 35.5Q457-240 478-240t35.5-14.5ZM442-394h74q0-33 7.5-52t42.5-52q26-26 41-49.5t15-56.5q0-56-41-86t-97-30q-57 0-92.5 30T342-618l66 26q5-18 22.5-39t53.5-21q32 0 48 17.5t16 38.5q0 20-12 37.5T506-526q-44 39-54 59t-10 73Zm38 314q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+        </svg>
+      </button>
+      <a href="https://github.com/snw-mint/bubblefm" target="_blank" rel="noopener noreferrer" class="github-link-btn"
+        aria-label="Repositório do GitHub">
+        <svg width="800" height="800" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+          <path
+            d="M12 2.247a10 10 0 0 0-3.162 19.487c.5.088.687-.212.687-.475 0-.237-.012-1.025-.012-1.862-2.513.462-3.163-.613-3.363-1.175a3.64 3.64 0 0 0-1.025-1.413c-.35-.187-.85-.65-.013-.662a2 2 0 0 1 1.538 1.025 2.137 2.137 0 0 0 2.912.825 2.1 2.1 0 0 1 .638-1.338c-2.225-.25-4.55-1.112-4.55-4.937a3.9 3.9 0 0 1 1.025-2.688 3.6 3.6 0 0 1 .1-2.65s.837-.262 2.75 1.025a9.43 9.43 0 0 1 5 0c1.912-1.3 2.75-1.025 2.75-1.025a3.6 3.6 0 0 1 .1 2.65 3.87 3.87 0 0 1 1.025 2.688c0 3.837-2.338 4.687-4.562 4.937a2.37 2.37 0 0 1 .674 1.85c0 1.338-.012 2.413-.012 2.75 0 .263.187.575.687.475A10.005 10.005 0 0 0 12 2.247" />
+        </svg>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+          <path
+            d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61zM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="landing-card">
+      <h1 class="landing-title">Visualize your Last.fm scrobbles & minutes</h1>
+      <p class="landing-subtitle">
+        Enter your Last.fm username to generate aesthetic charts of your top artists, tracks, and total listening
+        time.
+      </p>
+
+      <form id="form-username" class="username-form">
+        <div class="input-group">
+          <div class="input-with-icon">
+            <span class="input-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                fill="currentColor">
+                <path
+                  d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480v58q0 59-40.5 100.5T740-280q-35 0-66-15t-52-43q-29 29-65.5 43.5T480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480v58q0 26 17 44t43 18q26 0 43-18t17-44v-58q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93h160q17 0 28.5 11.5T680-120q0 17-11.5 28.5T640-80H480Zm85-315q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Z" />
+              </svg>
+            </span>
+            <input type="text" id="userInput" placeholder="Last.fm username" autocomplete="off" required />
+
+            <div class="calendar-trigger-container">
+              <button type="button" id="calendarTrigger" class="calendar-trigger" aria-label="Select timeframe">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"
                   fill="currentColor">
                   <path
-                    d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480v58q0 59-40.5 100.5T740-280q-35 0-66-15t-52-43q-29 29-65.5 43.5T480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480v58q0 26 17 44t43 18q26 0 43-18t17-44v-58q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93h160q17 0 28.5 11.5T680-120q0 17-11.5 28.5T640-80H480Zm85-315q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Z" />
+                    d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-40q0-17 11.5-28.5T280-880t28.5 11.5T320-840v40h320v-40q0-17 11.5-28.5T680-880t28.5 11.5T720-840v40h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80zm0-80h560v-400H200zm0-480h560v-80H200zm0 0v-80zm280 240q-17 0-28.5-11.5T440-440t11.5-28.5T480-480t28.5 11.5T520-440t-11.5 28.5T480-400m-188.5-11.5Q280-423 280-440t11.5-28.5T320-480t28.5 11.5T360-440t-11.5 28.5T320-400t-28.5-11.5M640-400q-17 0-28.5-11.5T600-440t11.5-28.5T640-480t28.5 11.5T680-440t-11.5 28.5T640-400M480-240q-17 0-28.5-11.5T440-280t11.5-28.5T480-320t28.5 11.5T520-280t-11.5 28.5T480-240m-188.5-11.5Q280-263 280-280t11.5-28.5T320-320t28.5 11.5T360-280t-11.5 28.5T320-240t-28.5-11.5M640-240q-17 0-28.5-11.5T600-280t11.5-28.5T640-320t28.5 11.5T680-280t-11.5 28.5T640-240" />
                 </svg>
-              </span>
-              <input type="text" id="userInput" placeholder="Last.fm username" autocomplete="off" required />
+              </button>
+
+              <div class="calendar-tooltip" id="calendarTooltip">Current: October</div>
+
+              <div class="calendar-popover" id="calendarPopover">
+                <div class="popover-header">
+                  <button type="button" class="popover-tab active" data-tab="month">Month</button>
+                  <button type="button" class="popover-tab" data-tab="week">Week</button>
+                </div>
+                <div class="popover-body" id="popoverOptions">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
             </div>
-            <button type="submit" id="btnIr" class="btn-primary">View Stats</button>
           </div>
-        </form>
 
-        <p class="signup-link">
-          Don't have a Last.fm account?
-          <a href="https://www.last.fm/join" target="_blank" rel="noopener noreferrer">Create one!</a>
-        </p>
+          <!-- Loading Container -->
+          <div id="loading-container" style="display: none;" class="loading-container">
+            <div id="loading-status" class="loading-status">Initializing...</div>
+            <div class="progress-bar-bg">
+              <div id="loading-progress" class="progress-bar-fill"></div>
+            </div>
+          </div>
 
-        <p id="mensagemErro" class="error-message"></p>
+          <button type="submit" id="btnIr" class="btn-primary">View Stats</button>
+        </div>
+      </form>
+
+      <p class="signup-link">
+        Don't have a Last.fm account?
+        <a href="https://www.last.fm/join" target="_blank" rel="noopener noreferrer">Create one!</a>
+      </p>
+
+      <p id="mensagemErro" class="error-message"></p>
+    </section>
+
+    <div class="landing-features" style="gap: 2rem; padding-top: 2rem;">
+      <section class="feature-section centered">
+        <div class="feature-content" style="max-width: 600px; margin: 0 auto;">
+          <h2>Your Music Taste, Beautifully Displayed</h2>
+          <p>
+            Join thousands of Last.fm users creating stunning visualizations of their listening habits. See your top
+            artists, tracks, and total minutes listened. It's completely free and takes seconds.
+          </p>
+        </div>
+        <div class="feature-image-container" style="background: transparent">
+          <img src="assets/leading/mockup-light.webp" alt="Animated card effect light" class="feature-img img-light"
+            loading="lazy" />
+          <img src="assets/leading/mockup-dark.webp" alt="Animated card effect dark" class="feature-img img-dark"
+            loading="lazy" />
+        </div>
       </section>
+    </div>
+  </main>
 
-      <div class="landing-features" style="gap: 2rem; padding-top: 2rem;">
-        <section class="feature-section centered">
-          <div class="feature-content" style="max-width: 600px; margin: 0 auto;">
-            <h2>Your Music Taste, Beautifully Displayed</h2>
-            <p>
-              Join thousands of Last.fm users creating stunning visualizations of their listening habits. See your top artists, tracks, and total minutes listened. It's completely free and takes seconds.
-            </p>
-          </div>
-          <div class="feature-image-container" style="background: transparent">
-            <img
-              src="assets/leading/mockup-light.webp"
-              alt="Animated card effect light"
-              class="feature-img img-light"
-              loading="lazy" />
-            <img
-              src="assets/leading/mockup-dark.webp"
-              alt="Animated card effect dark"
-              class="feature-img img-dark"
-              loading="lazy" />
-          </div>
-        </section>
-      </div>
-    </main>
+  <footer class="app-footer">
+    <div class="footer-info">
+      <span class="info-line-1">
+        ©
+        <span id="currentYear">2026</span>
+        BubbleFM.
+      </span>
+      <span class="separator">|</span>
+      <span class="info-line-3">
+        by
+        <a href="https://github.com/snw-mint/" target="_blank" rel="noopener noreferrer">Snow Mint</a>
+      </span>
+    </div>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <span class="dot">•</span>
+      <a href="terms.html">Terms of Use</a>
+      <span class="dot">•</span>
+      <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+      <span class="dot">•</span>
+      <span class="versao">v1.0.0</span>
+    </div>
+  </footer>
+  <script type="module" src="/js/unified.js"></script>
+</body>
 
-    <footer class="app-footer">
-      <div class="footer-info">
-        <span class="info-line-1">
-          ©
-          <span id="currentYear">2026</span>
-          BubbleFM.
-        </span>
-        <span class="separator">|</span>
-        <span class="info-line-3">
-          by
-          <a href="https://github.com/snw-mint/" target="_blank" rel="noopener noreferrer">Snow Mint</a>
-        </span>
-      </div>
-      <div class="footer-links">
-        <a href="privacy.html">Privacy Policy</a>
-        <span class="dot">•</span>
-        <a href="terms.html">Terms of Use</a>
-        <span class="dot">•</span>
-        <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
-        <span class="dot">•</span>
-        <span class="versao">v1.0.0</span>
-      </div>
-    </footer>
-    <script type="module" src="/js/unified.js"></script>
-  </body>
 </html>
