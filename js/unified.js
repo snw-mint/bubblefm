@@ -161,35 +161,368 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+/* ---------------------------------------------------------------------------
+ * Configuration
+ * ------------------------------------------------------------------------- */
+const LASTFM_BASE_URL = "https://bubblefm.snw-mint.workers.dev/data";
+const LASTFM_PAGE_LIMIT = 200; // maximum accepted by user.getRecentTracks
+
+// Request pacing. Every visitor shares the worker's API key, so we stay polite.
+const LASTFM_CONCURRENCY = 4;
+const LASTFM_MIN_GAP_MS = 200; // ~5 requests/second per visitor
+const LASTFM_BACKGROUND_SLOTS = 2; // slots usable by low-priority work (durations)
+const DEEZER_CONCURRENCY = 3;
+const DEEZER_MIN_GAP_MS = 120;
+
+const MAX_RETRIES = 4;
+const RETRYABLE_LASTFM_ERRORS = new Set([8, 11, 16, 29]); // 29 = rate limit exceeded
+const MISSING_SCROBBLES_TOLERANCE = 3;
+
+// Listening time
+const AVG_TRACK_SECONDS = 210; // last-resort estimate (3.5 min)
+const AVG_TRACK_MINUTES = AVG_TRACK_SECONDS / 60;
+const MAX_BACKGROUND_LOOKUPS = 400; // new track.getInfo calls allowed per page load
+const MAX_CONSECUTIVE_LOOKUP_FAILURES = 8;
+
+// Cache
+const CACHE_PREFIX = "bubblefm_cache_v3_";
+const DURATION_CACHE_KEY = "bubblefm_durations_v1";
+const DURATION_CACHE_MAX = 6000;
+const TTL_CURRENT_PERIOD_MS = 5 * 60 * 1000;
+const TTL_CLOSED_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
+const TTL_USERINFO_MS = 10 * 60 * 1000;
+const TTL_TAGS_MS = 30 * 24 * 60 * 60 * 1000;
+const TTL_ASSET_MS = 14 * 24 * 60 * 60 * 1000;
+const TTL_ASSET_MISS_MS = 12 * 60 * 60 * 1000;
+
 const periodCache = {};
 let currentActiveData = null;
+let currentLoad = null;
 
-function getLocalStorageCache(key) {
-  try {
-    const raw = localStorage.getItem("bubblefm_cache_" + key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
-      return parsed.data;
-    } else {
-      localStorage.removeItem("bubblefm_cache_" + key);
+/* ---------------------------------------------------------------------------
+ * Small helpers
+ * ------------------------------------------------------------------------- */
+function abortError() {
+  return new DOMException("Aborted", "AbortError");
+}
+
+function sleep(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(abortError());
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(abortError());
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+function backoffDelay(attempt) {
+  return Math.min(8000, 500 * 2 ** attempt) * (0.5 + Math.random() * 0.5);
+}
+
+function toArray(value) {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function formatMinutes(minutes) {
+  return Math.round(minutes).toLocaleString("en-US");
+}
+
+class LastfmError extends Error {
+  constructor(message, code, retryable = false) {
+    super(message);
+    this.name = "LastfmError";
+    this.code = code;
+    this.retryable = retryable;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * localStorage cache (TTL + quota-aware)
+ * ------------------------------------------------------------------------- */
+const storage = {
+  get(key) {
+    try {
+      return JSON.parse(localStorage.getItem(key));
+    } catch (e) {
+      return null;
     }
-  } catch (e) {}
-  return null;
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+  remove(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) { }
+  },
+};
+
+function listCacheKeys() {
+  const keys = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(CACHE_PREFIX)) keys.push(key);
+    }
+  } catch (e) { }
+  return keys;
 }
 
-function setLocalStorageCache(key, data) {
-  try {
-    localStorage.setItem(
-      "bubblefm_cache_" + key,
-      JSON.stringify({
-        timestamp: Date.now(),
-        data: data,
-      })
-    );
-  } catch (e) {}
+function pruneCache() {
+  const now = Date.now();
+  const alive = [];
+  listCacheKeys().forEach((key) => {
+    const entry = storage.get(key);
+    if (!entry || now > entry.expires) storage.remove(key);
+    else alive.push({ key, expires: entry.expires });
+  });
+  // Still full? drop the entries that expire first (roughly the oldest ones).
+  alive.sort((a, b) => a.expires - b.expires);
+  alive.slice(0, Math.ceil(alive.length / 4)).forEach((item) => storage.remove(item.key));
 }
+
+function getCached(key) {
+  const entry = storage.get(CACHE_PREFIX + key);
+  if (!entry) return null;
+  if (Date.now() > entry.expires) {
+    storage.remove(CACHE_PREFIX + key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCached(key, data, ttlMs) {
+  const entry = { expires: Date.now() + ttlMs, data };
+  if (storage.set(CACHE_PREFIX + key, entry)) return;
+  pruneCache();
+  storage.set(CACHE_PREFIX + key, entry);
+}
+
+// Cache entries written by older versions (stale, never expired, often huge).
+(function purgeLegacyCache() {
+  try {
+    const legacy = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("bubblefm_cache_") && !key.startsWith(CACHE_PREFIX)) legacy.push(key);
+    }
+    legacy.forEach((key) => localStorage.removeItem(key));
+  } catch (e) { }
+})();
+
+/* ---------------------------------------------------------------------------
+ * Request limiter: concurrency cap + minimum gap between request starts,
+ * with a separate low-priority lane for background work.
+ * ------------------------------------------------------------------------- */
+function createLimiter({ concurrency, minGapMs = 0, backgroundSlots = concurrency }) {
+  const high = [];
+  const low = [];
+  let active = 0;
+  let activeLow = 0;
+  let nextStart = 0;
+  let timer = null;
+
+  function pump() {
+    if (timer) return;
+    while (active < concurrency) {
+      const job = high.length ? high.shift() : activeLow < backgroundSlots && low.length ? low.shift() : null;
+      if (!job) return;
+
+      if (job.signal?.aborted) {
+        job.reject(abortError());
+        continue;
+      }
+
+      const wait = nextStart - Date.now();
+      if (wait > 0) {
+        (job.background ? low : high).unshift(job);
+        timer = setTimeout(() => {
+          timer = null;
+          pump();
+        }, wait);
+        return;
+      }
+
+      nextStart = Date.now() + minGapMs;
+      active++;
+      if (job.background) activeLow++;
+      job
+        .task()
+        .then(job.resolve, job.reject)
+        .finally(() => {
+          active--;
+          if (job.background) activeLow--;
+          pump();
+        });
+    }
+  }
+
+  return {
+    run(task, { background = false, signal } = {}) {
+      return new Promise((resolve, reject) => {
+        (background ? low : high).push({ task, resolve, reject, background, signal });
+        pump();
+      });
+    },
+    // Back-pressure: after a rate limit / server error nobody starts a request for a while.
+    cooldown(ms) {
+      nextStart = Math.max(nextStart, Date.now() + ms);
+    },
+  };
+}
+
+const lastfmLimiter = createLimiter({
+  concurrency: LASTFM_CONCURRENCY,
+  minGapMs: LASTFM_MIN_GAP_MS,
+  backgroundSlots: LASTFM_BACKGROUND_SLOTS,
+});
+const deezerLimiter = createLimiter({ concurrency: DEEZER_CONCURRENCY, minGapMs: DEEZER_MIN_GAP_MS });
+
+/* ---------------------------------------------------------------------------
+ * Last.fm client (through the Cloudflare worker)
+ * ------------------------------------------------------------------------- */
+async function fetchOnce(url, signal) {
+  const res = await fetch(url, { signal });
+  let json = null;
+  try {
+    json = await res.json();
+  } catch (e) { }
+  return { res, json };
+}
+
+// Every attempt (including retries) goes through the limiter, so pacing holds
+// even while failing, and a rate limit slows down every pending request.
+async function requestWithRetry(url, { signal, retries, validate, background }) {
+  let lastError = new LastfmError("Request failed", "unknown", true);
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    if (signal?.aborted) throw abortError();
+    let waitMs = backoffDelay(attempt);
+
+    try {
+      const { res, json } = await lastfmLimiter.run(() => fetchOnce(url, signal), { background, signal });
+      if (res.ok && json && !json.error && (!validate || validate(json))) return json;
+
+      const code = json?.error ?? res.status;
+      const retryable =
+        res.status === 429 || res.status >= 500 || RETRYABLE_LASTFM_ERRORS.has(json?.error) || (res.ok && !json?.error);
+      lastError = new LastfmError(json?.message || `HTTP ${res.status}`, code, retryable);
+      if (!retryable) throw lastError;
+
+      const retryAfter = parseInt(res.headers.get("Retry-After"), 10);
+      if (retryAfter > 0) waitMs = Math.min(retryAfter, 30) * 1000;
+    } catch (err) {
+      if (err.name === "AbortError") throw err;
+      if (err instanceof LastfmError && !err.retryable) throw err;
+      if (!(err instanceof LastfmError)) lastError = err; // network failure
+    }
+
+    if (attempt < retries) {
+      lastfmLimiter.cooldown(waitMs);
+      await sleep(waitMs, signal);
+    }
+  }
+
+  throw lastError;
+}
+
+function lastfmRequest(params, { fresh = false, background = false, signal, retries = MAX_RETRIES, validate } = {}) {
+  const query = Object.entries(params)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+  const url = `${LASTFM_BASE_URL}?${query}${fresh ? `&_t=${Date.now()}` : ""}`;
+  return requestWithRetry(url, { signal, retries, validate, background });
+}
+
+const userInfoCache = new Map();
+function getUserInfo(username) {
+  const key = username.toLowerCase();
+  const hit = userInfoCache.get(key);
+  if (hit && Date.now() - hit.at < TTL_USERINFO_MS) return hit.promise;
+
+  // No abort signal on purpose: the result is shared between consecutive loads.
+  const promise = lastfmRequest({ method: "user.getinfo", user: username });
+  userInfoCache.set(key, { at: Date.now(), promise });
+  promise.catch(() => userInfoCache.delete(key));
+  return promise;
+}
+
+/* ---------------------------------------------------------------------------
+ * Track durations (persistent, shared by every period)
+ * ------------------------------------------------------------------------- */
+const durationStore = (() => {
+  let map = null;
+  let dirty = false;
+  let saveTimer = null;
+  let avgCache = null;
+
+  function load() {
+    if (!map) {
+      const raw = storage.get(DURATION_CACHE_KEY);
+      map = raw && raw.v === 1 && raw.d && typeof raw.d === "object" ? raw.d : {};
+    }
+    return map;
+  }
+
+  function flush() {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+    if (!dirty || !map) return;
+    const keys = Object.keys(map);
+    if (keys.length > DURATION_CACHE_MAX) {
+      keys.slice(0, keys.length - DURATION_CACHE_MAX).forEach((key) => delete map[key]);
+    }
+    if (storage.set(DURATION_CACHE_KEY, { v: 1, d: map })) dirty = false;
+  }
+
+  return {
+    get(key) {
+      return load()[key];
+    },
+    set(key, seconds) {
+      const m = load();
+      delete m[key]; // re-insert so recently used entries survive pruning
+      m[key] = seconds;
+      dirty = true;
+      avgCache = null;
+      if (!saveTimer) saveTimer = setTimeout(flush, 1500);
+    },
+    average() {
+      if (avgCache === null) {
+        let sum = 0;
+        let count = 0;
+        Object.values(load()).forEach((sec) => {
+          if (sec > 0) {
+            sum += sec;
+            count++;
+          }
+        });
+        avgCache = count >= 20 ? sum / count : 0;
+      }
+      return avgCache;
+    },
+    flush,
+  };
+})();
+
+window.addEventListener("pagehide", () => durationStore.flush());
+
+function durationKey(artist, track) {
+  return `${artist}\u0001${track}`.toLowerCase();
+}
+
 
 function updatePeriodNavigation(period, offset) {
   const periodDisplayText = document.getElementById("periodDisplayText");
@@ -289,17 +622,76 @@ function fetchDeezerJsonp(type, query) {
   });
 }
 
-async function fetchAssetData(type, query) {
-  const cleanQuery = (query || "").replace(/["']/g, "").trim();
-  if (!cleanQuery) return null;
-  try {
-    const jsonpData = await fetchDeezerJsonp(type, cleanQuery);
-    if (jsonpData && jsonpData.data && jsonpData.data.length > 0) return jsonpData;
-  } catch (e) {
-    console.warn("Deezer JSONP fetch warning:", e);
+function trimDeezerItem(item) {
+  const pick = (obj, keys) => {
+    const out = {};
+    keys.forEach((key) => {
+      if (obj[key] !== undefined) out[key] = obj[key];
+    });
+    return out;
+  };
+  const trimmed = pick(item, [
+    "name",
+    "nb_fan",
+    "picture",
+    "picture_medium",
+    "picture_big",
+    "picture_xl",
+    "cover",
+    "cover_medium",
+    "cover_big",
+    "cover_xl",
+  ]);
+  if (item.album) trimmed.album = pick(item.album, ["cover", "cover_medium", "cover_big", "cover_xl"]);
+  return trimmed;
+}
+
+async function fetchDeezerWithRetry(type, query) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const result = await fetchDeezerJsonp(type, query);
+    if (result && !result.error) return result;
+    if (attempt === 0) await sleep(800);
   }
   return null;
 }
+
+const assetInflight = new Map();
+
+// Same return shape as the Deezer search endpoint ({ data: [...] }), but cached
+// (persistently) and rate limited, so reopening a period or generating a card
+// does not hit Deezer again.
+async function fetchAssetData(type, query) {
+  const cleanQuery = (query || "").replace(/["']/g, "").trim();
+  if (!cleanQuery) return null;
+
+  const cacheKey = `dz_${type}_${cleanQuery.toLowerCase()}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached.data.length > 0 ? cached : null;
+
+  if (assetInflight.has(cacheKey)) return assetInflight.get(cacheKey);
+
+  const promise = deezerLimiter
+    .run(() => fetchDeezerWithRetry(type, cleanQuery))
+    .then((result) => {
+      if (result && Array.isArray(result.data) && result.data.length > 0) {
+        const value = { data: result.data.slice(0, 5).map(trimDeezerItem) };
+        setCached(cacheKey, value, TTL_ASSET_MS);
+        return value;
+      }
+      if (result && !result.error) setCached(cacheKey, { data: [] }, TTL_ASSET_MISS_MS);
+      return null;
+    })
+    .catch((err) => {
+      console.warn("Deezer fetch warning:", err);
+      return null;
+    })
+    .finally(() => assetInflight.delete(cacheKey));
+
+  assetInflight.set(cacheKey, promise);
+  return promise;
+}
+
+
 
 const IGNORED_TAGS = new Set([
   "seen live",
@@ -342,39 +734,44 @@ function formatVibeTag(tag) {
     .join("");
 }
 
-async function fetchTopVibeTag(artists, lastfmBaseUrl) {
+async function fetchArtistTags(artistName, signal) {
+  const cacheKey = `tags_${artistName.toLowerCase()}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const json = await lastfmRequest({ method: "artist.gettoptags", artist: artistName }, { signal, retries: 2 });
+  const tags = toArray(json.toptags?.tag)
+    .slice(0, 8)
+    .map((t) => ({ name: t.name, count: t.count }));
+  setCached(cacheKey, tags, TTL_TAGS_MS);
+  return tags;
+}
+
+async function fetchTopVibeTag(artists, signal) {
   if (!artists || artists.length === 0) return null;
-  const topArtists = artists.slice(0, 5);
   const tagScores = {};
 
-  const promises = topArtists.map(async (artist) => {
-    try {
-      const res = await fetch(
-        `${lastfmBaseUrl}?method=artist.gettoptags&artist=${encodeURIComponent(artist.name)}&_t=${Date.now()}`
-      );
-      if (!res.ok) return;
-      const json = await res.json();
-      let rawTags = json.toptags?.tag || [];
-      if (!Array.isArray(rawTags)) rawTags = [rawTags];
-
-      rawTags.slice(0, 8).forEach((t) => {
-        const tagName = (t.name || "").toLowerCase().trim();
-        if (!tagName || IGNORED_TAGS.has(tagName)) return;
-        const count = parseInt(t.count || 0, 10) || 1;
-        const weight = count * (artist.playcount || 1);
-        tagScores[tagName] = (tagScores[tagName] || 0) + weight;
-      });
-    } catch (e) {}
-  });
-
-  await Promise.all(promises);
+  await Promise.all(
+    artists.slice(0, 5).map(async (artist) => {
+      try {
+        const tags = await fetchArtistTags(artist.name, signal);
+        tags.forEach((t) => {
+          const tagName = (t.name || "").toLowerCase().trim();
+          if (!tagName || IGNORED_TAGS.has(tagName)) return;
+          const count = parseInt(t.count || 0, 10) || 1;
+          tagScores[tagName] = (tagScores[tagName] || 0) + count * (artist.playcount || 1);
+        });
+      } catch (e) {
+        if (e.name === "AbortError") throw e;
+      }
+    }),
+  );
 
   const sortedTags = Object.keys(tagScores).sort((a, b) => tagScores[b] - tagScores[a]);
-  if (sortedTags.length > 0) {
-    return formatVibeTag(sortedTags[0]);
-  }
-  return null;
+  return sortedTags.length > 0 ? formatVibeTag(sortedTags[0]) : null;
 }
+
+
 
 function initFaqModal() {
   const faqToggle = document.getElementById("faq-toggle");
@@ -525,7 +922,7 @@ function initFaqModal() {
       const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
       localStorage.setItem("bubblefm_faq_open_count", count.toString());
       console.log(`[Analytics] FAQ Opened. Total local opens: ${count}`);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const closeFaq = () => {
@@ -617,226 +1014,535 @@ function resetToSkeletons() {
   });
 }
 
-async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) {
-  const cacheKey = `${username}_${period}_${offset}`;
+/* ---------------------------------------------------------------------------
+ * Period loading pipeline
+ *   1. cache lookup
+ *   2. user info + every page of scrobbles (paced, retried, validated)
+ *   3. one-pass aggregation, listening time from cached real durations
+ *   4. render immediately
+ *   5. in the background: Deezer images, vibe tag and missing track durations,
+ *      refreshing the numbers on screen as they arrive
+ * ------------------------------------------------------------------------- */
+function getPeriodRange(period, offset) {
+  const now = new Date();
+  let from;
+  let to;
+  let subtitleText = "";
+  let reviewLabel = "Month Review";
 
-  if (periodCache[cacheKey]) {
-    currentActiveData = periodCache[cacheKey];
-    renderData(username, currentActiveData);
-    return;
+  if (period === "week") {
+    const dayOfWeek = now.getDay();
+    const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+    currentMonday.setHours(0, 0, 0, 0);
+
+    const targetMonday = new Date(
+      currentMonday.getFullYear(),
+      currentMonday.getMonth(),
+      currentMonday.getDate() + offset * 7,
+      0,
+      0,
+      0,
+    );
+    from = Math.floor(targetMonday.getTime() / 1000);
+
+    let targetEnd;
+    if (offset === 0) {
+      targetEnd = new Date(now);
+      to = Math.floor(now.getTime() / 1000);
+    } else {
+      targetEnd = new Date(targetMonday.getFullYear(), targetMonday.getMonth(), targetMonday.getDate() + 6, 23, 59, 59);
+      to = Math.floor(targetEnd.getTime() / 1000);
+    }
+
+    const startDay = targetMonday.getDate().toString().padStart(2, "0");
+    const endDay = targetEnd.getDate().toString().padStart(2, "0");
+    const monthShort = targetEnd.toLocaleString("en-US", { month: "short" }).toLowerCase();
+    subtitleText = `${startDay}-${endDay} ${monthShort}`;
+    reviewLabel = "Week Review";
+  } else {
+    const targetMonthStart = new Date(now.getFullYear(), now.getMonth() + offset, 1, 0, 0, 0);
+    from = Math.floor(targetMonthStart.getTime() / 1000);
+    if (offset === 0) {
+      to = Math.floor(now.getTime() / 1000);
+    } else {
+      const targetMonthEnd = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0, 23, 59, 59);
+      to = Math.floor(targetMonthEnd.getTime() / 1000);
+    }
+    subtitleText = targetMonthStart.toLocaleString("en-US", { month: "long" }).toUpperCase();
   }
 
-  const stored = getLocalStorageCache(cacheKey);
-  if (stored) {
-    periodCache[cacheKey] = stored;
-    currentActiveData = stored;
-    renderData(username, stored);
+  return { from, to, subtitleText, reviewLabel, isCurrent: offset === 0 };
+}
+
+// Single pass over every scrobble. `records` keeps one entry per unique
+// artist/album/track combination so listening time can be recomputed cheaply
+// whenever a new track duration becomes known.
+function aggregateScrobbles(rawTracks) {
+  const artistMap = new Map();
+  const albumMap = new Map();
+  const trackMap = new Map();
+  const records = new Map();
+  let scrobbleCount = 0;
+
+  for (const raw of rawTracks) {
+    if (!raw || raw["@attr"]?.nowplaying) continue; // "now playing" is not a scrobble yet
+    const artistName = raw.artist?.["#text"] || raw.artist?.name;
+    if (!artistName) continue;
+    const albumName = raw.album?.["#text"];
+    const trackName = raw.name;
+    scrobbleCount++;
+
+    let artist = artistMap.get(artistName);
+    if (!artist) artistMap.set(artistName, (artist = { name: artistName, playcount: 0, seconds: 0 }));
+    artist.playcount++;
+
+    let album = null;
+    if (albumName) {
+      const albumKey = `${artistName}\u0001${albumName}`;
+      album = albumMap.get(albumKey);
+      if (!album) {
+        albumMap.set(albumKey, (album = { name: albumName, artist: { name: artistName }, playcount: 0, seconds: 0 }));
+      }
+      album.playcount++;
+    }
+
+    let track = null;
+    if (trackName) {
+      const trackKey = `${artistName}\u0001${trackName}`;
+      track = trackMap.get(trackKey);
+      if (!track) {
+        trackMap.set(trackKey, (track = { name: trackName, artist: { name: artistName }, playcount: 0, seconds: 0 }));
+      }
+      track.playcount++;
+    }
+
+    const recordKey = `${artistName}\u0002${albumName || ""}\u0002${trackName || ""}`;
+    let record = records.get(recordKey);
+    if (!record) {
+      records.set(
+        recordKey,
+        (record = { artist, album, track, dkey: trackName ? durationKey(artistName, trackName) : null, n: 0 }),
+      );
+    }
+    record.n++;
+  }
+
+  const byPlays = (a, b) => b.playcount - a.playcount;
+  return {
+    artists: [...artistMap.values()].sort(byPlays),
+    albums: [...albumMap.values()].sort(byPlays),
+    tracks: [...trackMap.values()].sort(byPlays),
+    records: [...records.values()],
+    scrobbleCount,
+  };
+}
+
+// Plays-weighted average of the durations we already know for this period.
+function fallbackSeconds(records) {
+  let knownSeconds = 0;
+  let knownPlays = 0;
+  records.forEach((r) => {
+    const known = r.dkey ? durationStore.get(r.dkey) : 0;
+    if (known > 0) {
+      knownSeconds += known * r.n;
+      knownPlays += r.n;
+    }
+  });
+  if (knownPlays > 0) return knownSeconds / knownPlays;
+  return durationStore.average() || AVG_TRACK_SECONDS;
+}
+
+// Distributes listening time over artists/albums/tracks and returns total minutes.
+function artistFallbacks(records) {
+  const sums = new Map();
+  records.forEach((r) => {
+    const known = r.dkey ? durationStore.get(r.dkey) : 0;
+    if (!(known > 0)) return;
+    const entry = sums.get(r.artist) || { seconds: 0, plays: 0 };
+    entry.seconds += known * r.n;
+    entry.plays += r.n;
+    sums.set(r.artist, entry);
+  });
+  return sums;
+}
+
+function applyDurations(model) {
+  model.artists.forEach((i) => (i.seconds = 0));
+  model.albums.forEach((i) => (i.seconds = 0));
+  model.tracks.forEach((i) => (i.seconds = 0));
+
+  const general = fallbackSeconds(model.records);
+  const byArtist = artistFallbacks(model.records);
+  let total = 0;
+  model.records.forEach((r) => {
+    const known = r.dkey ? durationStore.get(r.dkey) : 0;
+    const artistAvg = byArtist.get(r.artist);
+    const fallback = artistAvg ? artistAvg.seconds / artistAvg.plays : general;
+    const seconds = (known > 0 ? known : fallback) * r.n;
+    r.artist.seconds += seconds;
+    if (r.album) r.album.seconds += seconds;
+    if (r.track) r.track.seconds += seconds;
+    total += seconds;
+  });
+  return Math.round(total / 60);
+}
+
+// Unique tracks whose duration is not known yet, most played first.
+function planDurationLookups(model) {
+  const unique = new Map();
+  model.records.forEach((r) => {
+    if (!r.dkey || !r.track) return;
+    let entry = unique.get(r.dkey);
+    if (!entry) unique.set(r.dkey, (entry = { dkey: r.dkey, artist: r.artist.name, track: r.track.name, plays: 0 }));
+    entry.plays += r.n;
+  });
+  return [...unique.values()]
+    .filter((e) => durationStore.get(e.dkey) === undefined && !failedLookups.has(e.dkey))
+    .sort((a, b) => b.plays - a.plays);
+}
+
+const failedLookups = new Set();
+
+function hasUnresolvedDurations(model) {
+  return model.records.some((r) => r.dkey && durationStore.get(r.dkey) === undefined);
+}
+
+async function lookupTrackDuration(artist, track, signal) {
+  try {
+    const json = await lastfmRequest(
+      { method: "track.getinfo", artist, track, autocorrect: 1 },
+      { background: true, signal, retries: 2 },
+    );
+    const ms = parseInt(json.track?.duration || 0, 10);
+    return ms > 0 ? Math.round(ms / 1000) : 0; // 0 = Last.fm has no duration for it
+  } catch (err) {
+    if (err.name === "AbortError") throw err;
+    if (err instanceof LastfmError && !err.retryable && err.code === 6) return 0; // track not found
+    return null; // temporary failure: do not cache
+  }
+}
+
+async function refineDurations(model, data, pending, signal) {
+  const queue = pending.slice(0, MAX_BACKGROUND_LOOKUPS);
+  if (queue.length === 0) return;
+
+  let index = 0;
+  let consecutiveFailures = 0;
+  let sinceLastUpdate = 0;
+  let stopped = false;
+
+  const update = (refining) => {
+    if (signal.aborted) return;
+    data.totalMinutes = applyDurations(model);
+    refreshMinutesUI(data, refining);
+  };
+
+  const worker = async () => {
+    while (!stopped && !signal.aborted) {
+      const item = queue[index++];
+      if (!item) return;
+
+      let seconds;
+      try {
+        seconds = await lookupTrackDuration(item.artist, item.track, signal);
+      } catch (e) {
+        return; // aborted
+      }
+
+      if (seconds === null) {
+        failedLookups.add(item.dkey);
+        if (++consecutiveFailures >= MAX_CONSECUTIVE_LOOKUP_FAILURES) stopped = true; // worker may not allow track.getinfo
+        continue;
+      }
+
+      consecutiveFailures = 0;
+      durationStore.set(item.dkey, seconds);
+      if (++sinceLastUpdate >= 10) {
+        sinceLastUpdate = 0;
+        update(true);
+      }
+    }
+  };
+
+  await Promise.all(Array.from({ length: LASTFM_BACKGROUND_SLOTS }, worker));
+  durationStore.flush();
+  update(hasUnresolvedDurations(model)); // keep the "~" while part of the total is still estimated
+}
+
+function updateTop1Image(type, imageUrl) {
+  const imgEl = document.getElementById(`${type}1Img`);
+  const skeletonEl = document.getElementById(`${type}1Skeleton`);
+  if (!imgEl || !skeletonEl || !imageUrl || imgEl.dataset.applied === imageUrl) return;
+  imgEl.dataset.applied = imageUrl;
+  imgEl.src = imageUrl;
+  imgEl.onload = () => {
+    imgEl.classList.add("fade-in");
+    imgEl.style.display = "block";
+    skeletonEl.style.display = "none";
+  };
+}
+
+// Applies whatever images / vibe tag are available. Safe to call repeatedly.
+function applyAssets(data) {
+  updateTop1Image("artist", data.artistImage);
+  updateTop1Image("album", data.albumImage);
+  updateTop1Image("track", data.trackImage);
+
+  const artistCoverEl = document.getElementById("artistCover");
+  const coverContainer = document.getElementById("coverContainer");
+  if (artistCoverEl && coverContainer && data.artistCoverImage && artistCoverEl.dataset.applied !== data.artistCoverImage) {
+    artistCoverEl.dataset.applied = data.artistCoverImage;
+    artistCoverEl.src = data.artistCoverImage;
+    artistCoverEl.onload = () => {
+      artistCoverEl.classList.add("fade-in");
+      artistCoverEl.style.display = "block";
+      const icon = document.getElementById("coverSkeletonIcon");
+      if (icon) icon.style.display = "none";
+      coverContainer.classList.remove("skeleton", "skeleton-icon");
+    };
+  }
+
+  const userVibeEl = document.getElementById("userVibe");
+  if (userVibeEl && data.vibeTag !== undefined) {
+    userVibeEl.textContent = data.vibeTag || "-";
+    userVibeEl.classList.remove("skeleton", "skeleton-text");
+    userVibeEl.style.width = "auto";
+  }
+}
+
+// Updates only the minute figures already on screen (no re-render, no flicker).
+function refreshMinutesUI(data, refining) {
+  const totalEl = document.getElementById("userMinutes");
+  if (totalEl && data.totalMinutes != null && !totalEl.classList.contains("skeleton")) {
+    totalEl.textContent = `${refining ? "~" : ""}${formatMinutes(data.totalMinutes)}`;
+  }
+
+  [
+    ["listTopArtists", data.artists],
+    ["listTopTracks", data.tracks],
+    ["listTopAlbums", data.albums],
+  ].forEach(([listId, items]) => {
+    document.querySelectorAll(`#${listId} .chart-item`).forEach((row, i) => {
+      const item = items[i];
+      if (item && item.seconds != null) row.setAttribute("data-minutes", formatMinutes(item.seconds / 60));
+    });
+  });
+}
+
+function loadAssets(data, signal) {
+  const tasks = [];
+  const apply = () => {
+    if (!signal.aborted) applyAssets(data);
+  };
+
+  if (data.artists.length > 0) {
+    tasks.push(
+      fetchTopVibeTag(data.artists, signal)
+        .then((vibe) => {
+          data.vibeTag = vibe;
+        })
+        .catch((err) => {
+          if (err.name === "AbortError") throw err;
+          data.vibeTag = null;
+        })
+        .then(apply),
+    );
+  }
+
+  const topArtistName = data.artists[0]?.name;
+  if (topArtistName) {
+    tasks.push(
+      fetchAssetData("artist", topArtistName)
+        .then((json) => {
+          if (!json?.data?.length) return;
+          const best = selectBestArtist(json.data, topArtistName);
+          if (best) {
+            data.artistImage = best.picture_xl || best.picture;
+            data.artistCoverImage = best.picture_xl || best.picture_big || best.picture;
+          }
+        })
+        .then(apply),
+    );
+  }
+
+  const topAlbum = data.albums[0];
+  if (topAlbum) {
+    tasks.push(
+      fetchAssetData("album", `${topAlbum.name} ${topAlbum.artist?.name || ""}`)
+        .then((json) => {
+          if (json?.data?.length) data.albumImage = json.data[0].cover_xl || json.data[0].cover;
+        })
+        .then(apply),
+    );
+  }
+
+  const topTrack = data.tracks[0];
+  if (topTrack) {
+    tasks.push(
+      fetchAssetData("track", `${topTrack.name} ${topTrack.artist?.name || ""}`)
+        .then((json) => {
+          const item = json?.data?.[0];
+          if (item) data.trackImage = item.album ? item.album.cover_xl || item.album.cover : item.cover_xl || item.cover;
+        })
+        .then(apply),
+    );
+  }
+
+  return Promise.allSettled(tasks);
+}
+
+function showLoadError(error) {
+  const notFound = error?.code === 6;
+  ["userScrobbles", "userMinutes", "userDailyAvg", "userVibe"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = "-";
+      el.classList.remove("skeleton", "skeleton-text");
+      el.style.width = "auto";
+    }
+  });
+  const info = document.getElementById("chartsTimeText");
+  if (info) {
+    info.textContent = notFound
+      ? "We couldn't find that Last.fm user."
+      : "We couldn't load all of your data from Last.fm. Please try again in a moment.";
+  }
+}
+
+// Compact copy for localStorage (the UI never needs more than the top 10).
+function snapshotForCache(data) {
+  return {
+    ...data,
+    artists: data.artists.slice(0, 20),
+    albums: data.albums.slice(0, 20),
+    tracks: data.tracks.slice(0, 20),
+  };
+}
+
+async function loadForeground(username, period, offset, range, signal) {
+  const fresh = range.isCurrent;
+  const validate = (json) => Boolean(json.recenttracks);
+  const pageParams = (page) => {
+    const params = { method: "user.getrecenttracks", user: username, limit: LASTFM_PAGE_LIMIT };
+    if (page) params.page = page;
+    params.from = range.from;
+    params.to = range.to;
+    return params;
+  };
+
+  const [userInfo, firstPage] = await Promise.all([
+    getUserInfo(username),
+    lastfmRequest(pageParams(0), { fresh, signal, validate }),
+  ]);
+
+  const attr = firstPage.recenttracks?.["@attr"] || {};
+  const totalPages = parseInt(attr.totalPages || 0, 10);
+  const expectedTotal = parseInt(attr.total || 0, 10);
+  const pages = [toArray(firstPage.recenttracks?.track)];
+
+  if (totalPages > 1) {
+    // Stop the remaining pages as soon as one of them definitively fails.
+    const inner = new AbortController();
+    const forwardAbort = () => inner.abort();
+    signal.addEventListener("abort", forwardAbort, { once: true });
+    try {
+      const rest = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, i) =>
+          lastfmRequest(pageParams(i + 2), { fresh, signal: inner.signal, validate }).catch((err) => {
+            inner.abort();
+            throw err;
+          }),
+        ),
+      );
+      rest.forEach((page) => pages.push(toArray(page.recenttracks?.track)));
+    } finally {
+      signal.removeEventListener("abort", forwardAbort);
+    }
+  }
+
+  const rawTracks = pages.flat();
+
+  // Integrity check: never show (or cache) numbers computed from partial data.
+  if (expectedTotal && rawTracks.length < expectedTotal - MISSING_SCROBBLES_TOLERANCE) {
+    throw new LastfmError(`Incomplete data: received ${rawTracks.length} of ${expectedTotal} scrobbles`, "incomplete", true);
+  }
+
+  const model = aggregateScrobbles(rawTracks);
+  const data = {
+    artists: model.artists,
+    albums: model.albums,
+    tracks: model.tracks,
+    artistImage: null,
+    artistCoverImage: null,
+    albumImage: null,
+    trackImage: null,
+    userInfo,
+    scrobbleCount: model.scrobbleCount,
+    totalMinutes: applyDurations(model),
+    from: range.from,
+    to: range.to,
+    period,
+    offset,
+    subtitleText: range.subtitleText,
+    reviewLabel: range.reviewLabel,
+    vibeTag: undefined,
+  };
+
+  return { data, model };
+}
+
+async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) {
+  if (currentLoad) currentLoad.controller.abort(); // a newer request supersedes the previous one
+  const load = { controller: new AbortController() };
+  currentLoad = load;
+  const { signal } = load.controller;
+
+  const range = getPeriodRange(period, offset);
+  // Keyed by the absolute period start, so "last month" never collides across months.
+  const cacheKey = `${username.toLowerCase()}_${period}_${range.from}`;
+  const ttl = range.isCurrent ? TTL_CURRENT_PERIOD_MS : TTL_CLOSED_PERIOD_MS;
+
+  let cachedData = null;
+  const inMemory = periodCache[cacheKey];
+  if (inMemory && Date.now() < inMemory.expires) {
+    cachedData = inMemory.data;
+  } else {
+    cachedData = getCached(cacheKey);
+    if (cachedData) periodCache[cacheKey] = { data: cachedData, expires: Date.now() + ttl };
+  }
+  if (cachedData) {
+    currentActiveData = cachedData;
+    renderData(username, cachedData);
     return;
   }
 
   try {
-    const lastfmBaseUrl = "https://bubblefm.snw-mint.workers.dev/data";
+    const { data, model } = await loadForeground(username, period, offset, range, signal);
+    if (signal.aborted) return;
 
-    let from, to;
-    const now = new Date();
-    let subtitleText = "";
-    let reviewLabel = "Month Review";
-
-    if (period === "month") {
-      const targetMonthStart = new Date(now.getFullYear(), now.getMonth() + offset, 1, 0, 0, 0);
-      from = Math.floor(targetMonthStart.getTime() / 1000);
-      if (offset === 0) {
-        to = Math.floor(now.getTime() / 1000);
-      } else {
-        const targetMonthEnd = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0, 23, 59, 59);
-        to = Math.floor(targetMonthEnd.getTime() / 1000);
-      }
-      subtitleText = targetMonthStart.toLocaleString("en-US", { month: "long" }).toUpperCase();
-      reviewLabel = "Month Review";
-    } else if (period === "week") {
-      const dayOfWeek = now.getDay();
-      const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-      const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
-      currentMonday.setHours(0, 0, 0, 0);
-
-      const targetMonday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + offset * 7, 0, 0, 0);
-      from = Math.floor(targetMonday.getTime() / 1000);
-
-      let targetEnd;
-      if (offset === 0) {
-        targetEnd = new Date(now);
-        to = Math.floor(now.getTime() / 1000);
-      } else {
-        targetEnd = new Date(targetMonday.getFullYear(), targetMonday.getMonth(), targetMonday.getDate() + 6, 23, 59, 59);
-        to = Math.floor(targetEnd.getTime() / 1000);
-      }
-
-      const startDay = targetMonday.getDate().toString().padStart(2, "0");
-      const endDay = targetEnd.getDate().toString().padStart(2, "0");
-      const monthShort = targetEnd.toLocaleString("en-US", { month: "short" }).toLowerCase();
-      subtitleText = `${startDay}-${endDay} ${monthShort}`;
-      reviewLabel = "Week Review";
-    }
-
-    const [userInfoRes, firstPageRes] = await Promise.all([
-      fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${username}&_t=${Date.now()}`),
-      fetch(
-        `${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&from=${from}&to=${to}&_t=${Date.now()}`,
-      ),
-    ]);
-
-    const userInfo = await userInfoRes.json();
-    const firstPageData = await firstPageRes.json();
-
-    let rawTracks = firstPageData.recenttracks?.track || [];
-    if (!Array.isArray(rawTracks)) rawTracks = [rawTracks];
-
-    const totalPages = parseInt(firstPageData.recenttracks?.["@attr"]?.totalPages || 0, 10);
-
-    if (totalPages > 1) {
-      const promises = [];
-      for (let i = 2; i <= totalPages; i++) {
-        promises.push(
-          fetch(
-            `${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&page=${i}&from=${from}&to=${to}&_t=${Date.now()}`,
-          ).then((r) => r.json()),
-        );
-      }
-      const pagesData = await Promise.all(promises);
-      pagesData.forEach((page) => {
-        let pageTracks = page.recenttracks?.track || [];
-        if (!Array.isArray(pageTracks)) pageTracks = [pageTracks];
-        rawTracks = rawTracks.concat(pageTracks);
-      });
-    }
-
-    const artistMap = {};
-    const albumMap = {};
-    const trackMap = {};
-
-    rawTracks.forEach((track) => {
-      const artistName = track.artist?.["#text"] || track.artist?.name;
-      const albumName = track.album?.["#text"];
-      const trackName = track.name;
-
-      if (!artistName) return;
-
-      if (!artistMap[artistName]) artistMap[artistName] = { name: artistName, playcount: 0 };
-      artistMap[artistName].playcount++;
-
-      if (albumName) {
-        const albumKey = `${artistName} - ${albumName}`;
-        if (!albumMap[albumKey]) albumMap[albumKey] = { name: albumName, artist: { name: artistName }, playcount: 0 };
-        albumMap[albumKey].playcount++;
-      }
-
-      if (trackName) {
-        const trackKey = `${artistName} - ${trackName}`;
-        if (!trackMap[trackKey]) trackMap[trackKey] = { name: trackName, artist: { name: artistName }, playcount: 0 };
-        trackMap[trackKey].playcount++;
-      }
-    });
-
-    const artists = Object.values(artistMap).sort((a, b) => b.playcount - a.playcount);
-    const albums = Object.values(albumMap).sort((a, b) => b.playcount - a.playcount);
-    const tracks = Object.values(trackMap).sort((a, b) => b.playcount - a.playcount);
-
-    const topArtistName = artists[0]?.name;
-    const topAlbumName = albums[0]?.name;
-    const topAlbumArtist = albums[0]?.artist?.name;
-    const topTrackName = tracks[0]?.name;
-    const topTrackArtist = tracks[0]?.artist?.name;
-
-    let artistImage = null;
-    let artistCoverImage = null;
-    let albumImage = null;
-    let trackImage = null;
-    let vibeTag = null;
-
-    const assetPromises = [];
-
-    if (artists && artists.length > 0) {
-      assetPromises.push(
-        fetchTopVibeTag(artists, lastfmBaseUrl)
-          .then((v) => {
-            vibeTag = v;
-          })
-          .catch(() => {}),
-      );
-    }
-
-    if (topArtistName) {
-      assetPromises.push(
-        fetchAssetData("artist", topArtistName)
-          .then((data) => {
-            if (data && data.data && data.data.length > 0) {
-              const bestArtist = selectBestArtist(data.data, topArtistName);
-              if (bestArtist) {
-                artistImage = bestArtist.picture_xl || bestArtist.picture;
-                artistCoverImage = bestArtist.picture_xl || bestArtist.picture_big || bestArtist.picture;
-              }
-            }
-          })
-          .catch((err) => console.warn("Artist asset fetch warning:", err)),
-      );
-    }
-
-    if (topAlbumName) {
-      const albumQuery = `${topAlbumName} ${topAlbumArtist || ""}`;
-      assetPromises.push(
-        fetchAssetData("album", albumQuery)
-          .then((data) => {
-            if (data && data.data && data.data.length > 0) {
-              albumImage = data.data[0].cover_xl || data.data[0].cover;
-            }
-          })
-          .catch((err) => console.warn("Album asset fetch warning:", err)),
-      );
-    }
-
-    if (topTrackName) {
-      const trackQuery = `${topTrackName} ${topTrackArtist || ""}`;
-      assetPromises.push(
-        fetchAssetData("track", trackQuery)
-          .then((data) => {
-            if (data && data.data && data.data.length > 0) {
-              const item = data.data[0];
-              trackImage = item.album ? item.album.cover_xl || item.album.cover : item.cover_xl || item.cover;
-            }
-          })
-          .catch((err) => console.warn("Track asset fetch warning:", err)),
-      );
-    }
-
-    await Promise.all(assetPromises);
-
-    const data = {
-      artists,
-      albums,
-      tracks,
-      artistImage,
-      artistCoverImage,
-      albumImage,
-      trackImage,
-      userInfo,
-      rawTracks,
-      from,
-      to,
-      period,
-      offset,
-      subtitleText,
-      reviewLabel,
-      vibeTag,
-    };
-
-    periodCache[cacheKey] = data;
-    setLocalStorageCache(cacheKey, data);
+    const pending = planDurationLookups(model);
     currentActiveData = data;
     renderData(username, data);
+    if (pending.length > 0) refreshMinutesUI(data, true);
+
+    // Background work: images, vibe tag and exact track durations.
+    Promise.allSettled([loadAssets(data, signal), refineDurations(model, data, pending, signal)]).then(() => {
+      if (signal.aborted) return;
+      const assetsOk = data.artists.length === 0 || Boolean(data.artistImage);
+      const durationsOk = !hasUnresolvedDurations(model);
+      const entryTtl = assetsOk && durationsOk ? ttl : TTL_CURRENT_PERIOD_MS; // incomplete: revisit soon
+      const snapshot = snapshotForCache(data);
+      setCached(cacheKey, snapshot, entryTtl);
+      periodCache[cacheKey] = { data: snapshot, expires: Date.now() + entryTtl };
+    });
   } catch (error) {
+    if (error.name === "AbortError") return;
     console.error("Error fetching API data:", error);
+    if (currentLoad === load) showLoadError(error);
   }
 }
+
 
 function renderData(username, data) {
   const {
@@ -864,7 +1570,7 @@ function renderData(username, data) {
       const name = escapeHTML(item.name);
       const playcountNum = parseInt(item.playcount || 0, 10);
       const playcountStr = playcountNum.toLocaleString("en-US");
-      const minutesStr = Math.round(playcountNum * 3.5).toLocaleString("en-US");
+      const minutesStr = formatMinutes(item.seconds != null ? item.seconds / 60 : playcountNum * AVG_TRACK_MINUTES);
 
       if (rank === 1) {
         let subText = "";
@@ -908,19 +1614,6 @@ function renderData(username, data) {
   renderList("listTopTracks", tracks, "track");
   renderList("listTopAlbums", albums, "album");
 
-  function updateTop1Image(type, imageUrl) {
-    const imgEl = document.getElementById(`${type}1Img`);
-    const skeletonEl = document.getElementById(`${type}1Skeleton`);
-    if (imgEl && skeletonEl && imageUrl) {
-      imgEl.src = imageUrl;
-      imgEl.onload = () => {
-        imgEl.classList.add("fade-in");
-        imgEl.style.display = "block";
-        skeletonEl.style.display = "none";
-      };
-    }
-  }
-
   updateTop1Image("artist", artistImage);
   updateTop1Image("album", albumImage);
   updateTop1Image("track", trackImage);
@@ -942,8 +1635,8 @@ function renderData(username, data) {
     const images = userInfo?.user?.image;
     const avatarUrl = Array.isArray(images)
       ? images.find((img) => img.size === "extralarge")?.["#text"] ||
-        images.find((img) => img.size === "large")?.["#text"] ||
-        images[images.length - 1]?.["#text"]
+      images.find((img) => img.size === "large")?.["#text"] ||
+      images[images.length - 1]?.["#text"]
       : null;
     if (avatarUrl && avatarUrl.trim() !== "") {
       userAvatarEl.src = avatarUrl;
@@ -978,13 +1671,13 @@ function renderData(username, data) {
   }
 
   if (userScrobblesEl) {
-    const playcount = rawTracks.length;
+    const playcount = data.scrobbleCount ?? rawTracks?.length ?? 0;
     userScrobblesEl.textContent = playcount.toLocaleString("en-US");
     removeSkeletonText(userScrobblesEl);
 
     if (userMinutesEl) {
-      const estimatedMinutes = Math.round(playcount * 3.5);
-      userMinutesEl.textContent = estimatedMinutes.toLocaleString("en-US");
+      const estimatedMinutes = Math.round(data.totalMinutes ?? playcount * AVG_TRACK_MINUTES);
+      userMinutesEl.textContent = formatMinutes(estimatedMinutes);
       removeSkeletonText(userMinutesEl);
     }
 
@@ -998,7 +1691,7 @@ function renderData(username, data) {
     }
 
     const userVibeEl = document.getElementById("userVibe");
-    if (userVibeEl) {
+    if (userVibeEl && vibeTag !== undefined) {
       userVibeEl.textContent = vibeTag || "-";
       removeSkeletonText(userVibeEl);
     }
@@ -1045,7 +1738,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (nextStepBtn) {
     nextStepBtn.addEventListener("click", () => {
-      if(step1 && step2) {
+      if (step1 && step2) {
         step1.style.display = "none";
         step2.style.display = "block";
       }
@@ -1054,7 +1747,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (backStepBtn) {
     backStepBtn.addEventListener("click", () => {
-      if(step1 && step2) {
+      if (step1 && step2) {
         step2.style.display = "none";
         step1.style.display = "block";
       }
@@ -1063,7 +1756,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
-      if(step1 && step2) {
+      if (step1 && step2) {
         step1.style.display = "block";
         step2.style.display = "none";
       }
@@ -1149,7 +1842,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      const minutes = Math.round(data.rawTracks.length * 3.5);
+      const minutes = Math.round(data.totalMinutes ?? (data.scrobbleCount || 0) * AVG_TRACK_MINUTES);
       const minutesEl = document.getElementById("storyTotalMinutes");
       if (minutesEl) {
         minutesEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
