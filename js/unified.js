@@ -184,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (loadingContainer) loadingContainer.style.display = "block";
         
         let progress = 0;
-        let page = 1;
         
         function updateLoadingStatus(text) {
           if (!loadingStatus) return;
@@ -198,22 +197,64 @@ document.addEventListener("DOMContentLoaded", () => {
         
         updateLoadingStatus("Initializing...");
 
+        const skipLoadingBtn = document.getElementById("skip-loading-btn");
+        if (skipLoadingBtn) skipLoadingBtn.style.display = "none";
+
         const progressInterval = setInterval(() => {
-          progress += Math.random() * 15;
+          progress += Math.random() * 8;
+          if (progress > 95) progress = 95; // Hold at 95% until done
           
           if (progress < 30) {
             updateLoadingStatus("Fetching user profile...");
-          } else if (progress < 80) {
-            if (Math.random() > 0.5) page++;
-            updateLoadingStatus(`Extracting scrobbles (page ${page}/5)...`);
-          } else if (progress < 99) {
+          } else if (progress < 70) {
+            updateLoadingStatus("Extracting scrobbles...");
+          } else if (progress < 95) {
             updateLoadingStatus("Calculating final charts...");
+          } else if (progress === 95) {
+            updateLoadingStatus("Calculating exact durations...");
+            if (skipLoadingBtn) skipLoadingBtn.style.display = "block";
           }
 
-          if (progress >= 100) {
-            progress = 100;
+          if (loadingProgress) loadingProgress.style.width = `${progress}%`;
+        }, 500);
+
+        if (skipLoadingBtn) {
+          skipLoadingBtn.onclick = (ev) => {
+            ev.preventDefault();
+            const dialog = document.getElementById("skipConfirmDialog");
+            const btnConfirm = document.getElementById("btnDialogConfirm");
+            const btnCancel = document.getElementById("btnDialogCancel");
+            
+            if (dialog && btnConfirm && btnCancel) {
+              dialog.style.display = "flex";
+              
+              btnConfirm.onclick = () => {
+                dialog.style.display = "none";
+                clearInterval(progressInterval);
+                window.location.href = "result.html";
+              };
+              
+              btnCancel.onclick = () => {
+                dialog.style.display = "none";
+              };
+            }
+          };
+        }
+
+        fetchLastfmAndDeezerData(userInput, periodType, timeframeOffset)
+          .then(() => {
             clearInterval(progressInterval);
-            updateLoadingStatus("Done! (Test completed)");
+            if (loadingProgress) loadingProgress.style.width = "100%";
+            updateLoadingStatus("Done! Redirecting...");
+            if (skipLoadingBtn) skipLoadingBtn.style.display = "none";
+            
+            setTimeout(() => {
+              window.location.href = "result.html";
+            }, 600);
+          })
+          .catch((err) => {
+            clearInterval(progressInterval);
+            updateLoadingStatus("Error loading data. Check username.");
             
             setTimeout(() => {
               if (calendarTriggerContainer) calendarTriggerContainer.style.display = "flex";
@@ -223,11 +264,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnIr.textContent = "View Stats";
               }
               if (loadingProgress) loadingProgress.style.width = "0%";
-              updateLoadingStatus("Initializing...");
             }, 3000);
-          }
-          if (loadingProgress) loadingProgress.style.width = `${progress}%`;
-        }, 500);
+          });
       }
     });
   }
@@ -254,64 +292,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!user) {
       window.location.href = "index.html";
     } else {
-      let currentPeriod = "month";
-      let periodOffset = 0;
-      updatePeriodNavigation(currentPeriod, periodOffset);
-
-      const toggleBtns = document.querySelectorAll(".time-toggle-btn");
-      if (toggleBtns.length > 0) {
-        toggleBtns.forEach((btn) => {
-          btn.addEventListener("click", () => {
-            if (btn.classList.contains("active")) return;
-
-            toggleBtns.forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-
-            currentPeriod = btn.getAttribute("data-period");
-            periodOffset = 0;
-            updatePeriodNavigation(currentPeriod, periodOffset);
-            resetToSkeletons();
-            fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
-          });
-        });
-      }
-
-      const prevPeriodBtn = document.getElementById("prevPeriodBtn");
-      const nextPeriodBtn = document.getElementById("nextPeriodBtn");
-      let isNavigating = false;
-
-      const handlePeriodChange = async (newOffset) => {
-        if (isNavigating) return;
-        isNavigating = true;
-
-        if (prevPeriodBtn) prevPeriodBtn.disabled = true;
-        if (nextPeriodBtn) nextPeriodBtn.disabled = true;
-
-        periodOffset = newOffset;
-        updatePeriodNavigation(currentPeriod, periodOffset);
-        resetToSkeletons();
-
-        try {
-          await fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
-        } finally {
-          isNavigating = false;
-          updatePeriodNavigation(currentPeriod, periodOffset);
-        }
-      };
-
-      if (prevPeriodBtn) {
-        prevPeriodBtn.addEventListener("click", () => {
-          handlePeriodChange(periodOffset - 1);
-        });
-      }
-
-      if (nextPeriodBtn) {
-        nextPeriodBtn.addEventListener("click", () => {
-          if (periodOffset >= 0) return;
-          handlePeriodChange(periodOffset + 1);
-        });
-      }
-
+      const currentPeriod = sessionStorage.getItem("lastfm_period") || "month";
+      const periodOffset = parseInt(sessionStorage.getItem("lastfm_offset") || "0", 10);
       fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
     }
   }
@@ -337,7 +319,7 @@ const MISSING_SCROBBLES_TOLERANCE = 3;
 // Listening time
 const AVG_TRACK_SECONDS = 210; // last-resort estimate (3.5 min)
 const AVG_TRACK_MINUTES = AVG_TRACK_SECONDS / 60;
-const MAX_BACKGROUND_LOOKUPS = 400; // new track.getInfo calls allowed per page load
+const MAX_BACKGROUND_LOOKUPS = 2000; // new track.getInfo calls allowed per page load
 const MAX_CONSECUTIVE_LOOKUP_FAILURES = 8;
 
 // Cache
@@ -677,45 +659,6 @@ window.addEventListener("pagehide", () => durationStore.flush());
 
 function durationKey(artist, track) {
   return `${artist}\u0001${track}`.toLowerCase();
-}
-
-
-function updatePeriodNavigation(period, offset) {
-  const periodDisplayText = document.getElementById("periodDisplayText");
-  const prevPeriodBtn = document.getElementById("prevPeriodBtn");
-  const nextPeriodBtn = document.getElementById("nextPeriodBtn");
-
-  if (nextPeriodBtn) {
-    nextPeriodBtn.disabled = offset >= 0;
-  }
-  if (prevPeriodBtn) {
-    prevPeriodBtn.disabled = false;
-  }
-
-  if (!periodDisplayText) return;
-
-  const now = new Date();
-  if (period === "month") {
-    const targetMonthStart = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-    periodDisplayText.textContent = targetMonthStart.toLocaleString("en-US", { month: "long" });
-  } else if (period === "week") {
-    const dayOfWeek = now.getDay();
-    const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
-    currentMonday.setHours(0, 0, 0, 0);
-
-    const targetMonday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + offset * 7);
-    let targetEnd;
-    if (offset === 0) {
-      targetEnd = new Date(now);
-    } else {
-      targetEnd = new Date(targetMonday.getFullYear(), targetMonday.getMonth(), targetMonday.getDate() + 6);
-    }
-
-    const startDay = targetMonday.getDate().toString().padStart(2, "0");
-    const endDay = targetEnd.getDate().toString().padStart(2, "0");
-    periodDisplayText.textContent = `${startDay}-${endDay}`;
-  }
 }
 
 function isPlaceholderImage(url) {
@@ -1653,6 +1596,8 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
   const load = { controller: new AbortController() };
   currentLoad = load;
   const { signal } = load.controller;
+  
+  failedLookups.clear(); // Reset temporary failures for the new search
 
   const range = getPeriodRange(period, offset);
   // Keyed by the absolute period start, so "last month" never collides across months.
@@ -1667,9 +1612,28 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     cachedData = getCached(cacheKey);
     if (cachedData) periodCache[cacheKey] = { data: cachedData, expires: Date.now() + ttl };
   }
+  
   if (cachedData) {
     currentActiveData = cachedData;
     renderData(username, cachedData);
+
+    const assetsOk = cachedData.artists.length === 0 || Boolean(cachedData.artistImage);
+    const hasUnresolved = cachedData.totalMinutes == null || String(document.getElementById("userMinutes")?.textContent).includes("~");
+    
+    if (!assetsOk || hasUnresolved) {
+      const tempModel = cachedData.rawTracks ? aggregateScrobbles(cachedData.rawTracks, range) : null;
+      const pending = tempModel ? planDurationLookups(tempModel) : [];
+      return Promise.allSettled([
+        !assetsOk ? loadAssets(cachedData, signal) : Promise.resolve(),
+        pending.length > 0 ? refineDurations(tempModel, cachedData, pending, signal) : Promise.resolve()
+      ]).then(() => {
+        if (signal.aborted) return;
+        const entryTtl = (cachedData.artists.length === 0 || Boolean(cachedData.artistImage)) && (!tempModel || !hasUnresolvedDurations(tempModel)) ? ttl : TTL_CURRENT_PERIOD_MS;
+        const snapshot = snapshotForCache(cachedData);
+        setCached(cacheKey, snapshot, entryTtl);
+        periodCache[cacheKey] = { data: snapshot, expires: Date.now() + entryTtl };
+      });
+    }
     return;
   }
 
@@ -1682,8 +1646,13 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     renderData(username, data);
     if (pending.length > 0) refreshMinutesUI(data, true);
 
+    // Save preliminary snapshot immediately so redirects (like on index.html) don't lose the data
+    const preliminarySnapshot = snapshotForCache(data);
+    setCached(cacheKey, preliminarySnapshot, TTL_CURRENT_PERIOD_MS);
+    periodCache[cacheKey] = { data: preliminarySnapshot, expires: Date.now() + TTL_CURRENT_PERIOD_MS };
+
     // Background work: images, vibe tag and exact track durations.
-    Promise.allSettled([loadAssets(data, signal), refineDurations(model, data, pending, signal)]).then(() => {
+    return Promise.allSettled([loadAssets(data, signal), refineDurations(model, data, pending, signal)]).then(() => {
       if (signal.aborted) return;
       const assetsOk = data.artists.length === 0 || Boolean(data.artistImage);
       const durationsOk = !hasUnresolvedDurations(model);
@@ -1696,6 +1665,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     if (error.name === "AbortError") return;
     console.error("Error fetching API data:", error);
     if (currentLoad === load) showLoadError(error);
+    throw error;
   }
 }
 
@@ -2001,7 +1971,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const minutes = Math.round(data.totalMinutes ?? (data.scrobbleCount || 0) * AVG_TRACK_MINUTES);
       const minutesEl = document.getElementById("storyTotalMinutes");
       if (minutesEl) {
-        minutesEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
+        const isEstimating = String(document.getElementById("userMinutes")?.textContent || "").includes("~");
+        minutesEl.textContent = `${isEstimating ? "~ " : ""}${minutes.toLocaleString("en-US")} minutes`;
       }
 
       const fetchAssetImage = async (type, query, targetName = "") => {
