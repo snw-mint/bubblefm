@@ -8,7 +8,7 @@
   --color-card: #ffffff;
   --color-primary: #1d1d1f;
   --color-primary-text: #ffffff;
-  --color-accent: #0071e3;
+  --color-accent: var(--color-brand);
   --color-error: #ff3b30;
 
   --radius-sm: 8px;
@@ -36,7 +36,7 @@
   --color-card: #1c1c1e;
   --color-primary: #ffffff;
   --color-primary-text: #000000;
-  --color-accent: #0a84ff;
+  --color-accent: var(--color-brand);
   --color-error: #ff453a;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -293,7 +293,11 @@ button {
 
 .input-with-icon:focus-within {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+  box-shadow: 0 0 0 3px rgba(185, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .input-with-icon:focus-within {
+  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.25);
 }
 
 .input-icon {
@@ -451,14 +455,14 @@ button {
 
 .period-option.selected {
   border-left-color: var(--color-accent);
-  background-color: rgba(0, 113, 227, 0.08);
+  background-color: rgba(185, 0, 0, 0.08);
   font-weight: 600;
   color: var(--color-accent);
 }
 
 [data-theme="dark"] .period-option.selected {
   border-left-color: var(--color-accent);
-  background-color: rgba(10, 132, 255, 0.12);
+  background-color: rgba(255, 68, 68, 0.12);
   color: var(--color-accent);
 }
 
