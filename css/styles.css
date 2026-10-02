@@ -599,68 +599,6 @@ button {
   line-height: 1;
 }
 
-.header-controls-wrapper {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.period-control-container,
-.time-control-container {
-  display: flex;
-  align-items: center;
-  background-color: var(--color-card);
-  border-radius: var(--radius-full);
-  padding: 4px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-}
-
-.period-nav-btn {
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  transition: background-color 0.2s ease;
-}
-
-.period-nav-btn:hover:not(:disabled) {
-  background-color: var(--color-border);
-}
-
-.period-nav-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.period-display-text {
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0 1rem;
-  min-width: 80px;
-  text-align: center;
-}
-
-.time-toggle-btn {
-  padding: 0.4rem 1.2rem;
-  border-radius: var(--radius-full);
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.time-toggle-btn.active {
-  background-color: var(--color-primary);
-  color: var(--color-primary-text);
-  box-shadow: var(--shadow-sm);
-}
-
 /* Charts Grid */
 .charts-section {
   max-width: 1200px;
@@ -912,12 +850,6 @@ button {
   .user-profile-image {
     width: 120px;
     height: 120px;
-  }
-
-  .header-controls-wrapper {
-    flex-direction: column;
-    align-self: center;
-    margin-left: 0;
   }
 
   .stats-cards-container {
@@ -2325,13 +2257,6 @@ input:checked+.slider:before {
   .user-info-wrapper {
     flex-direction: column !important;
     align-items: flex-start !important;
-  }
-
-  .header-controls-wrapper {
-    width: 100% !important;
-    margin-left: 0 !important;
-    justify-content: space-between !important;
-    padding-top: 1rem !important;
   }
 
   .main-container {

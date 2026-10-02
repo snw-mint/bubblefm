@@ -100,62 +100,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       let currentPeriod = "month";
       let periodOffset = 0;
-      updatePeriodNavigation(currentPeriod, periodOffset);
-
-      const toggleBtns = document.querySelectorAll(".time-toggle-btn");
-      if (toggleBtns.length > 0) {
-        toggleBtns.forEach((btn) => {
-          btn.addEventListener("click", () => {
-            if (btn.classList.contains("active")) return;
-
-            toggleBtns.forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-
-            currentPeriod = btn.getAttribute("data-period");
-            periodOffset = 0;
-            updatePeriodNavigation(currentPeriod, periodOffset);
-            resetToSkeletons();
-            fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
-          });
-        });
-      }
-
-      const prevPeriodBtn = document.getElementById("prevPeriodBtn");
-      const nextPeriodBtn = document.getElementById("nextPeriodBtn");
-      let isNavigating = false;
-
-      const handlePeriodChange = async (newOffset) => {
-        if (isNavigating) return;
-        isNavigating = true;
-
-        if (prevPeriodBtn) prevPeriodBtn.disabled = true;
-        if (nextPeriodBtn) nextPeriodBtn.disabled = true;
-
-        periodOffset = newOffset;
-        updatePeriodNavigation(currentPeriod, periodOffset);
-        resetToSkeletons();
-
-        try {
-          await fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
-        } finally {
-          isNavigating = false;
-          updatePeriodNavigation(currentPeriod, periodOffset);
-        }
-      };
-
-      if (prevPeriodBtn) {
-        prevPeriodBtn.addEventListener("click", () => {
-          handlePeriodChange(periodOffset - 1);
-        });
-      }
-
-      if (nextPeriodBtn) {
-        nextPeriodBtn.addEventListener("click", () => {
-          if (periodOffset >= 0) return;
-          handlePeriodChange(periodOffset + 1);
-        });
-      }
-
       fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
     }
   }
@@ -175,7 +119,7 @@ function getLocalStorageCache(key) {
     } else {
       localStorage.removeItem("bubblefm_cache_" + key);
     }
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -188,46 +132,9 @@ function setLocalStorageCache(key, data) {
         data: data,
       })
     );
-  } catch (e) {}
+  } catch (e) { }
 }
 
-function updatePeriodNavigation(period, offset) {
-  const periodDisplayText = document.getElementById("periodDisplayText");
-  const prevPeriodBtn = document.getElementById("prevPeriodBtn");
-  const nextPeriodBtn = document.getElementById("nextPeriodBtn");
-
-  if (nextPeriodBtn) {
-    nextPeriodBtn.disabled = offset >= 0;
-  }
-  if (prevPeriodBtn) {
-    prevPeriodBtn.disabled = false;
-  }
-
-  if (!periodDisplayText) return;
-
-  const now = new Date();
-  if (period === "month") {
-    const targetMonthStart = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-    periodDisplayText.textContent = targetMonthStart.toLocaleString("en-US", { month: "long" });
-  } else if (period === "week") {
-    const dayOfWeek = now.getDay();
-    const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
-    currentMonday.setHours(0, 0, 0, 0);
-
-    const targetMonday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + offset * 7);
-    let targetEnd;
-    if (offset === 0) {
-      targetEnd = new Date(now);
-    } else {
-      targetEnd = new Date(targetMonday.getFullYear(), targetMonday.getMonth(), targetMonday.getDate() + 6);
-    }
-
-    const startDay = targetMonday.getDate().toString().padStart(2, "0");
-    const endDay = targetEnd.getDate().toString().padStart(2, "0");
-    periodDisplayText.textContent = `${startDay}-${endDay}`;
-  }
-}
 
 function isPlaceholderImage(url) {
   if (!url) return true;
@@ -364,7 +271,7 @@ async function fetchTopVibeTag(artists, lastfmBaseUrl) {
         const weight = count * (artist.playcount || 1);
         tagScores[tagName] = (tagScores[tagName] || 0) + weight;
       });
-    } catch (e) {}
+    } catch (e) { }
   });
 
   await Promise.all(promises);
@@ -525,7 +432,7 @@ function initFaqModal() {
       const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
       localStorage.setItem("bubblefm_faq_open_count", count.toString());
       console.log(`[Analytics] FAQ Opened. Total local opens: ${count}`);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const closeFaq = () => {
@@ -626,12 +533,14 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     return;
   }
 
-  const stored = getLocalStorageCache(cacheKey);
-  if (stored) {
-    periodCache[cacheKey] = stored;
-    currentActiveData = stored;
-    renderData(username, stored);
-    return;
+  if (offset < 0) {
+    const stored = getLocalStorageCache(cacheKey);
+    if (stored) {
+      periodCache[cacheKey] = stored;
+      currentActiveData = stored;
+      renderData(username, stored);
+      return;
+    }
   }
 
   try {
@@ -680,33 +589,40 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
 
     const [userInfoRes, firstPageRes] = await Promise.all([
       fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${username}&_t=${Date.now()}`),
-      fetch(
-        `${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&from=${from}&to=${to}&_t=${Date.now()}`,
-      ),
+      fetch(`${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&from=${from}&to=${to}&_t=${Date.now()}`),
     ]);
 
     const userInfo = await userInfoRes.json();
     const firstPageData = await firstPageRes.json();
 
+    const officialTotalScrobbles = parseInt(firstPageData.recenttracks?.["@attr"]?.total || "0", 10);
+    const totalPages = parseInt(firstPageData.recenttracks?.["@attr"]?.totalPages || "0", 10);
+
     let rawTracks = firstPageData.recenttracks?.track || [];
     if (!Array.isArray(rawTracks)) rawTracks = [rawTracks];
 
-    const totalPages = parseInt(firstPageData.recenttracks?.["@attr"]?.totalPages || 0, 10);
+    rawTracks = rawTracks.filter((track) => !track["@attr"]?.nowplaying);
 
-    if (totalPages > 1) {
-      const promises = [];
-      for (let i = 2; i <= totalPages; i++) {
-        promises.push(
-          fetch(
-            `${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&page=${i}&from=${from}&to=${to}&_t=${Date.now()}`,
-          ).then((r) => r.json()),
+    const MAX_PAGES_TO_FETCH = 4;
+    const pagesToFetch = Math.min(totalPages, MAX_PAGES_TO_FETCH);
+
+    if (pagesToFetch > 1) {
+      const pagePromises = [];
+      for (let i = 2; i <= pagesToFetch; i++) {
+        pagePromises.push(
+          fetch(`${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&page=${i}&from=${from}&to=${to}&_t=${Date.now()}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .catch(() => null)
         );
       }
-      const pagesData = await Promise.all(promises);
+
+      const pagesData = await Promise.all(pagePromises);
       pagesData.forEach((page) => {
-        let pageTracks = page.recenttracks?.track || [];
-        if (!Array.isArray(pageTracks)) pageTracks = [pageTracks];
-        rawTracks = rawTracks.concat(pageTracks);
+        if (page && page.recenttracks && page.recenttracks.track) {
+          let pageTracks = page.recenttracks.track;
+          if (!Array.isArray(pageTracks)) pageTracks = [pageTracks];
+          rawTracks = rawTracks.concat(pageTracks.filter((t) => !t["@attr"]?.nowplaying));
+        }
       });
     }
 
@@ -755,13 +671,13 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
 
     const assetPromises = [];
 
-    if (artists && artists.length > 0) {
+    if (artists.length > 0) {
       assetPromises.push(
         fetchTopVibeTag(artists, lastfmBaseUrl)
           .then((v) => {
             vibeTag = v;
           })
-          .catch(() => {}),
+          .catch(() => {})
       );
     }
 
@@ -769,7 +685,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
       assetPromises.push(
         fetchAssetData("artist", topArtistName)
           .then((data) => {
-            if (data && data.data && data.data.length > 0) {
+            if (data?.data?.length > 0) {
               const bestArtist = selectBestArtist(data.data, topArtistName);
               if (bestArtist) {
                 artistImage = bestArtist.picture_xl || bestArtist.picture;
@@ -777,7 +693,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
               }
             }
           })
-          .catch((err) => console.warn("Artist asset fetch warning:", err)),
+          .catch((err) => console.warn("Artist asset fetch warning:", err))
       );
     }
 
@@ -786,11 +702,11 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
       assetPromises.push(
         fetchAssetData("album", albumQuery)
           .then((data) => {
-            if (data && data.data && data.data.length > 0) {
+            if (data?.data?.length > 0) {
               albumImage = data.data[0].cover_xl || data.data[0].cover;
             }
           })
-          .catch((err) => console.warn("Album asset fetch warning:", err)),
+          .catch((err) => console.warn("Album asset fetch warning:", err))
       );
     }
 
@@ -799,16 +715,19 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
       assetPromises.push(
         fetchAssetData("track", trackQuery)
           .then((data) => {
-            if (data && data.data && data.data.length > 0) {
+            if (data?.data?.length > 0) {
               const item = data.data[0];
               trackImage = item.album ? item.album.cover_xl || item.album.cover : item.cover_xl || item.cover;
             }
           })
-          .catch((err) => console.warn("Track asset fetch warning:", err)),
+          .catch((err) => console.warn("Track asset fetch warning:", err))
       );
     }
 
     await Promise.all(assetPromises);
+
+    const totalScrobbles = officialTotalScrobbles || rawTracks.length;
+    const estimatedMinutes = Math.round(totalScrobbles * 3.5);
 
     const data = {
       artists,
@@ -820,6 +739,8 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
       trackImage,
       userInfo,
       rawTracks,
+      totalScrobbles,
+      estimatedMinutes,
       from,
       to,
       period,
@@ -830,7 +751,9 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     };
 
     periodCache[cacheKey] = data;
-    setLocalStorageCache(cacheKey, data);
+    if (offset < 0) {
+      setLocalStorageCache(cacheKey, data);
+    }
     currentActiveData = data;
     renderData(username, data);
   } catch (error) {
@@ -942,8 +865,8 @@ function renderData(username, data) {
     const images = userInfo?.user?.image;
     const avatarUrl = Array.isArray(images)
       ? images.find((img) => img.size === "extralarge")?.["#text"] ||
-        images.find((img) => img.size === "large")?.["#text"] ||
-        images[images.length - 1]?.["#text"]
+      images.find((img) => img.size === "large")?.["#text"] ||
+      images[images.length - 1]?.["#text"]
       : null;
     if (avatarUrl && avatarUrl.trim() !== "") {
       userAvatarEl.src = avatarUrl;
@@ -978,12 +901,12 @@ function renderData(username, data) {
   }
 
   if (userScrobblesEl) {
-    const playcount = rawTracks.length;
+    const playcount = data.totalScrobbles || rawTracks.length;
     userScrobblesEl.textContent = playcount.toLocaleString("en-US");
     removeSkeletonText(userScrobblesEl);
 
     if (userMinutesEl) {
-      const estimatedMinutes = Math.round(playcount * 3.5);
+      const estimatedMinutes = data.estimatedMinutes || Math.round(playcount * 3.5);
       userMinutesEl.textContent = estimatedMinutes.toLocaleString("en-US");
       removeSkeletonText(userMinutesEl);
     }
@@ -1006,8 +929,7 @@ function renderData(username, data) {
 
   const chartsTimeTextEl = document.getElementById("chartsTimeText");
   if (chartsTimeTextEl) {
-    const activePeriodBtn = document.querySelector(".time-toggle-btn.active");
-    const currentP = activePeriodBtn ? activePeriodBtn.dataset.period : "month";
+    const currentP = data?.period || "month";
     if (currentP === "week") {
       chartsTimeTextEl.textContent = "Showing charts since last Monday";
     } else {
@@ -1045,7 +967,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (nextStepBtn) {
     nextStepBtn.addEventListener("click", () => {
-      if(step1 && step2) {
+      if (step1 && step2) {
         step1.style.display = "none";
         step2.style.display = "block";
       }
@@ -1054,7 +976,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (backStepBtn) {
     backStepBtn.addEventListener("click", () => {
-      if(step1 && step2) {
+      if (step1 && step2) {
         step2.style.display = "none";
         step1.style.display = "block";
       }
@@ -1063,7 +985,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
-      if(step1 && step2) {
+      if (step1 && step2) {
         step1.style.display = "block";
         step2.style.display = "none";
       }
@@ -1149,10 +1071,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      const minutes = Math.round(data.rawTracks.length * 3.5);
       const minutesEl = document.getElementById("storyTotalMinutes");
       if (minutesEl) {
-        minutesEl.textContent = `${minutes.toLocaleString("en-US")} minutes`;
+        const estMinutes = data.estimatedMinutes || Math.round((data.totalScrobbles || data.rawTracks.length) * 3.5);
+        minutesEl.textContent = `~${estMinutes.toLocaleString("en-US")} minutes`;
       }
 
       const fetchAssetImage = async (type, query, targetName = "") => {
