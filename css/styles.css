@@ -198,7 +198,6 @@ button {
 }
 
 .theme-toggle-btn,
-.faq-toggle-btn,
 .github-link-btn {
   width: 2.5rem;
   height: 2.5rem;
@@ -211,13 +210,11 @@ button {
 }
 
 .theme-toggle-btn:active,
-.faq-toggle-btn:active,
 .github-link-btn:active {
   transform: scale(0.95);
 }
 
 .theme-toggle-btn svg,
-.faq-toggle-btn svg,
 .github-link-btn svg {
   width: 1.25rem;
   height: 1.25rem;
@@ -225,7 +222,6 @@ button {
 }
 
 .home-header.header-overlay .theme-toggle-btn,
-.home-header.header-overlay .faq-toggle-btn,
 .home-header.header-overlay .github-link-btn {
   color: #ffffff;
   background-color: rgba(0, 0, 0, 0.3);
@@ -2290,7 +2286,6 @@ input:checked+.slider:before {
   }
 
   .home-header .theme-toggle-btn,
-  .home-header .faq-toggle-btn,
   .home-header .github-link-btn {
     width: 2.25rem;
     height: 2.25rem;
