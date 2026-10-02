@@ -128,12 +128,7 @@ function initFaqModal() {
             </div>
           </details>
 
-          <details class="faq-item">
-            <summary class="faq-question">How do I switch the Match card's Light / Dark theme?</summary>
-            <div class="faq-answer">
-              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
-            </div>
-          </details>
+
 
           <details class="faq-item">
             <summary class="faq-question">Are my personal data or Last.fm credentials saved?</summary>

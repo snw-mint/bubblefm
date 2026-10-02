@@ -61,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- CUSTOM SELECTS LOGIC ---
   // --- CALENDAR POPOVER LOGIC ---
   const calendarTrigger = document.getElementById("calendarTrigger");
   const calendarPopover = document.getElementById("calendarPopover");
@@ -79,24 +78,26 @@ document.addEventListener("DOMContentLoaded", () => {
     popoverOptions.innerHTML = "";
     
     if (type === "month") {
-      const currentMonth = new Date().getMonth();
-      for (let i = 0; i <= currentMonth; i++) {
-        const offset = (i - currentMonth).toString();
+      const options = [
+        { label: "This month", value: "0" },
+        { label: "Last month", value: "-1" }
+      ];
+      options.forEach(opt => {
         const div = document.createElement("div");
         div.className = "popover-option";
-        if (currentPeriodType === "month" && currentTimeframeValue === offset) div.classList.add("active");
-        div.setAttribute("data-value", offset);
-        div.textContent = monthNames[i];
+        if (currentPeriodType === "month" && currentTimeframeValue === opt.value) div.classList.add("active");
+        div.setAttribute("data-value", opt.value);
+        div.textContent = opt.label;
         
         div.addEventListener("click", (e) => {
           e.stopPropagation();
           currentPeriodType = "month";
-          currentTimeframeValue = offset;
-          if (calendarTooltip) calendarTooltip.textContent = `Current: ${monthNames[i]}`;
+          currentTimeframeValue = opt.value;
+          if (calendarTooltip) calendarTooltip.textContent = `Current: ${opt.label}`;
           calendarPopover.classList.remove("active");
         });
         popoverOptions.appendChild(div);
-      }
+      });
     } else if (type === "week") {
       const options = [
         { label: "This week", value: "0" },
@@ -122,8 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (calendarTrigger && calendarPopover) {
-    const currentMonthIndex = new Date().getMonth();
-    if (calendarTooltip) calendarTooltip.textContent = `Current: ${monthNames[currentMonthIndex]}`;
+    if (calendarTooltip) calendarTooltip.textContent = `Current: This month`;
     
     calendarTrigger.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -149,6 +149,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!calendarPopover.contains(e.target) && !calendarTrigger.contains(e.target)) {
         calendarPopover.classList.remove("active");
       }
+    });
+  }
+
+  const infoAlertTrigger = document.getElementById("infoAlertTrigger");
+  const infoDialog = document.getElementById("infoDialog");
+  const btnInfoDialogGotIt = document.getElementById("btnInfoDialogGotIt");
+
+  if (infoAlertTrigger && infoDialog && btnInfoDialogGotIt) {
+    infoAlertTrigger.addEventListener("click", () => {
+      infoDialog.style.display = "flex";
+    });
+    btnInfoDialogGotIt.addEventListener("click", () => {
+      infoDialog.style.display = "none";
     });
   }
 
@@ -894,16 +907,25 @@ function initFaqModal() {
         </div>
         <div class="faq-list">
           <details class="faq-item" open>
-            <summary class="faq-question">How are monthly and weekly charts calculated?</summary>
+            <summary class="faq-question">How are the timeframes calculated?</summary>
             <div class="faq-answer">
-              <p><strong>Monthly charts</strong> count scrobbles starting from the 1st day of the current month. <strong>Weekly charts</strong> count from Monday of the current week. Once these timeframes end, counts automatically reset for the next period.</p>
+              <p>We fetch <strong>exact calendar periods</strong> to guarantee 100% accurate scrobble counts and minutes.</p>
+              <p style="margin-top: 0.5rem;"><strong>"This Month" & "This Week":</strong> Start from the 1st of the current month (or Monday) up to the exact moment you check. The count will only grow as you listen.</p>
+              <p style="margin-top: 0.5rem;"><strong>"Last Month" & "Last Week":</strong> Capture the entire exact previous calendar period. These results are locked and will never decrease over time.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">Why can't I see older months anymore?</summary>
+            <div class="faq-answer">
+              <p>To improve API stability and ensure your stats are always perfectly accurate, we restricted the timeline to the current and immediate past periods. This completely eliminates missing tracks and prevents timeouts.</p>
             </div>
           </details>
 
           <details class="faq-item">
             <summary class="faq-question">How can I view detailed stats for individual items?</summary>
             <div class="faq-answer">
-              <p>Hover over (or tap on mobile) any artist, album, or song in your chart to view its total scrobble count and estimated listening time in minutes.</p>
+              <p>Hover over (or tap on mobile) any artist, album, or song in your chart to view its total scrobble count and exact listening time in minutes.</p>
             </div>
           </details>
 
@@ -914,12 +936,7 @@ function initFaqModal() {
             </div>
           </details>
 
-          <details class="faq-item">
-            <summary class="faq-question">How do I switch my card's Light / Dark theme?</summary>
-            <div class="faq-answer">
-              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
-            </div>
-          </details>
+
 
           <details class="faq-item">
             <summary class="faq-question">Are my personal data or Last.fm credentials saved?</summary>
@@ -975,12 +992,7 @@ function initFaqModal() {
             </div>
           </details>
 
-          <details class="faq-item">
-            <summary class="faq-question">How do I switch the Match card's Light / Dark theme?</summary>
-            <div class="faq-answer">
-              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
-            </div>
-          </details>
+
 
           <details class="faq-item">
             <summary class="faq-question">Are my personal data or Last.fm credentials saved?</summary>
