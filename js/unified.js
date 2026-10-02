@@ -1134,6 +1134,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const selectedBgOption = document.querySelector(".bg-option.selected");
       const selectedBg = selectedBgOption ? selectedBgOption.dataset.bg : "candy";
       const isLight = document.getElementById("themeToggleCheckbox").checked;
+      const useScrobbles = Boolean(document.getElementById("useScrobblesCheckbox")?.checked);
 
       const cardElement = document.getElementById("storyCard");
       if (cardElement) {
@@ -1174,8 +1175,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const minutesEl = document.getElementById("storyTotalMinutes");
       if (minutesEl) {
-        const estMinutes = data.estimatedMinutes || Math.round((data.totalScrobbles || data.rawTracks.length) * 3.5);
-        minutesEl.textContent = `~${estMinutes.toLocaleString("en-US")} minutes`;
+        if (useScrobbles) {
+          const totalScrobbles = data.totalScrobbles || data.rawTracks.length;
+          minutesEl.textContent = `${totalScrobbles.toLocaleString("en-US")} scrobbles`;
+        } else {
+          const estMinutes = data.estimatedMinutes || Math.round((data.totalScrobbles || data.rawTracks.length) * 3.5);
+          minutesEl.textContent = `~${estMinutes.toLocaleString("en-US")} minutes`;
+        }
       }
 
       const fetchAssetImage = async (type, query, targetName = "") => {
@@ -1278,7 +1284,8 @@ document.addEventListener("DOMContentLoaded", () => {
               umami.track("Card Generated", {
                 type: "single",
                 service: serviceSelect,
-                theme: isLight ? "light" : "dark"
+                theme: isLight ? "light" : "dark",
+                metric: useScrobbles ? "scrobbles" : "minutes"
               });
             }
 
