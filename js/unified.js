@@ -402,52 +402,66 @@ function initFaqModal() {
         <span class="close-button" id="faqCloseBtn">&times;</span>
         <div class="faq-header">
           <h2>Frequently Asked Questions</h2>
-          <p class="modal-info">Quick answers about BubbleFM features, calculations, and feedback.</p>
+          <p class="modal-info">Everything you need to know about BubbleFM calculations, card generation, and features.</p>
         </div>
         <div class="faq-list">
           <details class="faq-item" open>
-            <summary class="faq-question">How are monthly and weekly charts calculated?</summary>
+            <summary class="faq-question">1. How are data calculated?</summary>
             <div class="faq-answer">
-              <p><strong>Monthly charts</strong> count scrobbles starting from the 1st day of the current month. <strong>Weekly charts</strong> count from Monday of the current week. Once these timeframes end, counts automatically reset for the next period.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">How can I view detailed stats for individual items?</summary>
-            <div class="faq-answer">
-              <p>Hover over (or tap on mobile) any artist, album, or song in your chart to view its total scrobble count and estimated listening time in minutes.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">How do I generate and download a shareable story card?</summary>
-            <div class="faq-answer">
-              <p>Click the green floating button at the bottom right labeled <strong>Generate card</strong>. Follow the quick step-by-step setup to pick your layout, colors, and format, then download your image.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">How do I switch my card's Light / Dark theme?</summary>
-            <div class="faq-answer">
-              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">Are my personal data or Last.fm credentials saved?</summary>
-            <div class="faq-answer">
-              <p>No login or account creation is required! All stats and images are fetched live on your device using public APIs (Last.fm, Deezer, MusicBrainz). Your data is never saved on servers.</p>
-            </div>
-          </details>
-
-          <details class="faq-item">
-            <summary class="faq-question">Feedback, Suggestions & Bug Reports</summary>
-            <div class="faq-answer">
-              <p>BubbleFM is open-source! We welcome community contributions and feedback on GitHub:</p>
+              <p>Calculations are processed directly in your browser using official data from the Last.fm and Deezer public APIs:</p>
               <ul class="faq-links-list">
-                <li><strong>Design Feedback:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feedback.yml" target="_blank" rel="noopener noreferrer">Propose a design or UI improvement</a></li>
-                <li><strong>Feature Ideas:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feature.yml" target="_blank" rel="noopener noreferrer">Suggest a new feature</a></li>
-                <li><strong>Bug Reports:</strong> <a href="https://github.com/snw-mint/bubblefm/issues/new?template=bug.yml" target="_blank" rel="noopener noreferrer">Report an issue or bug</a></li>
+                <li><strong>Timeframe:</strong> Calculated either monthly (from the 1st to the last day of the selected month) or weekly (from Monday to Sunday).</li>
+                <li><strong>Scrobbles:</strong> Fetched via the Last.fm API (<code>user.getrecenttracks</code>), ignoring active <em>now playing</em> tracks. The total scrobble count is extracted directly from the official API count (<code>@attr.total</code>).</li>
+                <li><strong>Minutes:</strong> Estimated by multiplying the total scrobbles by 3.5 minutes (standard average song duration): <code>Math.round(totalScrobbles * 3.5)</code>.</li>
+                <li><strong>Daily Avg:</strong> Calculated by dividing total scrobbles by the number of days elapsed in the selected period: <code>Math.round(totalScrobbles / daysElapsed)</code>.</li>
+                <li><strong>Vibe:</strong> Fetches community tags for your top 5 artists via <code>artist.gettoptags</code>, discards generic system tags, and weights tag frequencies by each artist's playcount. The highest-scoring music genre tag determines your vibe.</li>
+                <li><strong>Rankings:</strong> Recent scrobbles in the timeframe are aggregated by artist, album, and track, and sorted in descending order by playcount. Artwork is fetched via the Deezer public API.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">2. Is the data exact? Why?</summary>
+            <div class="faq-answer">
+              <ul class="faq-links-list">
+                <li><strong>Scrobbles:</strong> <strong>Yes, exact.</strong> The total scrobble count reflects the official listening history recorded on Last.fm for the selected timeframe.</li>
+                <li><strong>Minutes:</strong> <strong>No, it is an estimate.</strong> Last.fm logs each scrobble event, but does not record the exact duration in seconds you spent listening. BubbleFM therefore uses the standard industry average of 3.5 minutes per track (<code>Math.round(scrobbles * 3.5)</code>).</li>
+                <li><strong>Rankings (Artists, Albums, Tracks):</strong> The app fetches up to 4 pages of recent tracks (up to 800 scrobbles) within the period to compile the rankings. For users with over 800 scrobbles in a month, rankings reflect this recent 800-track sample.</li>
+                <li><strong>Vibe:</strong> An estimate based on the most frequent community tags on Last.fm associated with your top artists.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">3. How to generate a card?</summary>
+            <div class="faq-answer">
+              <p>Click the floating <strong>Generate card</strong> button at the bottom of the page to open the customization modal:</p>
+              <ul class="faq-links-list">
+                <li><strong>Background:</strong> Choose from available visual themes (Candy, Sunset, Midnight, Emerald, etc.) to set as your card backdrop.</li>
+                <li><strong>Service logo:</strong> Pick your favorite music streaming logo (Spotify, Apple Music, YouTube Music, Deezer, Last.fm, or None) to stamp on top.</li>
+                <li><strong>Light theme:</strong> Toggle this on for a bright card with dark text, or leave it off for the classic dark theme.</li>
+                <li><strong>Use scrobbles:</strong> Turn this on to display your total scrobble count (e.g., <code>406 scrobbles</code>) in the bottom stat instead of estimated minutes (e.g., <code>~1,420 minutes</code>).</li>
+              </ul>
+              <p style="margin-top: 0.6rem;">Once configured, proceed and click <strong>Generate</strong> to render the canvas and start your high-resolution PNG download automatically.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">4. Is my data saved?</summary>
+            <div class="faq-answer">
+              <p><strong>No.</strong> BubbleFM has no backend servers, database, or account system. No passwords or credentials are ever collected or stored.</p>
+              <p>All data is retrieved live on your device directly from public APIs (Last.fm and Deezer). To ensure fast navigation between previously viewed months without repeated network requests, a temporary cache is stored locally in your browser's <code>localStorage</code>.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">5. How can I contribute?</summary>
+            <div class="faq-answer">
+              <p>BubbleFM is an open-source project! You can contribute directly on GitHub:</p>
+              <ul class="faq-links-list">
+                <li><strong>Bugs:</strong> Found an issue or visual glitch? Open a ticket via <a href="https://github.com/snw-mint/bubblefm/issues/new?template=bug.yml" target="_blank" rel="noopener noreferrer">Report a bug</a>.</li>
+                <li><strong>Features:</strong> Have an idea for a new feature or design improvement? Submit it via <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feature.yml" target="_blank" rel="noopener noreferrer">Suggest a feature</a> or <a href="https://github.com/snw-mint/bubblefm/issues/new?template=feedback.yml" target="_blank" rel="noopener noreferrer">Design feedback</a>.</li>
+                <li><strong>Questions:</strong> For general questions, ideas, or discussions, visit the <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">GitHub repository Issues</a>.</li>
               </ul>
             </div>
           </details>
@@ -546,6 +560,17 @@ function initFaqModal() {
   faqModal.addEventListener("click", (e) => {
     if (e.target === faqModal) closeFaq();
   });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && faqModal.classList.contains("show")) {
+      closeFaq();
+    }
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initFaqModal);
+} else {
+  initFaqModal();
 }
 
 function initGlobalTooltip() {
