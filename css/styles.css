@@ -284,10 +284,11 @@ button {
   background-color: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0 1rem;
+  padding: 0 0.75rem 0 1rem;
   height: 3.5rem;
   box-shadow: var(--shadow-sm);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
 }
 
 .input-with-icon:focus-within {
@@ -314,6 +315,166 @@ button {
   font-size: 1.05rem;
   color: var(--color-text);
   width: 100%;
+}
+
+.period-picker-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+
+.period-picker-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.period-picker-btn:hover {
+  color: var(--color-text);
+  background-color: var(--color-border);
+}
+
+.period-picker-btn.active,
+.period-picker-btn.has-custom {
+  color: var(--color-accent);
+}
+
+.period-picker-btn svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.period-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 240px;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 0.5rem;
+  z-index: 1000;
+  display: none;
+}
+
+.period-dropdown.show {
+  display: block;
+  animation: headerDropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.period-dropdown-tabs {
+  display: flex;
+  gap: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.4rem;
+}
+
+[data-theme="dark"] .period-dropdown-tabs {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.period-tab-btn {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.period-tab-btn:hover {
+  color: var(--color-text);
+}
+
+.period-tab-btn.active {
+  background-color: var(--color-card);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .period-tab-btn.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--color-text);
+}
+
+.period-tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.period-tab-content.active {
+  display: flex;
+}
+
+.period-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  text-align: left;
+}
+
+.period-option:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .period-option:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.period-option.selected {
+  border-left-color: var(--color-accent);
+  background-color: rgba(0, 113, 227, 0.08);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+[data-theme="dark"] .period-option.selected {
+  border-left-color: var(--color-accent);
+  background-color: rgba(10, 132, 255, 0.12);
+  color: var(--color-accent);
+}
+
+.period-option-title {
+  font-weight: inherit;
+}
+
+.period-option-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.period-option.selected .period-option-desc {
+  color: var(--color-accent);
+  opacity: 0.85;
 }
 
 .btn-primary {

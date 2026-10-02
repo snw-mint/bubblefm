@@ -124,6 +124,42 @@
                 </svg>
               </span>
               <input type="text" id="userInput" placeholder="Last.fm username" autocomplete="off" required />
+              <div class="period-picker-container">
+                <button
+                  type="button"
+                  id="periodPickerBtn"
+                  class="period-picker-btn"
+                  aria-label="Select period"
+                  title="Select period">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-40q0-17 11.5-28.5T280-880q17 0 28.5 11.5T320-840v40h320v-40q0-17 11.5-28.5T680-880q17 0 28.5 11.5T720-840v40h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-188.5-11.5Q280-423 280-440t11.5-28.5Q303-480 320-480t28.5 11.5Q360-457 360-440t-11.5 28.5Q337-400 320-400t-28.5-11.5ZM640-400q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-188.5-11.5Q280-263 280-280t11.5-28.5Q303-320 320-320t28.5 11.5Q360-297 360-280t-11.5 28.5Q337-240 320-240t-28.5-11.5ZM640-240q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z"/></svg>
+                </button>
+                <div class="period-dropdown" id="periodDropdown">
+                  <div class="period-dropdown-tabs">
+                    <button type="button" class="period-tab-btn active" data-tab="month">Month</button>
+                    <button type="button" class="period-tab-btn" data-tab="week">Week</button>
+                  </div>
+                  <div class="period-tab-content active" id="periodTabMonth">
+                    <button type="button" class="period-option selected" data-period="month" data-offset="0">
+                      <span class="period-option-title">Current Month</span>
+                      <span class="period-option-desc" id="currentMonthDesc"></span>
+                    </button>
+                    <button type="button" class="period-option" data-period="month" data-offset="-1">
+                      <span class="period-option-title">Last Month</span>
+                      <span class="period-option-desc" id="lastMonthDesc"></span>
+                    </button>
+                  </div>
+                  <div class="period-tab-content" id="periodTabWeek">
+                    <button type="button" class="period-option" data-period="week" data-offset="0">
+                      <span class="period-option-title">Current Week</span>
+                      <span class="period-option-desc" id="currentWeekDesc"></span>
+                    </button>
+                    <button type="button" class="period-option" data-period="week" data-offset="-1">
+                      <span class="period-option-title">Last Week</span>
+                      <span class="period-option-desc" id="lastWeekDesc"></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             <button type="submit" id="btnIr" class="btn-primary">View Stats</button>
           </div>

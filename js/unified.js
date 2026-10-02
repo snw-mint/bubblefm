@@ -61,6 +61,105 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const periodPickerBtn = document.getElementById("periodPickerBtn");
+  const periodDropdown = document.getElementById("periodDropdown");
+  const periodOptions = document.querySelectorAll(".period-option");
+  const periodTabBtns = document.querySelectorAll(".period-tab-btn");
+  const periodTabContents = document.querySelectorAll(".period-tab-content");
+
+  let selectedPeriod = sessionStorage.getItem("lastfm_period") || "month";
+  let selectedOffset = parseInt(sessionStorage.getItem("lastfm_offset") || "0", 10);
+
+  if (periodPickerBtn && periodDropdown) {
+    const now = new Date();
+    const currentMonthDesc = document.getElementById("currentMonthDesc");
+    if (currentMonthDesc) {
+      currentMonthDesc.textContent = now.toLocaleString("en-US", { month: "short" });
+    }
+    const lastMonthDesc = document.getElementById("lastMonthDesc");
+    if (lastMonthDesc) {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      lastMonthDesc.textContent = lastMonth.toLocaleString("en-US", { month: "short" });
+    }
+    const dayOfWeek = now.getDay();
+    const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+    const lastMonday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() - 7);
+    const lastSunday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() - 1);
+    const currentWeekDesc = document.getElementById("currentWeekDesc");
+    if (currentWeekDesc) {
+      currentWeekDesc.textContent = `${currentMonday.getDate().toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
+    }
+    const lastWeekDesc = document.getElementById("lastWeekDesc");
+    if (lastWeekDesc) {
+      lastWeekDesc.textContent = `${lastMonday.getDate().toString().padStart(2, "0")}-${lastSunday.getDate().toString().padStart(2, "0")}`;
+    }
+
+    const syncPeriodUI = () => {
+      periodOptions.forEach((opt) => {
+        const match = opt.getAttribute("data-period") === selectedPeriod && parseInt(opt.getAttribute("data-offset"), 10) === selectedOffset;
+        opt.classList.toggle("selected", match);
+      });
+      periodTabBtns.forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === selectedPeriod);
+      });
+      periodTabContents.forEach((c) => {
+        c.classList.toggle("active", c.id === (selectedPeriod === "month" ? "periodTabMonth" : "periodTabWeek"));
+      });
+      periodPickerBtn.classList.toggle("has-custom", selectedPeriod !== "month" || selectedOffset !== 0);
+    };
+
+    syncPeriodUI();
+
+    periodPickerBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = periodDropdown.classList.toggle("show");
+      periodPickerBtn.classList.toggle("active", isOpen);
+      if (isOpen) {
+        syncPeriodUI();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!periodDropdown.contains(e.target) && !periodPickerBtn.contains(e.target)) {
+        periodDropdown.classList.remove("show");
+        periodPickerBtn.classList.remove("active");
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        periodDropdown.classList.remove("show");
+        periodPickerBtn.classList.remove("active");
+      }
+    });
+
+    periodTabBtns.forEach((tabBtn) => {
+      tabBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const tab = tabBtn.getAttribute("data-tab");
+        periodTabBtns.forEach((b) => b.classList.remove("active"));
+        tabBtn.classList.add("active");
+        periodTabContents.forEach((c) => {
+          c.classList.toggle("active", c.id === (tab === "month" ? "periodTabMonth" : "periodTabWeek"));
+        });
+      });
+    });
+
+    periodOptions.forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectedPeriod = opt.getAttribute("data-period");
+        selectedOffset = parseInt(opt.getAttribute("data-offset") || "0", 10);
+        sessionStorage.setItem("lastfm_period", selectedPeriod);
+        sessionStorage.setItem("lastfm_offset", selectedOffset.toString());
+        syncPeriodUI();
+        periodDropdown.classList.remove("show");
+        periodPickerBtn.classList.remove("active");
+      });
+    });
+  }
+
   const formUsername = document.getElementById("form-username");
   if (formUsername) {
     formUsername.addEventListener("submit", (e) => {
@@ -68,6 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const userInput = document.getElementById("userInput").value.trim();
       if (userInput) {
         sessionStorage.setItem("lastfm_user", userInput);
+        sessionStorage.setItem("lastfm_period", selectedPeriod);
+        sessionStorage.setItem("lastfm_offset", selectedOffset.toString());
         if (typeof umami !== "undefined") {
           umami.track("Search Initiated", { type: "single" });
         }
@@ -98,8 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!user) {
       window.location.href = "index.html";
     } else {
-      let currentPeriod = "month";
-      let periodOffset = 0;
+      const currentPeriod = sessionStorage.getItem("lastfm_period") || "month";
+      const periodOffset = parseInt(sessionStorage.getItem("lastfm_offset") || "0", 10);
       fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
     }
   }
