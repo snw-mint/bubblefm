@@ -105,7 +105,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1rem;
   margin-bottom: 3rem;
   background-color: rgba(245, 245, 247, 0.72);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -219,6 +219,19 @@ button {
   width: 1.25rem;
   height: 1.25rem;
   fill: currentColor;
+}
+
+.home-header.header-overlay .brand-bubble {
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.home-header.header-overlay .brand-fm {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.home-header.header-overlay .logo-icon {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
 .home-header.header-overlay .theme-toggle-btn,

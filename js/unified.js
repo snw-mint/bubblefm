@@ -440,7 +440,7 @@ function initFaqModal() {
                 <li><strong>Background:</strong> Choose from available visual themes (Candy, Sunset, Midnight, Emerald, etc.) to set as your card backdrop.</li>
                 <li><strong>Service logo:</strong> Pick your favorite music streaming logo (Spotify, Apple Music, YouTube Music, Deezer, Last.fm, or None) to stamp on top.</li>
                 <li><strong>Light theme:</strong> Toggle this on for a bright card with dark text, or leave it off for the classic dark theme.</li>
-                <li><strong>Use scrobbles:</strong> Turn this on to display your total scrobble count (e.g., <code>406 scrobbles</code>) in the bottom stat instead of estimated minutes (e.g., <code>~1,420 minutes</code>).</li>
+                <li><strong>Use scrobbles:</strong> Turn this on to display your total scrobble count (e.g., <code>406 scrobbles</code>) in the bottom stat instead of estimated minutes (e.g., <code>1,420 minutes</code>).</li>
               </ul>
               <p style="margin-top: 0.6rem;">Once configured, proceed and click <strong>Generate</strong> to render the canvas and start your high-resolution PNG download automatically.</p>
             </div>
@@ -729,7 +729,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
 
     rawTracks = rawTracks.filter((track) => !track["@attr"]?.nowplaying);
 
-    const MAX_PAGES_TO_FETCH = 4;
+    const MAX_PAGES_TO_FETCH = 5;
     const pagesToFetch = Math.min(totalPages, MAX_PAGES_TO_FETCH);
 
     if (pagesToFetch > 1) {
@@ -803,7 +803,7 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
           .then((v) => {
             vibeTag = v;
           })
-          .catch(() => {})
+          .catch(() => { })
       );
     }
 
@@ -1205,7 +1205,7 @@ document.addEventListener("DOMContentLoaded", () => {
           minutesEl.textContent = `${totalScrobbles.toLocaleString("en-US")} scrobbles`;
         } else {
           const estMinutes = data.estimatedMinutes || Math.round((data.totalScrobbles || data.rawTracks.length) * 3.5);
-          minutesEl.textContent = `~${estMinutes.toLocaleString("en-US")} minutes`;
+          minutesEl.textContent = `${estMinutes.toLocaleString("en-US")} minutes`;
         }
       }
 
