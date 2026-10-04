@@ -63,9 +63,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const periodPickerBtn = document.getElementById("periodPickerBtn");
   const periodDropdown = document.getElementById("periodDropdown");
+  const periodTooltip = document.getElementById("periodTooltip");
   const periodOptions = document.querySelectorAll(".period-option");
   const periodTabBtns = document.querySelectorAll(".period-tab-btn");
   const periodTabContents = document.querySelectorAll(".period-tab-content");
+
+  if (periodTooltip) {
+    let hasSeenTooltip = false;
+    try {
+      hasSeenTooltip = Boolean(localStorage.getItem("bubblefm_period_tooltip_seen"));
+    } catch (e) {
+      hasSeenTooltip = false;
+    }
+
+    if (!hasSeenTooltip) {
+      let tooltipTimer = null;
+
+      const dismissTooltip = () => {
+        if (tooltipTimer) {
+          clearTimeout(tooltipTimer);
+          tooltipTimer = null;
+        }
+        periodTooltip.classList.remove("visible");
+        try {
+          localStorage.setItem("bubblefm_period_tooltip_seen", "true");
+        } catch (e) {}
+      };
+
+      requestAnimationFrame(() => {
+        periodTooltip.classList.add("visible");
+      });
+
+      tooltipTimer = setTimeout(dismissTooltip, 6000);
+
+      periodTooltip.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dismissTooltip();
+        if (periodPickerBtn) {
+          periodPickerBtn.click();
+        }
+      });
+
+      if (periodPickerBtn) {
+        periodPickerBtn.addEventListener("click", dismissTooltip);
+      }
+    }
+  }
 
   let selectedPeriod = sessionStorage.getItem("lastfm_period") || "month";
   let selectedOffset = parseInt(sessionStorage.getItem("lastfm_offset") || "0", 10);
