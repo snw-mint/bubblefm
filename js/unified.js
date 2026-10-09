@@ -137,6 +137,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lastWeekDesc) {
       lastWeekDesc.textContent = `${lastMonday.getDate().toString().padStart(2, "0")}-${lastSunday.getDate().toString().padStart(2, "0")}`;
     }
+    const currentYearDesc = document.getElementById("currentYearDesc");
+    if (currentYearDesc) {
+      currentYearDesc.textContent = `${now.getFullYear()}`;
+    }
 
     const syncPeriodUI = () => {
       periodOptions.forEach((opt) => {
@@ -147,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.classList.toggle("active", btn.getAttribute("data-tab") === selectedPeriod);
       });
       periodTabContents.forEach((c) => {
-        c.classList.toggle("active", c.id === (selectedPeriod === "month" ? "periodTabMonth" : "periodTabWeek"));
+        c.classList.toggle("active", c.id === `periodTab${selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)}`);
       });
       periodPickerBtn.classList.toggle("has-custom", selectedPeriod !== "month" || selectedOffset !== 0);
     };
@@ -184,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
         periodTabBtns.forEach((b) => b.classList.remove("active"));
         tabBtn.classList.add("active");
         periodTabContents.forEach((c) => {
-          c.classList.toggle("active", c.id === (tab === "month" ? "periodTabMonth" : "periodTabWeek"));
+          c.classList.toggle("active", c.id === `periodTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
         });
       });
     });
@@ -754,77 +758,131 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
       const monthShort = targetEnd.toLocaleString("en-US", { month: "short" }).toLowerCase();
       subtitleText = `${startDay}-${endDay} ${monthShort}`;
       reviewLabel = "Week Review";
+    } else if (period === "year") {
+      const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      from = Math.floor(oneYearAgo.getTime() / 1000);
+      to = Math.floor(now.getTime() / 1000);
+      subtitleText = `${now.getFullYear()} WRAPPED`;
+      reviewLabel = "Year Review";
     }
 
-    const [userInfoRes, firstPageRes] = await Promise.all([
-      fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${username}&_t=${Date.now()}`),
-      fetch(`${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&from=${from}&to=${to}&_t=${Date.now()}`),
-    ]);
+    let userInfo = null;
+    let officialTotalScrobbles = 0;
+    let rawTracks = [];
+    let artists = [];
+    let albums = [];
+    let tracks = [];
 
-    const userInfo = await userInfoRes.json();
-    const firstPageData = await firstPageRes.json();
+    if (period === "year") {
+      const [userInfoRes, countRes, artistsRes, tracksRes, albumsRes] = await Promise.all([
+        fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${username}&_t=${Date.now()}`),
+        fetch(`${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=1&from=${from}&to=${to}&_t=${Date.now()}`),
+        fetch(`${lastfmBaseUrl}?method=user.gettopartists&user=${username}&period=12month&limit=10&_t=${Date.now()}`),
+        fetch(`${lastfmBaseUrl}?method=user.gettoptracks&user=${username}&period=12month&limit=10&_t=${Date.now()}`),
+        fetch(`${lastfmBaseUrl}?method=user.gettopalbums&user=${username}&period=12month&limit=10&_t=${Date.now()}`),
+      ]);
 
-    const officialTotalScrobbles = parseInt(firstPageData.recenttracks?.["@attr"]?.total || "0", 10);
-    const totalPages = parseInt(firstPageData.recenttracks?.["@attr"]?.totalPages || "0", 10);
+      const countData = await countRes.json();
+      userInfo = await userInfoRes.json();
+      const artistsData = await artistsRes.json();
+      const tracksData = await tracksRes.json();
+      const albumsData = await albumsRes.json();
 
-    let rawTracks = firstPageData.recenttracks?.track || [];
-    if (!Array.isArray(rawTracks)) rawTracks = [rawTracks];
+      officialTotalScrobbles = parseInt(countData.recenttracks?.["@attr"]?.total || "0", 10);
 
-    rawTracks = rawTracks.filter((track) => !track["@attr"]?.nowplaying);
+      let rawArtists = artistsData.topartists?.artist || [];
+      if (!Array.isArray(rawArtists)) rawArtists = [rawArtists];
+      artists = rawArtists.slice(0, 10).map((a) => ({
+        name: a.name,
+        playcount: parseInt(a.playcount || "0", 10),
+      }));
 
-    const MAX_PAGES_TO_FETCH = 5;
-    const pagesToFetch = Math.min(totalPages, MAX_PAGES_TO_FETCH);
+      let rawTracksData = tracksData.toptracks?.track || [];
+      if (!Array.isArray(rawTracksData)) rawTracksData = [rawTracksData];
+      tracks = rawTracksData.slice(0, 10).map((t) => ({
+        name: t.name,
+        artist: { name: t.artist?.name || t.artist?.["#text"] || "" },
+        playcount: parseInt(t.playcount || "0", 10),
+      }));
 
-    if (pagesToFetch > 1) {
-      const pagePromises = [];
-      for (let i = 2; i <= pagesToFetch; i++) {
-        pagePromises.push(
-          fetch(`${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&page=${i}&from=${from}&to=${to}&_t=${Date.now()}`)
-            .then((res) => (res.ok ? res.json() : null))
-            .catch(() => null)
-        );
+      let rawAlbums = albumsData.topalbums?.album || [];
+      if (!Array.isArray(rawAlbums)) rawAlbums = [rawAlbums];
+      albums = rawAlbums.slice(0, 10).map((al) => ({
+        name: al.name,
+        artist: { name: al.artist?.name || al.artist?.["#text"] || "" },
+        playcount: parseInt(al.playcount || "0", 10),
+      }));
+    } else {
+      const [userInfoRes, firstPageRes] = await Promise.all([
+        fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${username}&_t=${Date.now()}`),
+        fetch(`${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&from=${from}&to=${to}&_t=${Date.now()}`),
+      ]);
+
+      userInfo = await userInfoRes.json();
+      const firstPageData = await firstPageRes.json();
+
+      officialTotalScrobbles = parseInt(firstPageData.recenttracks?.["@attr"]?.total || "0", 10);
+      const totalPages = parseInt(firstPageData.recenttracks?.["@attr"]?.totalPages || "0", 10);
+
+      rawTracks = firstPageData.recenttracks?.track || [];
+      if (!Array.isArray(rawTracks)) rawTracks = [rawTracks];
+
+      rawTracks = rawTracks.filter((track) => !track["@attr"]?.nowplaying);
+
+      const MAX_PAGES_TO_FETCH = 5;
+      const pagesToFetch = Math.min(totalPages, MAX_PAGES_TO_FETCH);
+
+      if (pagesToFetch > 1) {
+        const pagePromises = [];
+        for (let i = 2; i <= pagesToFetch; i++) {
+          pagePromises.push(
+            fetch(`${lastfmBaseUrl}?method=user.getrecenttracks&user=${username}&limit=200&page=${i}&from=${from}&to=${to}&_t=${Date.now()}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .catch(() => null)
+          );
+        }
+
+        const pagesData = await Promise.all(pagePromises);
+        pagesData.forEach((page) => {
+          if (page && page.recenttracks && page.recenttracks.track) {
+            let pageTracks = page.recenttracks.track;
+            if (!Array.isArray(pageTracks)) pageTracks = [pageTracks];
+            rawTracks = rawTracks.concat(pageTracks.filter((t) => !t["@attr"]?.nowplaying));
+          }
+        });
       }
 
-      const pagesData = await Promise.all(pagePromises);
-      pagesData.forEach((page) => {
-        if (page && page.recenttracks && page.recenttracks.track) {
-          let pageTracks = page.recenttracks.track;
-          if (!Array.isArray(pageTracks)) pageTracks = [pageTracks];
-          rawTracks = rawTracks.concat(pageTracks.filter((t) => !t["@attr"]?.nowplaying));
+      const artistMap = {};
+      const albumMap = {};
+      const trackMap = {};
+
+      rawTracks.forEach((track) => {
+        const artistName = track.artist?.["#text"] || track.artist?.name;
+        const albumName = track.album?.["#text"];
+        const trackName = track.name;
+
+        if (!artistName) return;
+
+        if (!artistMap[artistName]) artistMap[artistName] = { name: artistName, playcount: 0 };
+        artistMap[artistName].playcount++;
+
+        if (albumName) {
+          const albumKey = `${artistName} - ${albumName}`;
+          if (!albumMap[albumKey]) albumMap[albumKey] = { name: albumName, artist: { name: artistName }, playcount: 0 };
+          albumMap[albumKey].playcount++;
+        }
+
+        if (trackName) {
+          const trackKey = `${artistName} - ${trackName}`;
+          if (!trackMap[trackKey]) trackMap[trackKey] = { name: trackName, artist: { name: artistName }, playcount: 0 };
+          trackMap[trackKey].playcount++;
         }
       });
+
+      artists = Object.values(artistMap).sort((a, b) => b.playcount - a.playcount);
+      albums = Object.values(albumMap).sort((a, b) => b.playcount - a.playcount);
+      tracks = Object.values(trackMap).sort((a, b) => b.playcount - a.playcount);
     }
-
-    const artistMap = {};
-    const albumMap = {};
-    const trackMap = {};
-
-    rawTracks.forEach((track) => {
-      const artistName = track.artist?.["#text"] || track.artist?.name;
-      const albumName = track.album?.["#text"];
-      const trackName = track.name;
-
-      if (!artistName) return;
-
-      if (!artistMap[artistName]) artistMap[artistName] = { name: artistName, playcount: 0 };
-      artistMap[artistName].playcount++;
-
-      if (albumName) {
-        const albumKey = `${artistName} - ${albumName}`;
-        if (!albumMap[albumKey]) albumMap[albumKey] = { name: albumName, artist: { name: artistName }, playcount: 0 };
-        albumMap[albumKey].playcount++;
-      }
-
-      if (trackName) {
-        const trackKey = `${artistName} - ${trackName}`;
-        if (!trackMap[trackKey]) trackMap[trackKey] = { name: trackName, artist: { name: artistName }, playcount: 0 };
-        trackMap[trackKey].playcount++;
-      }
-    });
-
-    const artists = Object.values(artistMap).sort((a, b) => b.playcount - a.playcount);
-    const albums = Object.values(albumMap).sort((a, b) => b.playcount - a.playcount);
-    const tracks = Object.values(trackMap).sort((a, b) => b.playcount - a.playcount);
 
     const topArtistName = artists[0]?.name;
     const topAlbumName = albums[0]?.name;
@@ -1236,6 +1294,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const mStr = d.toLocaleString("en-US", { month: "long" }).toUpperCase();
         if (data.period === "week") {
           monthYearEl.textContent = `${mStr} WEEK`;
+        } else if (data.period === "year") {
+          const currentYear = new Date().getFullYear();
+          monthYearEl.textContent = `${currentYear} WRAPPED`;
         } else {
           monthYearEl.textContent = `${mStr} ${d.getFullYear()}`;
         }

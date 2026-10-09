@@ -139,6 +139,7 @@
                   <div class="period-dropdown-tabs">
                     <button type="button" class="period-tab-btn active" data-tab="month">Month</button>
                     <button type="button" class="period-tab-btn" data-tab="week">Week</button>
+                    <button type="button" class="period-tab-btn" data-tab="year">Year</button>
                   </div>
                   <div class="period-tab-content active" id="periodTabMonth">
                     <button type="button" class="period-option selected" data-period="month" data-offset="0">
@@ -158,6 +159,12 @@
                     <button type="button" class="period-option" data-period="week" data-offset="-1">
                       <span class="period-option-title">Last Week</span>
                       <span class="period-option-desc" id="lastWeekDesc"></span>
+                    </button>
+                  </div>
+                  <div class="period-tab-content" id="periodTabYear">
+                    <button type="button" class="period-option" data-period="year" data-offset="0">
+                      <span class="period-option-title">Last 365 Days</span>
+                      <span class="period-option-desc" id="currentYearDesc"></span>
                     </button>
                   </div>
                 </div>
