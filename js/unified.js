@@ -219,7 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof umami !== "undefined") {
           umami.track("Search Initiated", { type: "single" });
         }
-        window.location.href = "result.html";
+        const timeVal = selectedOffset === -1 ? "past" : "current";
+        window.location.href = `result.html?user=${encodeURIComponent(userInput)}&period=${encodeURIComponent(selectedPeriod)}&time=${timeVal}`;
       }
     });
   }
@@ -236,18 +237,28 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof umami !== "undefined") {
           umami.track("Search Initiated", { type: "match" });
         }
-        window.location.href = "result.html";
+        window.location.href = `result.html?user1=${encodeURIComponent(userInput1)}&user2=${encodeURIComponent(userInput2)}`;
       }
     });
   }
 
   if (window.location.pathname.endsWith("result.html") || window.location.pathname.includes("result.html")) {
-    const user = sessionStorage.getItem("lastfm_user");
+    const urlParams = new URLSearchParams(window.location.search);
+    const user = urlParams.get("user") || sessionStorage.getItem("lastfm_user");
     if (!user) {
       window.location.href = "index.html";
     } else {
-      const currentPeriod = sessionStorage.getItem("lastfm_period") || "month";
-      const periodOffset = parseInt(sessionStorage.getItem("lastfm_offset") || "0", 10);
+      const currentPeriod = urlParams.get("period") || sessionStorage.getItem("lastfm_period") || "month";
+      const timeParam = urlParams.get("time") || urlParams.get("offset") || sessionStorage.getItem("lastfm_offset") || "current";
+      const periodOffset = (timeParam === "past" || timeParam === "-1") ? -1 : 0;
+      const timeVal = periodOffset === -1 ? "past" : "current";
+      sessionStorage.setItem("lastfm_user", user);
+      sessionStorage.setItem("lastfm_period", currentPeriod);
+      sessionStorage.setItem("lastfm_offset", periodOffset.toString());
+      if (urlParams.get("time") !== timeVal || !urlParams.get("user")) {
+        const newUrl = `result.html?user=${encodeURIComponent(user)}&period=${encodeURIComponent(currentPeriod)}&time=${timeVal}`;
+        window.history.replaceState(null, "", newUrl);
+      }
       fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
     }
   }
@@ -654,9 +665,9 @@ function initGlobalTooltip() {
 initGlobalTooltip();
 
 function resetToSkeletons() {
-  const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
-  if (btnGerarRelatorio) {
-    btnGerarRelatorio.classList.add("hidden");
+  const fabActions = document.getElementById("fabActions") || document.getElementById("btnGerarRelatorio");
+  if (fabActions) {
+    fabActions.classList.add("hidden");
   }
 
   const textFields = ["userScrobbles", "userMinutes", "userDailyAvg", "userVibe"];
@@ -1165,14 +1176,72 @@ function renderData(username, data) {
     }
   }
 
-  const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
-  if (btnGerarRelatorio) {
-    btnGerarRelatorio.classList.remove("hidden");
+  const fabActions = document.getElementById("fabActions") || document.getElementById("btnGerarRelatorio");
+  if (fabActions) {
+    fabActions.classList.remove("hidden");
+  }
+}
+
+function showToast(message) {
+  let toast = document.getElementById("bubbleToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "bubbleToast";
+    toast.className = "bubble-toast";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2500);
+}
+
+async function handleShareCharts() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const user = urlParams.get("user") || sessionStorage.getItem("lastfm_user") || "";
+  const period = urlParams.get("period") || sessionStorage.getItem("lastfm_period") || "month";
+  const timeParam = urlParams.get("time") || urlParams.get("offset") || sessionStorage.getItem("lastfm_offset") || "current";
+  const timeVal = (timeParam === "past" || timeParam === "-1") ? "past" : "current";
+  const shareUrl = `${window.location.origin}/result.html?user=${encodeURIComponent(user)}&period=${encodeURIComponent(period)}&time=${timeVal}`;
+  const shareText = `Check out ${user ? user + "'s" : "my"} music charts on BubbleFM!`;
+
+  if (typeof umami !== "undefined") {
+    umami.track("Share Link Clicked", { type: "single", user });
+  }
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `BubbleFM - ${user}'s Stats`,
+        text: shareText,
+        url: shareUrl,
+      });
+      return;
+    } catch (err) {
+      if (err.name === "AbortError") return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    showToast("Link copied to clipboard!");
+  } catch (err) {
+    showToast("Failed to copy link");
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
+  const shareToggle = document.getElementById("share-toggle");
+  const btnShareFab = document.getElementById("btnShareFab");
+  if (shareToggle) {
+    shareToggle.addEventListener("click", handleShareCharts);
+  }
+  if (btnShareFab) {
+    btnShareFab.addEventListener("click", handleShareCharts);
+  }
   const settingsModal = document.getElementById("generationSettingsModal");
   const closeSettings = document.getElementById("closeSettingsModal");
   const confirmSettings = document.getElementById("confirmSettingsBtn");

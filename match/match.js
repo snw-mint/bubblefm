@@ -187,6 +187,51 @@ function initFaqModal() {
   });
 }
 
+function showToast(message) {
+  let toast = document.getElementById("bubbleToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "bubbleToast";
+    toast.className = "bubble-toast";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2500);
+}
+
+async function handleShareMatch(user1, user2) {
+  const shareUrl = `${window.location.origin}/match/result.html?user1=${encodeURIComponent(user1)}&user2=${encodeURIComponent(user2)}`;
+  const shareText = `Check out the music taste match between ${user1} and ${user2} on BubbleFM!`;
+
+  if (typeof umami !== "undefined") {
+    umami.track("Share Link Clicked", { type: "match", user1, user2 });
+  }
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `BubbleFM - ${user1} & ${user2} TasteMatch`,
+        text: shareText,
+        url: shareUrl,
+      });
+      return;
+    } catch (err) {
+      if (err.name === "AbortError") return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    showToast("Match link copied to clipboard!");
+  } catch (err) {
+    showToast("Failed to copy link");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const themeToggle = document.getElementById("theme-toggle");
   const savedTheme = localStorage.getItem("theme");
@@ -210,12 +255,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       setTheme(isDark ? "light" : "dark");
     });
   }
-  const user1 = sessionStorage.getItem("lastfm_user1");
-  const user2 = sessionStorage.getItem("lastfm_user2");
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const user1 = urlParams.get("user1") || sessionStorage.getItem("lastfm_user1");
+  const user2 = urlParams.get("user2") || sessionStorage.getItem("lastfm_user2");
 
   if (!user1 || !user2) {
     window.location.href = "index.html";
     return;
+  }
+
+  sessionStorage.setItem("lastfm_user1", user1);
+  sessionStorage.setItem("lastfm_user2", user2);
+  if (!urlParams.get("user1") || !urlParams.get("user2")) {
+    const newUrl = `result.html?user1=${encodeURIComponent(user1)}&user2=${encodeURIComponent(user2)}`;
+    window.history.replaceState(null, "", newUrl);
+  }
+
+  const btnShareMatch = document.getElementById("btnShareMatch");
+  if (btnShareMatch) {
+    btnShareMatch.addEventListener("click", () => handleShareMatch(user1, user2));
+  }
+  const shareToggle = document.getElementById("share-toggle");
+  if (shareToggle) {
+    shareToggle.addEventListener("click", () => handleShareMatch(user1, user2));
   }
 
   try {
