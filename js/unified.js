@@ -53,11 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const isMob = Boolean(navigator.userAgentData?.mobile) || /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua);
     if (isWin && !isMob) {
       pb.style.display = "flex";
-      pb.addEventListener("click", () => {
-        if (typeof umami !== "undefined") {
-          umami.track("Fluent Scrobbler Outbound Click");
-        }
-      });
     }
   }
 
@@ -216,10 +211,10 @@ document.addEventListener("DOMContentLoaded", () => {
         sessionStorage.setItem("lastfm_user", userInput);
         sessionStorage.setItem("lastfm_period", selectedPeriod);
         sessionStorage.setItem("lastfm_offset", selectedOffset.toString());
-        if (typeof umami !== "undefined") {
-          umami.track("Search Initiated", { type: "single" });
-        }
         const timeVal = selectedOffset === -1 ? "past" : "current";
+        if (typeof umami !== "undefined") {
+          umami.track("Period Selected", { period: selectedPeriod, time: timeVal });
+        }
         window.location.href = `result.html?user=${encodeURIComponent(userInput)}&period=${encodeURIComponent(selectedPeriod)}&time=${timeVal}`;
       }
     });
@@ -234,9 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (userInput1 && userInput2) {
         sessionStorage.setItem("lastfm_user1", userInput1);
         sessionStorage.setItem("lastfm_user2", userInput2);
-        if (typeof umami !== "undefined") {
-          umami.track("Search Initiated", { type: "match" });
-        }
         window.location.href = `result.html?user1=${encodeURIComponent(userInput1)}&user2=${encodeURIComponent(userInput2)}`;
       }
     });
@@ -258,6 +250,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (urlParams.get("time") !== timeVal || !urlParams.get("user")) {
         const newUrl = `result.html?user=${encodeURIComponent(user)}&period=${encodeURIComponent(currentPeriod)}&time=${timeVal}`;
         window.history.replaceState(null, "", newUrl);
+      }
+      if (typeof umami !== "undefined") {
+        umami.track("Period Selected", { period: currentPeriod, time: timeVal });
       }
       fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
     }
@@ -597,14 +592,9 @@ function initFaqModal() {
   const openFaq = () => {
     faqModal.classList.add("show");
     faqModal.setAttribute("aria-hidden", "false");
-
     try {
-      if (typeof umami !== "undefined") {
-        umami.track("FAQ Opened");
-      }
       const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
       localStorage.setItem("bubblefm_faq_open_count", count.toString());
-      console.log(`[Analytics] FAQ Opened. Total local opens: ${count}`);
     } catch (e) { }
   };
 
@@ -1208,7 +1198,7 @@ async function handleShareCharts() {
   const shareText = `Check out ${user ? user + "'s" : "my"} music charts on BubbleFM!`;
 
   if (typeof umami !== "undefined") {
-    umami.track("Share Link Clicked", { type: "single", user });
+    umami.track("Share Clicked", { type: "single" });
   }
 
   if (navigator.share) {
@@ -1281,6 +1271,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
+      if (typeof umami !== "undefined") {
+        umami.track("Card Modal Opened");
+      }
       if (step1 && step2) {
         step1.style.display = "block";
         step2.style.display = "none";
@@ -1480,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (typeof umami !== "undefined") {
               umami.track("Card Generated", {
-                type: "single",
+                color: selectedBg,
                 service: serviceSelect,
                 theme: isLight ? "light" : "dark",
                 metric: useScrobbles ? "scrobbles" : "minutes"
@@ -1529,4 +1522,15 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (!link || !link.href || typeof umami === "undefined") return;
+
+    if (link.href.includes("buymeacoffee.com")) {
+      umami.track("Outbound Click", { destination: "buymeacoffee" });
+    } else if (link.href.includes("github.com")) {
+      umami.track("Outbound Click", { destination: "github" });
+    }
+  });
 });

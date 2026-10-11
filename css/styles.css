@@ -2035,6 +2035,38 @@ input:checked+.slider:before {
   margin: 0 !important;
 }
 
+.match-faq-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.match-faq-info svg {
+  flex-shrink: 0;
+}
+
+.faq-inline-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  font-family: inherit;
+}
+
+.faq-inline-btn:hover {
+  opacity: 0.8;
+}
+
 [data-theme='dark'] .fab-generate.fab-secondary {
   background: rgba(45, 45, 48, 0.9) !important;
   color: #fff !important;

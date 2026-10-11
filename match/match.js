@@ -166,12 +166,8 @@ function initFaqModal() {
     faqModal.setAttribute("aria-hidden", "false");
 
     try {
-      if (typeof umami !== "undefined") {
-        umami.track("FAQ Opened");
-      }
       const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
       localStorage.setItem("bubblefm_faq_open_count", count.toString());
-      console.log(`[Analytics] FAQ Opened. Total local opens: ${count}`);
     } catch (e) {}
   };
 
@@ -208,7 +204,7 @@ async function handleShareMatch(user1, user2) {
   const shareText = `Check out the music taste match between ${user1} and ${user2} on BubbleFM!`;
 
   if (typeof umami !== "undefined") {
-    umami.track("Share Link Clicked", { type: "match", user1, user2 });
+    umami.track("Share Clicked", { type: "match" });
   }
 
   if (navigator.share) {
@@ -508,4 +504,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error("Error fetching match data:", error);
   }
+
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (!link || !link.href || typeof umami === "undefined") return;
+
+    if (link.href.includes("buymeacoffee.com")) {
+      umami.track("Outbound Click", { destination: "buymeacoffee" });
+    } else if (link.href.includes("github.com")) {
+      umami.track("Outbound Click", { destination: "github" });
+    }
+  });
 });
