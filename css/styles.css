@@ -198,7 +198,8 @@ button {
 }
 
 .theme-toggle-btn,
-.github-link-btn {
+.github-link-btn,
+.bmac-link-btn {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--radius-full);
@@ -210,12 +211,14 @@ button {
 }
 
 .theme-toggle-btn:active,
-.github-link-btn:active {
+.github-link-btn:active,
+.bmac-link-btn:active {
   transform: scale(0.95);
 }
 
 .theme-toggle-btn svg,
-.github-link-btn svg {
+.github-link-btn svg,
+.bmac-link-btn svg {
   width: 1.25rem;
   height: 1.25rem;
   fill: currentColor;
@@ -235,11 +238,24 @@ button {
 }
 
 .home-header.header-overlay .theme-toggle-btn,
-.home-header.header-overlay .github-link-btn {
+.home-header.header-overlay .github-link-btn,
+.home-header.header-overlay .bmac-link-btn {
   color: #ffffff;
   background-color: rgba(0, 0, 0, 0.3);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+}
+
+.sheet-support-hint {
+  margin-top: 0.85rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.sheet-support-hint a {
+  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 /* Main Container */
@@ -2432,7 +2448,8 @@ input:checked+.slider:before {
   }
 
   .home-header .theme-toggle-btn,
-  .home-header .github-link-btn {
+  .home-header .github-link-btn,
+  .home-header .bmac-link-btn {
     width: 2.25rem;
     height: 2.25rem;
   }
