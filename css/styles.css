@@ -1023,20 +1023,33 @@ button {
   min-width: 0;
   overflow: hidden;
   width: 100%;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .chart-item {
   display: flex;
   align-items: center;
-  padding: 1rem 0;
+  padding: 0.85rem 1.25rem;
   border-bottom: 1px solid var(--color-border);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  transition: background-color 0.15s ease;
+}
+
+.chart-item:not(.top-1):hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .chart-item:not(.top-1):hover {
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .chart-item span {
@@ -1055,10 +1068,11 @@ button {
   aspect-ratio: 1 / 1;
   padding: 0;
   background-color: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 1rem;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  margin-bottom: 0;
+  box-shadow: none;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -1081,30 +1095,16 @@ button {
 .chart-item.top-1::after {
   content: "";
   position: absolute;
-  inset: -20px;
+  inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: transparent;
-  -webkit-backdrop-filter: blur(40px);
-  backdrop-filter: blur(40px);
-  mask-image: linear-gradient(to bottom,
-      transparent 0%,
-      transparent 15%,
-      rgba(0, 0, 0, 0.02) 25%,
-      rgba(0, 0, 0, 0.18) 40%,
-      rgba(0, 0, 0, 0.5) 60%,
-      rgba(0, 0, 0, 0.85) 78%,
-      black 95%,
-      black 100%);
-  -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0%,
-      transparent 15%,
-      rgba(0, 0, 0, 0.02) 25%,
-      rgba(0, 0, 0, 0.18) 40%,
-      rgba(0, 0, 0, 0.5) 60%,
-      rgba(0, 0, 0, 0.85) 78%,
-      black 95%,
-      black 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 35%,
+    rgba(0, 0, 0, 0.2) 55%,
+    rgba(0, 0, 0, 0.65) 80%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
 }
 
 .chart-item.top-1 .text-content {
@@ -1115,7 +1115,7 @@ button {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.25rem 1.1rem;
   background: transparent;
   border-top: none;
   min-width: 0;
@@ -1128,7 +1128,8 @@ button {
 
 .chart-item.top-1 .text-content span:first-child {
   font-size: 1.25rem;
-  font-weight: 800;
+  font-weight: 700;
+  letter-spacing: -0.3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1136,7 +1137,7 @@ button {
   width: 100%;
   max-width: 100%;
   color: #fff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 [data-theme="dark"] .chart-item.top-1 .text-content span:first-child {
@@ -1152,18 +1153,20 @@ button {
   display: block;
   width: 100%;
   max-width: 100%;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.9);
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="dark"] .chart-item.top-1 .text-content span:last-child {
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .chart-item span:first-child[style*="font-weight: bold"] {
-  width: 32px;
+  width: 30px;
   color: var(--color-text-muted) !important;
   font-weight: 600 !important;
+  font-size: 0.95rem;
   flex-shrink: 0;
 }
 
