@@ -927,6 +927,58 @@ button {
   fill: currentColor;
 }
 
+.mobile-actions-bar {
+  display: none;
+}
+
+.mobile-actions-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  gap: 0.35rem;
+}
+
+.mobile-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.mobile-pill-btn:active {
+  transform: scale(0.95);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .mobile-pill-btn:active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.mobile-pill-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: currentColor;
+}
+
+.mobile-pill-divider {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--color-border);
+}
+
 /* Charts Grid */
 .charts-section {
   max-width: 1200px;
@@ -2750,6 +2802,22 @@ input:checked+.slider:before {
 
   .main-container {
     padding: 5.5rem 1rem 1.5rem !important;
+  }
+
+  .home-header .share-header-btn,
+  .home-header .faq-header-btn {
+    display: none !important;
+  }
+
+  .mobile-actions-bar {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 5;
   }
 }
 
