@@ -418,22 +418,25 @@ button {
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--color-text-muted);
   cursor: pointer;
-  padding: 0.4rem;
-  border-radius: var(--radius-sm);
-  transition: color 0.15s ease, background-color 0.15s ease;
+  padding: 0.45rem;
+  border-radius: var(--radius-full);
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
 .period-picker-btn:hover {
   color: var(--color-text);
-  background-color: var(--color-border);
+  background-color: var(--color-card);
+  border-color: var(--color-border);
 }
 
 .period-picker-btn.active,
 .period-picker-btn.has-custom {
-  color: var(--color-accent);
+  color: var(--color-primary);
+  background-color: var(--color-card);
+  border-color: var(--color-border);
 }
 
 .period-picker-btn svg {
@@ -448,14 +451,16 @@ button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #1c1c1e;
-  color: #f5f5f7;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-md);
-  font-size: 0.8125rem;
+  background-color: rgba(23, 24, 26, 0.9);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  color: #ffffff;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.15);
   z-index: 1001;
   pointer-events: none;
@@ -468,7 +473,7 @@ button {
 }
 
 [data-theme="dark"] .period-tooltip {
-  background-color: #2c2c2e;
+  background-color: rgba(30, 30, 30, 0.92);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -511,18 +516,18 @@ button {
 
 .period-tooltip-arrow {
   position: absolute;
-  bottom: -5px;
-  right: 12px;
-  width: 10px;
-  height: 10px;
-  background-color: #1c1c1e;
+  bottom: -4px;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  background-color: rgba(23, 24, 26, 0.9);
   transform: rotate(45deg);
   border-right: 1px solid rgba(255, 255, 255, 0.15);
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 [data-theme="dark"] .period-tooltip-arrow {
-  background-color: #2c2c2e;
+  background-color: rgba(30, 30, 30, 0.92);
   border-right-color: rgba(255, 255, 255, 0.2);
   border-bottom-color: rgba(255, 255, 255, 0.2);
 }
@@ -531,14 +536,22 @@ button {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  width: 240px;
-  background-color: var(--color-card);
+  width: 250px;
+  background-color: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 0.5rem;
   z-index: 1000;
   display: none;
+}
+
+[data-theme="dark"] .period-dropdown {
+  background-color: rgba(20, 20, 22, 0.9);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
 }
 
 .period-dropdown.show {
@@ -548,11 +561,11 @@ button {
 
 .period-dropdown-tabs {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   background-color: rgba(0, 0, 0, 0.05);
   padding: 3px;
   border-radius: var(--radius-full);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.45rem;
 }
 
 [data-theme="dark"] .period-dropdown-tabs {
@@ -566,11 +579,12 @@ button {
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.825rem;
+  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
 }
 
 .period-tab-btn:hover {
@@ -578,20 +592,22 @@ button {
 }
 
 .period-tab-btn.active {
-  background-color: var(--color-card);
-  color: var(--color-text);
-  box-shadow: var(--shadow-sm);
+  background-color: #ffffff;
+  color: #17181A;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] .period-tab-btn.active {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: var(--color-text);
+  background-color: #2c2c2e;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .period-tab-content {
   display: none;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .period-tab-content.active {
@@ -604,13 +620,12 @@ button {
   justify-content: space-between;
   width: 100%;
   padding: 0.6rem 0.75rem;
-  border: none;
-  border-left: 3px solid transparent;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--color-text);
   font-family: inherit;
-  font-size: 0.9rem;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.875rem;
+  border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   text-align: left;
@@ -625,16 +640,16 @@ button {
 }
 
 .period-option.selected {
-  border-left-color: var(--color-accent);
-  background-color: rgba(185, 0, 0, 0.08);
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: var(--color-border);
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 [data-theme="dark"] .period-option.selected {
-  border-left-color: var(--color-accent);
-  background-color: rgba(255, 68, 68, 0.12);
-  color: var(--color-accent);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
 }
 
 .period-option-title {
@@ -644,12 +659,25 @@ button {
 .period-option-desc {
   font-size: 0.75rem;
   color: var(--color-text-muted);
-  font-weight: 400;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.04);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-full);
+}
+
+[data-theme="dark"] .period-option-desc {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
 }
 
 .period-option.selected .period-option-desc {
-  color: var(--color-accent);
-  opacity: 0.85;
+  color: var(--color-text);
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .period-option.selected .period-option-desc {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .btn-primary {
@@ -2628,7 +2656,7 @@ input:checked+.slider:before {
     left: 0;
     right: 0;
     margin: 0 auto;
-    width: 50%;
+    width: 90%;
     z-index: 100;
     padding: 0.5rem 1rem;
     margin-bottom: 0;
