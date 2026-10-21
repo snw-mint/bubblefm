@@ -1698,12 +1698,15 @@ input:checked+.slider:before {
 }
 
 .loader {
-  width: 64px;
-  height: 64px;
-  border: 6px solid var(--color-neutral-200);
-  border-bottom-color: var(--color-primary);
+  --color-1: #fff;
+  --size: 1.5px;
+
+  width: calc(48 * var(--size));
+  height: calc(48 * var(--size));
   border-radius: 50%;
   display: inline-block;
+  border-top: calc(3 * var(--size)) solid var(--color-1);
+  border-right: calc(3 * var(--size)) solid transparent;
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
 }
@@ -1712,7 +1715,6 @@ input:checked+.slider:before {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
@@ -2453,21 +2455,12 @@ input:checked+.slider:before {
   transform: scale(1);
 }
 
-#generationModal .dot-loader {
+#generationModal #generationStateLoading {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  width: 100%;
   height: auto;
-}
-
-#generationModal .dot-loader span {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background-color: #ffffff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  animation: bounce 1.4s infinite ease-in-out both;
 }
 
 #generationModal #generationStateComplete {
