@@ -30,7 +30,7 @@
 
 [data-theme="dark"] {
   --color-bg: #000000;
-  --color-text: #B5B5B5;
+  --color-text: #FFF;
   --color-text-muted: #737373;
   --color-border: rgba(255, 255, 255, 0.12);
   --color-card: #111111;
@@ -54,7 +54,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6, b, strong {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+b,
+strong {
   font-weight: 600;
 }
 
@@ -108,7 +115,7 @@ button {
   left: 0;
   right: 0;
   margin: 0 auto;
-  width: 70%;
+  width: 50%;
   max-width: 1200px;
   z-index: 100;
   display: flex;
@@ -284,29 +291,70 @@ button {
 
 .landing-card {
   text-align: center;
-  max-width: 480px;
+  max-width: 520px;
   width: 100%;
   margin-bottom: 4rem;
+  margin-top: 3rem;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  padding: 3rem 2.5rem;
+}
+
+[data-theme="dark"] .landing-card {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.landing-card .input-with-icon {
+  background-color: var(--color-bg);
 }
 
 .landing-title {
   font-size: 3rem;
   font-weight: 600;
-  letter-spacing: -1px;
-  line-height: 1.1;
-  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-bottom: 0.85rem;
 }
 
 .landing-subtitle {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: var(--color-text-muted);
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
 }
 
 /* Forms & Inputs */
-.username-form {
+.username-form,
+.match-form {
   width: 100%;
   margin-bottom: 1.5rem;
+}
+
+.match-inputs-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.match-inputs-container .input-with-icon {
+  flex: 1;
+  min-width: 0;
+}
+
+.vs-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.match-form .btn-primary {
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .input-group {
@@ -433,9 +481,12 @@ button {
 }
 
 @keyframes period-tooltip-bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-4px);
   }
@@ -2577,7 +2628,7 @@ input:checked+.slider:before {
     left: 0;
     right: 0;
     margin: 0 auto;
-    width: 90%;
+    width: 50%;
     z-index: 100;
     padding: 0.5rem 1rem;
     margin-bottom: 0;
@@ -2649,7 +2700,7 @@ input:checked+.slider:before {
 
   .home-header .header-nav .nav-link.active {
     color: var(--color-text);
-    font-weight: 700;
+    font-weight: 600;
     background-color: rgba(0, 0, 0, 0.05);
   }
 
@@ -2676,6 +2727,19 @@ input:checked+.slider:before {
   .user-info-wrapper {
     flex-direction: column !important;
     align-items: flex-start !important;
+  }
+
+  .landing-card {
+    padding: 2rem 1.25rem;
+    margin-bottom: 3rem;
+  }
+
+  .match-inputs-container {
+    gap: 0.5rem;
+  }
+
+  .landing-title {
+    font-size: 1.85rem;
   }
 
   .main-container {
