@@ -6,6 +6,39 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as htmlToImage from 'html-to-image';
+
+function escapeHTML(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function truncateWithEllipsis(str, maxLength = 20) {
+  if (!str) return "";
+  const s = String(str).trim();
+  if (s.length <= maxLength) return s;
+  return s.slice(0, maxLength).trimEnd() + "...";
+}
+
+function getAffinityTier(percentage) {
+  if (percentage >= 100) return "SUPER FRIENDS";
+  if (percentage >= 90) return "SOUL SYNCHRONIZED";
+  if (percentage >= 80) return "MUSIC TWINS";
+  if (percentage >= 70) return "VIBE PARTNERS";
+  if (percentage >= 60) return "SOUND NEIGHBORS";
+  if (percentage >= 50) return "COMMON GROUND";
+  if (percentage >= 40) return "OCCASIONAL OVERLAP";
+  if (percentage >= 30) return "CASUAL ACQUAINTANCES";
+  if (percentage >= 20) return "DISTANT WAVES";
+  if (percentage >= 10) return "PARALLEL LINES";
+  return "TOTAL STRANGERS";
+}
+
 const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920t28.5 11.5T520-880v80q0 17-11.5 28.5T480-760t-28.5-11.5M678-678q-11-11-11-27.5t11-28.5l56-57q12-12 28.5-12t28.5 12q11 11 11 28t-11 28l-57 57q-11 11-28 11t-28-11m122 238q-17 0-28.5-11.5T760-480t11.5-28.5T800-520h80q17 0 28.5 11.5T920-480t-11.5 28.5T880-440zM451.5-51.5Q440-63 440-80v-80q0-17 11.5-28.5T480-200t28.5 11.5T520-160v80q0 17-11.5 28.5T480-40t-28.5-11.5M226-678l-57-56q-12-12-12-29t12-28q11-11 28-11t28 11l57 57q11 11 11 28t-11 28q-12 11-28 11t-28-11m508 509-56-57q-11-12-11-28.5t11-27.5 27.5-11 28.5 11l57 56q12 11 11.5 28T791-169q-12 12-29 12t-28-12M80-440q-17 0-28.5-11.5T40-480t11.5-28.5T80-520h80q17 0 28.5 11.5T200-480t-11.5 28.5T160-440zm89 271q-11-11-11-28t11-28l57-57q11-11 27.5-11t28.5 11q12 12 12 28.5T282-225l-56 56q-12 12-29 12t-28-12m141-141q-70-70-70-170t70-170 170-70 170 70 70 170-70 170-170 70-170-70m283-57q47-47 47-113t-47-113-113-47-113 47-47 113 47 113 113 47 113-47M480-480"/></svg>`;
 const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M484-80q-84 0-157.5-32t-128-86.5-86.5-128T80-484q0-128 72-232t193-146q22-8 41 5.5t18 36.5q-3 85 27 162t90 137 137 90 162 27q26-1 38.5 17.5T863-345q-44 120-147.5 192.5T484-80m0-80q88 0 163-44t118-121q-86-8-163-43.5T464-465t-97-138-43-163q-77 43-120.5 118.5T160-484q0 135 94.5 229.5T484-160m-20-305"/></svg>`;
 
@@ -256,7 +289,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const user1 = urlParams.get("user1") || sessionStorage.getItem("lastfm_user1");
   const user2 = urlParams.get("user2") || sessionStorage.getItem("lastfm_user2");
 
-  if (!user1 || !user2) {
+  if (!user1 || !user2 || user1.toLowerCase().trim() === user2.toLowerCase().trim()) {
     window.location.href = "index.html";
     return;
   }
@@ -278,17 +311,34 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const [info1Res, info2Res, artists1Res, artists2Res] = await Promise.all([
+    const [
+      info1Res,
+      info2Res,
+      artists1Res,
+      artists2Res,
+      tracks1Res,
+      tracks2Res,
+      albums1Res,
+      albums2Res,
+    ] = await Promise.all([
       fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${user1}&_t=${Date.now()}`),
       fetch(`${lastfmBaseUrl}?method=user.getinfo&user=${user2}&_t=${Date.now()}`),
       fetch(`${lastfmBaseUrl}?method=user.gettopartists&user=${user1}&period=1month&limit=100&_t=${Date.now()}`),
-      fetch(`${lastfmBaseUrl}?method=user.gettopartists&user=${user2}&period=1month&limit=100&_t=${Date.now()}`)
+      fetch(`${lastfmBaseUrl}?method=user.gettopartists&user=${user2}&period=1month&limit=100&_t=${Date.now()}`),
+      fetch(`${lastfmBaseUrl}?method=user.gettoptracks&user=${user1}&period=1month&limit=10&_t=${Date.now()}`),
+      fetch(`${lastfmBaseUrl}?method=user.gettoptracks&user=${user2}&period=1month&limit=10&_t=${Date.now()}`),
+      fetch(`${lastfmBaseUrl}?method=user.gettopalbums&user=${user1}&period=1month&limit=10&_t=${Date.now()}`),
+      fetch(`${lastfmBaseUrl}?method=user.gettopalbums&user=${user2}&period=1month&limit=10&_t=${Date.now()}`)
     ]);
 
     const info1 = await info1Res.json();
     const info2 = await info2Res.json();
     const artists1Data = await artists1Res.json();
     const artists2Data = await artists2Res.json();
+    const tracks1Data = await tracks1Res.json();
+    const tracks2Data = await tracks2Res.json();
+    const albums1Data = await albums1Res.json();
+    const albums2Data = await albums2Res.json();
 
     if (info1.user) {
       document.getElementById("userDisplayName1").textContent = info1.user.name;
@@ -354,8 +404,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const map2 = new Map(list2.map((a, i) => [a.name.toLowerCase(), { ...a, rank: i + 1 }]));
 
     const common = [];
-    const unique1 = [];
-    const unique2 = [];
 
     for (const a1 of list1) {
       const nameKey = a1.name.toLowerCase();
@@ -365,14 +413,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           score: map1.get(nameKey).rank + map2.get(nameKey).rank,
           playcount: parseInt(a1.playcount) + parseInt(map2.get(nameKey).playcount),
         });
-      } else {
-        unique1.push(a1);
-      }
-    }
-
-    for (const a2 of list2) {
-      if (!map1.has(a2.name.toLowerCase())) {
-        unique2.push(a2);
       }
     }
     common.sort((a, b) => a.score - b.score || b.playcount - a.playcount);
@@ -487,10 +527,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const u1FallbackImg = await renderList(
       "listUser1Vibe",
       "msgUser1Vibe",
-      unique1,
-      `${user2} listens to all your top artists!`,
+      list1,
+      "No top artists found for this period.",
     );
-    await renderList("listUser2Vibe", "msgUser2Vibe", unique2, `${user1} listens to all your top artists!`);
+    await renderList("listUser2Vibe", "msgUser2Vibe", list2, "No top artists found for this period.");
     const coverSource = commonImg || u1FallbackImg;
     if (coverSource) {
       const coverUrl = coverSource.picture_xl || coverSource.picture_big || coverSource.picture;
@@ -500,7 +540,69 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("coverSkeletonIcon").style.display = "none";
     }
 
+    let rawArtists1 = artists1Data.topartists?.artist || [];
+    if (!Array.isArray(rawArtists1)) rawArtists1 = [rawArtists1];
+    const topArtists1 = rawArtists1.slice(0, 3).map((a) => ({
+      name: a.name,
+      playcount: parseInt(a.playcount || "0", 10),
+    }));
 
+    let rawArtists2 = artists2Data.topartists?.artist || [];
+    if (!Array.isArray(rawArtists2)) rawArtists2 = [rawArtists2];
+    const topArtists2 = rawArtists2.slice(0, 3).map((a) => ({
+      name: a.name,
+      playcount: parseInt(a.playcount || "0", 10),
+    }));
+
+    let rawTracks1 = tracks1Data.toptracks?.track || [];
+    if (!Array.isArray(rawTracks1)) rawTracks1 = [rawTracks1];
+    const topTracks1 = rawTracks1.slice(0, 3).map((t) => ({
+      name: t.name,
+      artist: { name: t.artist?.name || t.artist?.["#text"] || "" },
+      playcount: parseInt(t.playcount || "0", 10),
+    }));
+
+    let rawTracks2 = tracks2Data.toptracks?.track || [];
+    if (!Array.isArray(rawTracks2)) rawTracks2 = [rawTracks2];
+    const topTracks2 = rawTracks2.slice(0, 3).map((t) => ({
+      name: t.name,
+      artist: { name: t.artist?.name || t.artist?.["#text"] || "" },
+      playcount: parseInt(t.playcount || "0", 10),
+    }));
+
+    let rawAlbums1 = albums1Data.topalbums?.album || [];
+    if (!Array.isArray(rawAlbums1)) rawAlbums1 = [rawAlbums1];
+    const topAlbums1 = rawAlbums1.slice(0, 3).map((al) => ({
+      name: al.name,
+      artist: { name: al.artist?.name || al.artist?.["#text"] || "" },
+      playcount: parseInt(al.playcount || "0", 10),
+    }));
+
+    let rawAlbums2 = albums2Data.topalbums?.album || [];
+    if (!Array.isArray(rawAlbums2)) rawAlbums2 = [rawAlbums2];
+    const topAlbums2 = rawAlbums2.slice(0, 3).map((al) => ({
+      name: al.name,
+      artist: { name: al.artist?.name || al.artist?.["#text"] || "" },
+      playcount: parseInt(al.playcount || "0", 10),
+    }));
+
+    initCardGenerator({
+      user1,
+      user2,
+      displayName1: info1.user?.name || user1,
+      displayName2: info2.user?.name || user2,
+      matchPercentage,
+      user1Data: {
+        artists: topArtists1,
+        tracks: topTracks1,
+        albums: topAlbums1,
+      },
+      user2Data: {
+        artists: topArtists2,
+        tracks: topTracks2,
+        albums: topAlbums2,
+      },
+    });
   } catch (error) {
     console.error("Error fetching match data:", error);
   }
@@ -516,3 +618,171 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 });
+
+function initCardGenerator(matchContext) {
+  const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
+  const settingsModal = document.getElementById("generationSettingsModal");
+  const closeSettings = document.getElementById("closeSettingsModal");
+  const confirmSettings = document.getElementById("confirmSettingsBtn");
+  const bgOptions = document.querySelectorAll(".bg-option");
+  const fabActions = document.getElementById("fabActions") || btnGerarRelatorio;
+  const themeToggleCheckbox = document.getElementById("themeToggleCheckbox");
+  const cardElement = document.getElementById("storyCard");
+
+  if (fabActions) {
+    fabActions.classList.remove("hidden");
+  }
+
+  bgOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+      bgOptions.forEach((opt) => opt.classList.remove("selected"));
+      option.classList.add("selected");
+    });
+  });
+
+  if (btnGerarRelatorio && settingsModal) {
+    btnGerarRelatorio.addEventListener("click", () => {
+      if (typeof umami !== "undefined") {
+        umami.track("Match Card Modal Opened");
+      }
+      if (themeToggleCheckbox) {
+        themeToggleCheckbox.checked = document.documentElement.getAttribute("data-theme") === "light";
+      }
+      if (cardElement) {
+        cardElement.className = themeToggleCheckbox && themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
+      }
+      settingsModal.classList.add("show");
+    });
+
+    if (closeSettings) {
+      closeSettings.addEventListener("click", () => {
+        settingsModal.classList.remove("show");
+      });
+    }
+
+    settingsModal.addEventListener("click", (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.remove("show");
+      }
+    });
+  }
+
+  if (themeToggleCheckbox && cardElement) {
+    themeToggleCheckbox.addEventListener("change", () => {
+      cardElement.className = themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
+    });
+  }
+
+  if (confirmSettings && cardElement) {
+    confirmSettings.addEventListener("click", async () => {
+      settingsModal.classList.remove("show");
+
+      const selectedBgOption = document.querySelector(".bg-option.selected");
+      const selectedBg = selectedBgOption ? selectedBgOption.dataset.bg : "red";
+      const isLight = Boolean(themeToggleCheckbox && themeToggleCheckbox.checked);
+
+      cardElement.className = isLight ? "theme-light" : "theme-dark";
+
+      const cardBgImg = document.getElementById("storyCardBackgroundImg");
+      if (cardBgImg) {
+        cardBgImg.src = `/assets/bg/${selectedBg}.webp`;
+      }
+
+      document.getElementById("storyCardTitle").textContent = "Match";
+      document.getElementById("storyMatchScore").textContent = `${matchContext.matchPercentage}%`;
+
+      const tierName = getAffinityTier(matchContext.matchPercentage);
+      document.getElementById("storyMonthYear").textContent = tierName;
+      document.getElementById("storyTotalMinutes").textContent = `${matchContext.displayName1} & ${matchContext.displayName2}`;
+
+      const cleanCardTitle = (str) => {
+        if (!str) return "";
+        const cleaned = String(str).replace(/\s*\([^)]*\)/g, "").trim();
+        return cleaned || String(str).trim();
+      };
+
+      const populateList = (containerId, items, isTrackOrAlbum = false) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = "";
+        const top3 = (items || []).slice(0, 3);
+        top3.forEach((item, index) => {
+          const rank = index + 1;
+          const rawSubText = item.artist ? item.artist.name : `${item.playcount} streams`;
+          const rawName = isTrackOrAlbum ? cleanCardTitle(item.name) : item.name;
+          const displayName = truncateWithEllipsis(rawName, 22);
+          const displaySub = truncateWithEllipsis(rawSubText, 28);
+          container.innerHTML += `
+            <div class="story-item-row">
+              <span class="story-item-rank">${rank}</span>
+              <div class="story-item-details">
+                <span class="story-item-name" title="${escapeHTML(rawName)}">${escapeHTML(displayName)}</span>
+                <span class="story-item-sub" title="${escapeHTML(rawSubText)}">${escapeHTML(displaySub)}</span>
+              </div>
+            </div>
+          `;
+        });
+      };
+
+      populateList("storyListArtists1", matchContext.user1Data.artists, false);
+      populateList("storyListSongs1", matchContext.user1Data.tracks, true);
+      populateList("storyListAlbums1", matchContext.user1Data.albums, true);
+
+      populateList("storyListArtists2", matchContext.user2Data.artists, false);
+      populateList("storyListSongs2", matchContext.user2Data.tracks, true);
+      populateList("storyListAlbums2", matchContext.user2Data.albums, true);
+
+      const generationModal = document.getElementById("generationModal");
+      const stateLoading = document.getElementById("generationStateLoading");
+      const stateComplete = document.getElementById("generationStateComplete");
+
+      if (generationModal) {
+        stateLoading.style.display = "flex";
+        stateComplete.style.display = "none";
+        generationModal.classList.add("show");
+      }
+
+      confirmSettings.textContent = "Generating...";
+
+      setTimeout(() => {
+        htmlToImage
+          .toPng(cardElement, {
+            pixelRatio: 2,
+            backgroundColor: null,
+            cacheBust: true,
+          })
+          .then((dataUrl) => {
+            const link = document.createElement("a");
+            link.download = `bubblefm_match_${matchContext.user1}_${matchContext.user2}_${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+
+            if (typeof umami !== "undefined") {
+              umami.track("Match Card Generated", {
+                color: selectedBg,
+                theme: isLight ? "light" : "dark",
+                score: matchContext.matchPercentage,
+              });
+            }
+
+            confirmSettings.textContent = "Generate Card";
+
+            if (generationModal) {
+              stateLoading.style.display = "none";
+              stateComplete.style.display = "flex";
+              setTimeout(() => {
+                generationModal.classList.remove("show");
+              }, 2500);
+            }
+          })
+          .catch((err) => {
+            console.error("Error generating match card:", err);
+            confirmSettings.textContent = "Error";
+            if (generationModal) {
+              generationModal.classList.remove("show");
+            }
+          });
+      }, 1000);
+    });
+  }
+}

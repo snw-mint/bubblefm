@@ -256,11 +256,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const formMatch = document.getElementById("form-match");
   if (formMatch) {
+    const input1 = document.getElementById("userInput1");
+    const input2 = document.getElementById("userInput2");
+    const msgErro = document.getElementById("mensagemErro");
+    const clearError = () => {
+      if (msgErro && msgErro.textContent) msgErro.textContent = "";
+    };
+    if (input1) input1.addEventListener("input", clearError);
+    if (input2) input2.addEventListener("input", clearError);
+
     formMatch.addEventListener("submit", (e) => {
       e.preventDefault();
-      const userInput1 = document.getElementById("userInput1").value.trim();
-      const userInput2 = document.getElementById("userInput2").value.trim();
+      const userInput1 = input1 ? input1.value.trim() : "";
+      const userInput2 = input2 ? input2.value.trim() : "";
+      if (msgErro) msgErro.textContent = "";
+
       if (userInput1 && userInput2) {
+        if (userInput1.toLowerCase() === userInput2.toLowerCase()) {
+          if (msgErro) {
+            msgErro.textContent = "Please enter two different usernames.";
+          }
+          return;
+        }
         sessionStorage.setItem("lastfm_user1", userInput1);
         sessionStorage.setItem("lastfm_user2", userInput2);
         window.location.href = `result.html?user1=${encodeURIComponent(userInput1)}&user2=${encodeURIComponent(userInput2)}`;
@@ -1435,20 +1452,27 @@ document.addEventListener("DOMContentLoaded", () => {
         return s.slice(0, maxLength).trimEnd() + "...";
       };
 
-      const populateList = (containerId, items) => {
+      const cleanCardTitle = (str) => {
+        if (!str) return "";
+        const cleaned = String(str).replace(/\s*\([^)]*\)/g, "").trim();
+        return cleaned || String(str).trim();
+      };
+
+      const populateList = (containerId, items, isTrackOrAlbum = false) => {
         const container = document.getElementById(containerId);
         container.innerHTML = "";
         const top3 = items.slice(0, 3);
         top3.forEach((item, index) => {
           const rank = index + 1;
           const rawSubText = item.artist ? item.artist.name : `${item.playcount} streams`;
-          const displayName = truncateWithEllipsis(item.name, 22);
+          const rawName = isTrackOrAlbum ? cleanCardTitle(item.name) : item.name;
+          const displayName = truncateWithEllipsis(rawName, 22);
           const displaySub = truncateWithEllipsis(rawSubText, 28);
           container.innerHTML += `
             <div class="story-item-row">
               <span class="story-item-rank">${rank}</span>
               <div class="story-item-details">
-                <span class="story-item-name" title="${escapeHTML(item.name)}">${escapeHTML(displayName)}</span>
+                <span class="story-item-name" title="${escapeHTML(rawName)}">${escapeHTML(displayName)}</span>
                 <span class="story-item-sub" title="${escapeHTML(rawSubText)}">${escapeHTML(displaySub)}</span>
               </div>
             </div>
@@ -1456,9 +1480,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       };
 
-      populateList("storyListArtists", data.artists);
-      populateList("storyListSongs", data.tracks);
-      populateList("storyListAlbums", data.albums);
+      populateList("storyListArtists", data.artists, false);
+      populateList("storyListSongs", data.tracks, true);
+      populateList("storyListAlbums", data.albums, true);
 
       const topArtist = data.artists[0];
       const topSong = data.tracks[0];
