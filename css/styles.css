@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap');
 
 :root {
-  --color-bg: #f5f5f7;
-  --color-text: #1d1d1f;
-  --color-text-muted: #86868b;
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-card: #ffffff;
-  --color-primary: #1d1d1f;
-  --color-primary-text: #ffffff;
+  --color-bg: #FFFFFF;
+  --color-text: #17181A;
+  --color-text-muted: #737373;
+  --color-border: rgba(23, 24, 26, 0.08);
+  --color-card: #F1F1F2;
+  --color-primary: #17181A;
+  --color-primary-text: #FFFFFF;
   --color-accent: var(--color-brand);
   --color-error: #ff3b30;
 
@@ -19,9 +19,9 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
 
-  --font-title: 'Inter', sans-serif;
-  --font-text: 'Inter', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-title: 'Figtree', sans-serif;
+  --font-text: 'Figtree', sans-serif;
+  --font-body: 'Figtree', sans-serif;
 
   --color-brand: #b90000;
 
@@ -30,12 +30,12 @@
 
 [data-theme="dark"] {
   --color-bg: #000000;
-  --color-text: #f5f5f7;
-  --color-text-muted: #a1a1a6;
-  --color-border: rgba(255, 255, 255, 0.15);
-  --color-card: #1c1c1e;
-  --color-primary: #ffffff;
-  --color-primary-text: #000000;
+  --color-text: #B5B5B5;
+  --color-text-muted: #737373;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-card: #111111;
+  --color-primary: #FFFFFF;
+  --color-primary-text: #17181A;
   --color-accent: var(--color-brand);
   --color-error: #ff453a;
 
@@ -54,8 +54,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, h4, h5, h6, b, strong {
+  font-weight: 600;
+}
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Figtree', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
@@ -111,7 +115,7 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 0.6rem 2rem;
-  background-color: rgba(245, 245, 247, 0.72);
+  background-color: rgba(241, 241, 242, 0.85);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--color-border);
@@ -121,7 +125,7 @@ button {
 }
 
 [data-theme="dark"] .home-header {
-  background-color: rgba(0, 0, 0, 0.72);
+  background-color: rgba(17, 17, 17, 0.85);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -151,7 +155,7 @@ button {
 
 .logo-text {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.5px;
   display: flex;
 }
@@ -287,7 +291,7 @@ button {
 
 .landing-title {
   font-size: 3rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -1px;
   line-height: 1.1;
   margin-bottom: 1rem;
@@ -664,7 +668,7 @@ button {
 
 .feature-content h2 {
   font-size: 2.25rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.5px;
   margin-bottom: 1rem;
   line-height: 1.2;
@@ -2612,7 +2616,7 @@ input:checked+.slider:before {
     align-items: stretch;
     gap: 0.25rem;
     padding: 0.75rem 1rem;
-    background-color: rgba(245, 245, 247, 0.96);
+    background-color: rgba(241, 241, 242, 0.96);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid var(--color-border);
@@ -2622,7 +2626,7 @@ input:checked+.slider:before {
   }
 
   [data-theme="dark"] .home-header .header-nav {
-    background-color: rgba(18, 18, 18, 0.96);
+    background-color: rgba(17, 17, 17, 0.96);
     border: 1px solid var(--color-border);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
   }
