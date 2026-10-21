@@ -30,15 +30,33 @@
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <header class="home-header header-overlay">
-      <a href="index.html" class="logo-container">
-        <img src="logo.webp" alt="BubbleFM Logo" class="logo-icon" />
-        <span class="logo-text">
-          <span class="brand-bubble">Bubble</span>
-          <span class="brand-fm">FM</span>
-        </span>
-      </a>
+    <header class="home-header floating-header">
+      <div class="header-brand-group">
+        <a href="index.html" class="logo-container">
+          <img src="logo.webp" alt="BubbleFM Logo" class="logo-icon" />
+          <span class="logo-text">
+            <span class="brand-bubble">Bubble</span>
+            <span class="brand-fm">FM</span>
+          </span>
+        </a>
+      </div>
       <div class="header-actions">
+        <button
+          id="share-toggle"
+          class="share-header-btn"
+          type="button"
+          aria-label="Share charts"
+          title="Share charts">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M720-80q-50 0-85-35t-35-85q0-7 1-14.5t3-13.5L322-392q-17 15-38 23.5t-44 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q23 0 44 8.5t38 23.5l282-164q-2-6-3-13.5t-1-14.5q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-23 0-44-8.5T638-672L356-508q2 6 3 13.5t1 14.5q0 7-1 14.5t-3 13.5l282 164q17-15 38-23.5t44-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-640q17 0 28.5-11.5T760-760q0-17-11.5-28.5T720-800q-17 0-28.5 11.5T680-760q0 17 11.5 28.5T720-720ZM240-440q17 0 28.5-11.5T280-480q0-17-11.5-28.5T240-520q-17 0-28.5 11.5T200-480q0 17 11.5 28.5T240-440Zm480 280q17 0 28.5-11.5T760-200q0-17-11.5-28.5T720-240q-17 0-28.5 11.5T680-200q0 17 11.5 28.5T720-160Z"/></svg>
+        </button>
+        <button
+          id="faq-toggle"
+          class="faq-header-btn"
+          type="button"
+          aria-label="Frequently Asked Questions"
+          title="Frequently Asked Questions">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M508.5-291.5Q520-303 520-320v-160q0-17-11.5-28.5T480-520t-28.5 11.5T440-480v160q0 17 11.5 28.5T480-280t28.5-11.5m0-320Q520-623 520-640t-11.5-28.5T480-680t-28.5 11.5T440-640t11.5 28.5T480-600t28.5-11.5M480-80q-83 0-156-31.5T197-197t-85.5-127T80-480t31.5-156T197-763t127-85.5T480-880t156 31.5T763-763t85.5 127T880-480t-31.5 156T763-197t-127 85.5T480-80m0-80q134 0 227-93t93-227-93-227-227-93-227 93-93 227 93 227 227 93m0-320"/></svg>
+        </button>
         <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme"></button>
         <a
           href="https://buymeacoffee.com/snw.mint"
@@ -131,22 +149,6 @@
                     class="stat-value skeleton skeleton-text"
                     style="width: 70px; height: 20px"></span>
                 </div>
-                <button
-                  id="share-toggle"
-                  class="stat-share-btn"
-                  type="button"
-                  aria-label="Share charts"
-                  title="Share charts">
-                  <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M720-80q-50 0-85-35t-35-85q0-7 1-14.5t3-13.5L322-392q-17 15-38 23.5t-44 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q23 0 44 8.5t38 23.5l282-164q-2-6-3-13.5t-1-14.5q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-23 0-44-8.5T638-672L356-508q2 6 3 13.5t1 14.5q0 7-1 14.5t-3 13.5l282 164q17-15 38-23.5t44-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-640q17 0 28.5-11.5T760-760q0-17-11.5-28.5T720-800q-17 0-28.5 11.5T680-760q0 17 11.5 28.5T720-720ZM240-440q17 0 28.5-11.5T280-480q0-17-11.5-28.5T240-520q-17 0-28.5 11.5T200-480q0 17 11.5 28.5T240-440Zm480 280q17 0 28.5-11.5T760-200q0-17-11.5-28.5T720-240q-17 0-28.5 11.5T680-200q0 17 11.5 28.5T720-160Z"/></svg>
-                </button>
-                <button
-                  id="faq-toggle"
-                  class="stat-info-btn"
-                  type="button"
-                  aria-label="Frequently Asked Questions"
-                  title="Frequently Asked Questions">
-                  <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M508.5-291.5Q520-303 520-320v-160q0-17-11.5-28.5T480-520t-28.5 11.5T440-480v160q0 17 11.5 28.5T480-280t28.5-11.5m0-320Q520-623 520-640t-11.5-28.5T480-680t-28.5 11.5T440-640t11.5 28.5T480-600t28.5-11.5M480-80q-83 0-156-31.5T197-197t-85.5-127T80-480t31.5-156T197-763t127-85.5T480-880t156 31.5T763-763t85.5 127T880-480t-31.5 156T763-197t-127 85.5T480-80m0-80q134 0 227-93t93-227-93-227-227-93-227 93-93 227 93 227 227 93m0-320"/></svg>
-                </button>
               </div>
             </div>
           </div>
@@ -370,9 +372,6 @@
     <div class="fab-wrapper hidden" id="fabActions">
       <button id="btnGerarRelatorio" class="fab-generate" title="Generate Card">
         Generate Card
-      </button>
-      <button id="btnShareFab" class="fab-generate fab-secondary fab-icon-btn" type="button" title="Share charts" aria-label="Share charts">
-        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor"><path d="M720-80q-50 0-85-35t-35-85q0-7 1-14.5t3-13.5L322-392q-17 15-38 23.5t-44 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q23 0 44 8.5t38 23.5l282-164q-2-6-3-13.5t-1-14.5q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-23 0-44-8.5T638-672L356-508q2 6 3 13.5t1 14.5q0 7-1 14.5t-3 13.5l282 164q17-15 38-23.5t44-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-640q17 0 28.5-11.5T760-760q0-17-11.5-28.5T720-800q-17 0-28.5 11.5T680-760q0 17 11.5 28.5T720-720ZM240-440q17 0 28.5-11.5T280-480q0-17-11.5-28.5T240-520q-17 0-28.5 11.5T200-480q0 17 11.5 28.5T240-440Zm480 280q17 0 28.5-11.5T760-200q0-17-11.5-28.5T720-240q-17 0-28.5 11.5T680-200q0 17 11.5 28.5T720-160Z"/></svg>
       </button>
     </div>
 

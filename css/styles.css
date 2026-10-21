@@ -136,17 +136,6 @@ button {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.home-header.header-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  background: transparent;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  border-bottom: none;
-}
 
 .logo-container {
   display: flex;
@@ -218,7 +207,9 @@ button {
 
 .theme-toggle-btn,
 .github-link-btn,
-.bmac-link-btn {
+.bmac-link-btn,
+.faq-header-btn,
+.share-header-btn {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--radius-full);
@@ -226,43 +217,29 @@ button {
   align-items: center;
   justify-content: center;
   color: var(--color-text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .theme-toggle-btn:active,
 .github-link-btn:active,
-.bmac-link-btn:active {
+.bmac-link-btn:active,
+.faq-header-btn:active,
+.share-header-btn:active {
   transform: scale(0.95);
 }
 
 .theme-toggle-btn svg,
 .github-link-btn svg,
-.bmac-link-btn svg {
+.bmac-link-btn svg,
+.faq-header-btn svg,
+.share-header-btn svg {
   width: 1.25rem;
   height: 1.25rem;
   fill: currentColor;
-}
-
-.home-header.header-overlay .brand-bubble {
-  color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-
-.home-header.header-overlay .brand-fm {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-
-.home-header.header-overlay .logo-icon {
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
-}
-
-.home-header.header-overlay .theme-toggle-btn,
-.home-header.header-overlay .github-link-btn,
-.home-header.header-overlay .bmac-link-btn {
-  color: #ffffff;
-  background-color: rgba(0, 0, 0, 0.3);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
 }
 
 .sheet-support-hint {
@@ -2678,7 +2655,9 @@ input:checked+.slider:before {
 
   .home-header .theme-toggle-btn,
   .home-header .github-link-btn,
-  .home-header .bmac-link-btn {
+  .home-header .bmac-link-btn,
+  .home-header .faq-header-btn,
+  .home-header .share-header-btn {
     width: 2.25rem;
     height: 2.25rem;
   }
