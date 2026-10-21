@@ -1707,7 +1707,7 @@ input:checked+.slider:before {
 
 .story-list-block h3 {
   font-size: 2.5rem;
-  font-weight: 500;
+  font-weight: 800;
   color: var(--sc-text);
   margin-bottom: 20px;
   letter-spacing: -0.5px;
