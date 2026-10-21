@@ -75,6 +75,20 @@ strong {
   line-height: inherit;
 }
 
+.dynamic-word {
+  display: inline-block;
+  vertical-align: baseline;
+  transition: filter 0.35s ease, opacity 0.35s ease;
+  filter: blur(0);
+  opacity: 1;
+  will-change: filter, opacity;
+}
+
+.dynamic-word.blur-out {
+  filter: blur(10px);
+  opacity: 0;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--color-bg);

@@ -202,6 +202,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const dynamicWordEl = document.getElementById("dynamicWord");
+  if (dynamicWordEl) {
+    const words = ["Charts", "Minutes", "Scrobbles", "Vibe", "Tops"];
+    let currentIndex = 0;
+    setInterval(() => {
+      dynamicWordEl.classList.add("blur-out");
+      setTimeout(() => {
+        currentIndex = (currentIndex + 1) % words.length;
+        dynamicWordEl.textContent = words[currentIndex];
+        dynamicWordEl.classList.remove("blur-out");
+      }, 350);
+    }, 2800);
+  }
+
   const formUsername = document.getElementById("form-username");
   if (formUsername) {
     formUsername.addEventListener("submit", (e) => {
