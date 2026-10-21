@@ -14,7 +14,7 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
-  --radius-full: 9999px;
+  --radius-full: 20px;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
@@ -160,6 +160,10 @@ button {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
+body:has(.landing-card) .home-header {
+  animation: entryFadeDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 
 .logo-container {
   display: flex;
@@ -301,6 +305,7 @@ button {
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
   padding: 3rem 2.5rem;
+  animation: entryFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 [data-theme="dark"] .landing-card {
@@ -740,6 +745,15 @@ button {
   gap: 2.5rem;
   text-align: center;
   width: 100%;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.feature-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .feature-content {
@@ -1112,13 +1126,11 @@ button {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 35%,
-    rgba(0, 0, 0, 0.2) 55%,
-    rgba(0, 0, 0, 0.65) 80%,
-    rgba(0, 0, 0, 0.9) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 35%,
+      rgba(0, 0, 0, 0.2) 55%,
+      rgba(0, 0, 0, 0.65) 80%,
+      rgba(0, 0, 0, 0.9) 100%);
 }
 
 .chart-item.top-1 .text-content {
@@ -1220,32 +1232,77 @@ button {
 
 /* Footer */
 .app-footer {
-  padding: 2rem;
+  padding: 2.5rem 1.5rem;
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   border-top: 1px solid var(--color-border);
   margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .footer-info {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
 }
 
 .footer-info a,
 .footer-links a {
   color: var(--color-text);
   font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-info a:hover,
+.footer-links a:hover {
+  text-decoration: underline;
 }
 
 .footer-links {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  line-height: 1.6;
+}
+
+.footer-links .dot {
+  color: var(--color-border);
+  user-select: none;
 }
 
 @media (max-width: 768px) {
+  .app-footer {
+    padding: 2rem 1.25rem calc(2rem + env(safe-area-inset-bottom, 0px));
+    font-size: 0.825rem;
+  }
+
+  .footer-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    max-width: 340px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .footer-links .dot {
+    display: none;
+  }
   .user-profile-container {
     flex-direction: column;
     align-items: center;
@@ -2859,5 +2916,42 @@ input:checked+.slider:before {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes entryFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes entryFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(.landing-card) .home-header,
+  .landing-card {
+    animation: none !important;
+  }
+
+  .feature-section {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }

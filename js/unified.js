@@ -216,6 +216,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 2800);
   }
 
+  const featureSections = document.querySelectorAll(".landing-features .feature-section");
+  if (featureSections.length > 0) {
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12 }
+      );
+      featureSections.forEach((section) => observer.observe(section));
+    } else {
+      featureSections.forEach((section) => section.classList.add("is-visible"));
+    }
+  }
+
   const formUsername = document.getElementById("form-username");
   if (formUsername) {
     formUsername.addEventListener("submit", (e) => {
