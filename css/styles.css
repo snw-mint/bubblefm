@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
   --color-bg: #FFFFFF;
@@ -19,9 +19,10 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
 
-  --font-title: 'Figtree', sans-serif;
-  --font-text: 'Figtree', sans-serif;
-  --font-body: 'Figtree', sans-serif;
+  --font-title: 'Plus Jakarta Sans', sans-serif;
+  --font-text: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
 
   --color-brand: #b90000;
 
@@ -65,8 +66,17 @@ strong {
   font-weight: 600;
 }
 
+.highlight-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-size: 1.15em;
+  line-height: inherit;
+}
+
 body {
-  font-family: 'Figtree', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
@@ -289,7 +299,7 @@ button {
 
 .landing-title {
   font-size: 3rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.5px;
   line-height: 1.15;
   margin-bottom: 0.85rem;
@@ -724,7 +734,7 @@ button {
 
 .feature-content h2 {
   font-size: 2.25rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.5px;
   margin-bottom: 1rem;
   line-height: 1.2;
@@ -857,7 +867,7 @@ button {
 
 .user-display-name {
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: -1px;
   line-height: 1.2;
   margin-bottom: 1rem;
@@ -1002,7 +1012,7 @@ button {
 
 .chart-card h2 {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 500;
   margin-bottom: 1.5rem;
   letter-spacing: -0.5px;
 }
@@ -1334,6 +1344,7 @@ button {
 .modal h2 {
   font-family: var(--font-title);
   font-size: 1.5rem;
+  font-weight: 500;
   margin-bottom: 0.5rem;
   color: var(--color-text);
 }
@@ -1622,7 +1633,7 @@ input:checked+.slider:before {
 
 .story-list-block h3 {
   font-size: 2.5rem;
-  font-weight: 800;
+  font-weight: 500;
   color: var(--sc-text);
   margin-bottom: 20px;
   letter-spacing: -0.5px;
@@ -1767,6 +1778,7 @@ input:checked+.slider:before {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -2285,7 +2297,7 @@ input:checked+.slider:before {
 .sheet-header h2 {
   margin: 0 !important;
   font-size: 1.4rem !important;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .icon-button {

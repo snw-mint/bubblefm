@@ -1,8 +1,22 @@
-# <img src="logo.webp" width="50" align="center"> BubbleFM &nbsp; ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fsnw-mint%2Fbubblefm%2Frefs%2Fheads%2Fmain%2Fpackage.json%3F&query=version&label=latest%20version&color=%23b90000)
+<p align="center">
+  <img src="logo.svg" width="70" alt="BubbleFM Logo" />
+</p>
+
+<h1 align="center">BubbleFM</h1>
+
+<p align="center">
+  <a href="https://github.com/snw-mint/bubblefm/activity"><img src="https://img.shields.io/github/last-commit/snw-mint/bubblefm?style=plastic&color=%23E53E3E" alt="last commit" /></a>
+  <a href="https://github.com/snw-mint/bubblefm?tab=GPL-3.0-1-ov-file"><img src="https://img.shields.io/badge/GPLv3-message?style=plastic&label=license&color=%23E53E3E" alt="license" /></a>
+  <img src="https://img.shields.io/badge/yes-label?style=plastic&label=maintained" alt="maintained" />
+</p>
 
 <div align="center">
   <img src="assets\images\repo.png" alt="BubbleFM Dashboard"/>
 </div>
+
+<p align="center">
+  <strong>A clean, experimental dashboard to explore your monthly Last.fm stats.</strong>
+</p>
 
 ## About
 

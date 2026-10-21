@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (info1.user) {
       document.getElementById("userDisplayName1").textContent = info1.user.name;
       const titleEl1 = document.getElementById("titleUser1Vibe");
-      if (titleEl1) titleEl1.textContent = `${info1.user.name}'s vibe`;
+      if (titleEl1) titleEl1.innerHTML = `${info1.user.name}'s <span class="highlight-serif">vibe</span>`;
       document.getElementById("userDisplayName1").classList.remove("skeleton", "skeleton-text");
       document.getElementById("userDisplayName1").removeAttribute("style");
 
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (info2.user) {
       document.getElementById("userDisplayName2").textContent = info2.user.name;
       const titleEl2 = document.getElementById("titleUser2Vibe");
-      if (titleEl2) titleEl2.textContent = `${info2.user.name}'s vibe`;
+      if (titleEl2) titleEl2.innerHTML = `${info2.user.name}'s <span class="highlight-serif">vibe</span>`;
       document.getElementById("userDisplayName2").classList.remove("skeleton", "skeleton-text");
       document.getElementById("userDisplayName2").removeAttribute("style");
 
