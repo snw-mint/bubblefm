@@ -1,11 +1,11 @@
 name: Design Feedback
-description: Provide style and design feedback for the cards.
+description: Provide style and design feedback for the reports.
 title: "[Feedback]: "
 labels: ["feedback", "design", "ui"]
 body:
   - type: markdown
     attributes:
-      value: "We appreciate your feedback on the style and design of our cards."
+      value: "We appreciate your feedback on the style and design of our reports."
   - type: textarea
     id: feedback
     attributes:

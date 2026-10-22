@@ -548,21 +548,21 @@
   </footer>
 
   <div class="fab-wrapper hidden" id="fabActions">
-    <button id="btnGerarRelatorio" class="fab-generate" title="Generate Card">
+    <button id="btnGerarRelatorio" class="fab-generate" title="Generate Report">
       <animate-icons name="download" size="20"></animate-icons>
-      <span>Generate Card</span>
+      <span>Generate Report</span>
     </button>
   </div>
 
   <div id="generationSettingsModal" class="modal">
     <div class="modal-content settings-sheet">
       <div class="sheet-header">
-        <h2>Card Style</h2>
+        <h2>Report Style</h2>
         <button class="icon-button" id="closeSettingsModal" aria-label="Close">
           <animate-icons name="x" size="24"></animate-icons>
         </button>
       </div>
-      <div class="modal-subtitle">Choose a theme for your card</div>
+      <div class="modal-subtitle">Choose a theme for your report</div>
 
       <div class="bg-palette circular" id="bgStylePicker">
         <div class="bg-option selected" data-bg="red" style="color: #B90000;" title="Red">
@@ -595,7 +595,7 @@
 
       <button id="confirmSettingsBtn" class="btn-primary full-width">
         <animate-icons name="download" size="20"></animate-icons>
-        <span>Generate Card</span>
+        <span>Generate Report</span>
       </button>
     </div>
   </div>
@@ -611,12 +611,12 @@
     </div>
   </div>
 
-  <div id="storyCardContainer" class="hidden-card-container">
-    <div id="storyCard" class="theme-dark">
-      <img id="storyCardBackgroundImg" class="story-card-bg-img" crossorigin="anonymous" />
+  <div id="storyReportContainer" class="hidden-report-container">
+    <div id="storyReport" class="theme-dark">
+      <img id="storyReportBackgroundImg" class="story-report-bg-img" crossorigin="anonymous" />
 
       <div class="story-header">
-        <div id="storyCardTitle" class="story-title">Match</div>
+        <div id="storyReportTitle" class="story-title">Match</div>
         <div id="storyMatchScore" class="story-match-score">0%</div>
       </div>
 

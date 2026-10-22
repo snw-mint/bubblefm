@@ -163,9 +163,9 @@ function initFaqModal() {
           </details>
 
           <details class="faq-item">
-            <summary class="faq-question">How do I switch the Match card's Light / Dark theme?</summary>
+            <summary class="faq-question">How do I switch the Match report's Light / Dark theme?</summary>
             <div class="faq-answer">
-              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
+              <p>The generated report automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your report.</p>
             </div>
           </details>
 
@@ -587,7 +587,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       playcount: parseInt(al.playcount || "0", 10),
     }));
 
-    initCardGenerator({
+    initReportGenerator({
       user1,
       user2,
       displayName1: info1.user?.name || user1,
@@ -620,7 +620,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-function initCardGenerator(matchContext) {
+function initReportGenerator(matchContext) {
   const btnGerarRelatorio = document.getElementById("btnGerarRelatorio");
   const settingsModal = document.getElementById("generationSettingsModal");
   const closeSettings = document.getElementById("closeSettingsModal");
@@ -628,7 +628,7 @@ function initCardGenerator(matchContext) {
   const bgOptions = document.querySelectorAll(".bg-option");
   const fabActions = document.getElementById("fabActions") || btnGerarRelatorio;
   const themeToggleCheckbox = document.getElementById("themeToggleCheckbox");
-  const cardElement = document.getElementById("storyCard");
+  const reportElement = document.getElementById("storyReport");
 
   if (fabActions) {
     fabActions.classList.remove("hidden");
@@ -644,13 +644,13 @@ function initCardGenerator(matchContext) {
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
       if (typeof umami !== "undefined") {
-        umami.track("Match Card Modal Opened");
+        umami.track("Match Report Modal Opened");
       }
       if (themeToggleCheckbox) {
         themeToggleCheckbox.checked = document.documentElement.getAttribute("data-theme") === "light";
       }
-      if (cardElement) {
-        cardElement.className = themeToggleCheckbox && themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
+      if (reportElement) {
+        reportElement.className = themeToggleCheckbox && themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
       }
       settingsModal.classList.add("show");
     });
@@ -668,13 +668,13 @@ function initCardGenerator(matchContext) {
     });
   }
 
-  if (themeToggleCheckbox && cardElement) {
+  if (themeToggleCheckbox && reportElement) {
     themeToggleCheckbox.addEventListener("change", () => {
-      cardElement.className = themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
+      reportElement.className = themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
     });
   }
 
-  if (confirmSettings && cardElement) {
+  if (confirmSettings && reportElement) {
     confirmSettings.addEventListener("click", async () => {
       settingsModal.classList.remove("show");
 
@@ -682,21 +682,21 @@ function initCardGenerator(matchContext) {
       const selectedBg = selectedBgOption ? selectedBgOption.dataset.bg : "red";
       const isLight = Boolean(themeToggleCheckbox && themeToggleCheckbox.checked);
 
-      cardElement.className = isLight ? "theme-light" : "theme-dark";
+      reportElement.className = isLight ? "theme-light" : "theme-dark";
 
-      const cardBgImg = document.getElementById("storyCardBackgroundImg");
-      if (cardBgImg) {
-        cardBgImg.src = `/assets/bg/${selectedBg}.webp`;
+      const reportBgImg = document.getElementById("storyReportBackgroundImg");
+      if (reportBgImg) {
+        reportBgImg.src = `/assets/bg/${selectedBg}.webp`;
       }
 
-      document.getElementById("storyCardTitle").textContent = "Match";
+      document.getElementById("storyReportTitle").textContent = "Match";
       document.getElementById("storyMatchScore").textContent = `${matchContext.matchPercentage}%`;
 
       const tierName = getAffinityTier(matchContext.matchPercentage);
       document.getElementById("storyMonthYear").textContent = tierName;
       document.getElementById("storyTotalMinutes").textContent = `${matchContext.displayName1} & ${matchContext.displayName2}`;
 
-      const cleanCardTitle = (str) => {
+      const cleanReportTitle = (str) => {
         if (!str) return "";
         const cleaned = String(str).replace(/\s*\([^)]*\)/g, "").trim();
         return cleaned || String(str).trim();
@@ -710,7 +710,7 @@ function initCardGenerator(matchContext) {
         top3.forEach((item, index) => {
           const rank = index + 1;
           const rawSubText = item.artist ? item.artist.name : `${item.playcount} streams`;
-          const rawName = isTrackOrAlbum ? cleanCardTitle(item.name) : item.name;
+          const rawName = isTrackOrAlbum ? cleanReportTitle(item.name) : item.name;
           const displayName = truncateWithEllipsis(rawName, 22);
           const displaySub = truncateWithEllipsis(rawSubText, 28);
           container.innerHTML += `
@@ -747,7 +747,7 @@ function initCardGenerator(matchContext) {
 
       setTimeout(() => {
         htmlToImage
-          .toPng(cardElement, {
+          .toPng(reportElement, {
             pixelRatio: 2,
             backgroundColor: null,
             cacheBust: true,
@@ -759,14 +759,14 @@ function initCardGenerator(matchContext) {
             link.click();
 
             if (typeof umami !== "undefined") {
-              umami.track("Match Card Generated", {
+              umami.track("Match Report Generated", {
                 color: selectedBg,
                 theme: isLight ? "light" : "dark",
                 score: matchContext.matchPercentage,
               });
             }
 
-            confirmSettings.innerHTML = '<animate-icons name="download" size="20"></animate-icons><span>Generate Card</span>';
+            confirmSettings.innerHTML = '<animate-icons name="download" size="20"></animate-icons><span>Generate Report</span>';
 
             if (generationModal) {
               stateLoading.style.display = "none";
@@ -777,7 +777,7 @@ function initCardGenerator(matchContext) {
             }
           })
           .catch((err) => {
-            console.error("Error generating match card:", err);
+            console.error("Error generating match report:", err);
             confirmSettings.textContent = "Error";
             if (generationModal) {
               generationModal.classList.remove("show");

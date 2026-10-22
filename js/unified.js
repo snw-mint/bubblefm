@@ -507,7 +507,7 @@ function initFaqModal() {
         <span class="close-button" id="faqCloseBtn">&times;</span>
         <div class="faq-header">
           <h2>Frequently Asked Questions</h2>
-          <p class="modal-info">Everything you need to know about BubbleFM calculations, card generation, and features.</p>
+          <p class="modal-info">Everything you need to know about BubbleFM calculations, report generation, and features.</p>
         </div>
         <div class="faq-list">
           <details class="faq-item" open>
@@ -538,13 +538,13 @@ function initFaqModal() {
           </details>
 
           <details class="faq-item">
-            <summary class="faq-question">3. How to generate a card?</summary>
+            <summary class="faq-question">3. How to generate a report?</summary>
             <div class="faq-answer">
-              <p>Click the floating <strong>Generate card</strong> button at the bottom of the page to open the customization modal:</p>
+              <p>Click the floating <strong>Generate report</strong> button at the bottom of the page to open the customization modal:</p>
               <ul class="faq-links-list">
-                <li><strong>Background:</strong> Choose from available visual themes (Candy, Sunset, Midnight, Emerald, etc.) to set as your card backdrop.</li>
+                <li><strong>Background:</strong> Choose from available visual themes (Candy, Sunset, Midnight, Emerald, etc.) to set as your report backdrop.</li>
                 <li><strong>Service logo:</strong> Pick your favorite music streaming logo (Spotify, Apple Music, YouTube Music, Deezer, Last.fm, or None) to stamp on top.</li>
-                <li><strong>Light theme:</strong> Toggle this on for a bright card with dark text, or leave it off for the classic dark theme.</li>
+                <li><strong>Light theme:</strong> Toggle this on for a bright report with dark text, or leave it off for the classic dark theme.</li>
                 <li><strong>Use scrobbles:</strong> Turn this on to display your total scrobble count (e.g., <code>406 scrobbles</code>) in the bottom stat instead of estimated minutes (e.g., <code>1,420 minutes</code>).</li>
               </ul>
               <p style="margin-top: 0.6rem;">Once configured, proceed and click <strong>Generate</strong> to render the canvas and start your high-resolution PNG download automatically.</p>
@@ -607,9 +607,9 @@ function initFaqModal() {
           </details>
 
           <details class="faq-item">
-            <summary class="faq-question">How do I switch the Match card's Light / Dark theme?</summary>
+            <summary class="faq-question">How do I switch the Match report's Light / Dark theme?</summary>
             <div class="faq-answer">
-              <p>The generated card automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your card.</p>
+              <p>The generated report automatically matches the website's active theme. Click the <strong>Sun / Moon icon</strong> in the top header to toggle between light and dark mode before generating your report.</p>
             </div>
           </details>
 
@@ -684,7 +684,7 @@ function initGlobalTooltip() {
 
   document.addEventListener("mouseover", (e) => {
     const chartItem = e.target.closest(".chart-item");
-    if (chartItem && !chartItem.closest("#storyCardContainer")) {
+    if (chartItem && !chartItem.closest("#storyReportContainer")) {
       const plays = chartItem.getAttribute("data-plays");
       const minutes = chartItem.getAttribute("data-minutes");
       if (plays && minutes) {
@@ -1324,7 +1324,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
       if (typeof umami !== "undefined") {
-        umami.track("Card Modal Opened");
+        umami.track("Report Modal Opened");
       }
       if (step1 && step2) {
         step1.style.display = "block";
@@ -1346,19 +1346,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const storyCardContainer = document.getElementById("storyCardContainer");
-  const cardElement = document.getElementById("storyCard");
+  const storyReportContainer = document.getElementById("storyReportContainer");
+  const reportElement = document.getElementById("storyReport");
   const themeToggleCheckbox = document.getElementById("themeToggleCheckbox");
 
-  if (themeToggleCheckbox && cardElement) {
-    const updateCardTheme = () => {
-      cardElement.className = themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
+  if (themeToggleCheckbox && reportElement) {
+    const updateReportTheme = () => {
+      reportElement.className = themeToggleCheckbox.checked ? "theme-light" : "theme-dark";
     };
-    themeToggleCheckbox.addEventListener("change", updateCardTheme);
-    updateCardTheme();
+    themeToggleCheckbox.addEventListener("change", updateReportTheme);
+    updateReportTheme();
   }
 
-  if (confirmSettings && storyCardContainer) {
+  if (confirmSettings && storyReportContainer) {
     confirmSettings.addEventListener("click", async () => {
       if (!currentActiveData) {
         alert("Data not fully loaded yet. Please wait.");
@@ -1376,17 +1376,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const isLight = document.getElementById("themeToggleCheckbox").checked;
       const useScrobbles = Boolean(document.getElementById("useScrobblesCheckbox")?.checked);
 
-      const cardElement = document.getElementById("storyCard");
-      if (cardElement) {
-        cardElement.className = isLight ? "theme-light" : "theme-dark";
+      const reportElement = document.getElementById("storyReport");
+      if (reportElement) {
+        reportElement.className = isLight ? "theme-light" : "theme-dark";
       }
 
-      const cardBgImg = document.getElementById("storyCardBackgroundImg");
-      if (cardBgImg) {
-        cardBgImg.src = `/assets/bg/${selectedBg}.webp`;
+      const reportBgImg = document.getElementById("storyReportBackgroundImg");
+      if (reportBgImg) {
+        reportBgImg.src = `/assets/bg/${selectedBg}.webp`;
       }
 
-      document.getElementById("storyCardTitle").textContent = "Recap";
+      document.getElementById("storyReportTitle").textContent = "Recap";
 
       const logoContainer = document.getElementById("storyServiceLogo");
       logoContainer.innerHTML = "";
@@ -1453,7 +1453,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return s.slice(0, maxLength).trimEnd() + "...";
       };
 
-      const cleanCardTitle = (str) => {
+      const cleanReportTitle = (str) => {
         if (!str) return "";
         const cleaned = String(str).replace(/\s*\([^)]*\)/g, "").trim();
         return cleaned || String(str).trim();
@@ -1466,7 +1466,7 @@ document.addEventListener("DOMContentLoaded", () => {
         top3.forEach((item, index) => {
           const rank = index + 1;
           const rawSubText = item.artist ? item.artist.name : `${item.playcount} streams`;
-          const rawName = isTrackOrAlbum ? cleanCardTitle(item.name) : item.name;
+          const rawName = isTrackOrAlbum ? cleanReportTitle(item.name) : item.name;
           const displayName = truncateWithEllipsis(rawName, 22);
           const displaySub = truncateWithEllipsis(rawSubText, 28);
           container.innerHTML += `
@@ -1504,8 +1504,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("storyImageAlbum").src = src;
       }
 
-      storyCardContainer.style.opacity = "0";
-      storyCardContainer.style.zIndex = "-999";
+      storyReportContainer.style.opacity = "0";
+      storyReportContainer.style.zIndex = "-999";
       confirmSettings.textContent = "Generating...";
 
       const generationModal = document.getElementById("generationModal");
@@ -1519,7 +1519,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       setTimeout(() => {
-        htmlToImage.toPng(cardElement, {
+        htmlToImage.toPng(reportElement, {
           pixelRatio: 2,
           backgroundColor: null,
           cacheBust: true,
@@ -1531,7 +1531,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link.click();
 
             if (typeof umami !== "undefined") {
-              umami.track("Card Generated", {
+              umami.track("Report Generated", {
                 color: selectedBg,
                 service: serviceSelect,
                 theme: isLight ? "light" : "dark",
@@ -1539,7 +1539,7 @@ document.addEventListener("DOMContentLoaded", () => {
               });
             }
 
-            confirmSettings.innerHTML = '<animate-icons name="download" size="20"></animate-icons><span>Generate Card</span>';
+            confirmSettings.innerHTML = '<animate-icons name="download" size="20"></animate-icons><span>Generate Report</span>';
 
             if (generationModal) {
               stateLoading.style.display = "none";
