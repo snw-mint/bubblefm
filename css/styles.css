@@ -1051,10 +1051,21 @@ body:has(.landing-card) .home-header {
     align-items: center;
     padding: 0.35rem 0.6rem;
     background-color: var(--color-card);
-
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
     box-shadow: var(--shadow-sm);
     gap: 0.35rem;
+  }
+
+  .mobile-actions-pill animate-icons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-actions-pill svg {
+    fill: none !important;
+    stroke: currentColor;
   }
 
   .mobile-pill-btn {
@@ -3019,7 +3030,30 @@ body:has(.landing-card) .home-header {
 
     .user-info-wrapper {
       flex-direction: column !important;
-      align-items: flex-start !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100%;
+    }
+
+    .user-info-wrapper .user-info-details {
+      align-items: center !important;
+      text-align: center !important;
+      width: 100%;
+    }
+
+    .user-info-wrapper .user-display-name {
+      text-align: center !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    .user-info-wrapper .user-display-name.skeleton {
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    .chart-card h2 {
+      text-align: center !important;
     }
 
     .landing-card {
