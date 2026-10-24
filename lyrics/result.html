@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Lyrics Search Results - BubbleFM</title>
+  <meta name="title" content="Lyrics Search Results - BubbleFM" />
+  <meta name="description"
+    content="Select a track or album to create shareable lyrics cards." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <header class="home-header floating-header">
+    <div class="header-brand-group">
+      <a href="/index.html" class="logo-container">
+        <img src="/logo.svg" alt="BubbleFM Logo" class="logo-icon" />
+        <span class="logo-text">
+          <span class="brand-bubble">Bubble</span>
+          <span class="brand-fm">FM</span>
+        </span>
+      </a>
+    </div>
+    <div class="header-actions">
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme"></button>
+      <a href="https://buymeacoffee.com/snw.mint" target="_blank" rel="noopener noreferrer" class="bmac-link-btn"
+        aria-label="Buy Me a Coffee" title="Buy Me a Coffee">
+        <animate-icons name="coffee" size="24"></animate-icons>
+      </a>
+      <a href="https://github.com/snw-mint/bubblefm" target="_blank" rel="noopener noreferrer" class="github-link-btn"
+        aria-label="GitHub Repository" title="GitHub Repository">
+        <animate-icons name="github" size="24"></animate-icons>
+      </a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="lyrics-results-container">
+      <div class="lyrics-results-header">
+        <h1 class="lyrics-results-title">Select a <span class="highlight-serif">Result</span></h1>
+        <p class="lyrics-results-subtitle" id="searchSubtitle">Searching for songs...</p>
+      </div>
+
+      <div class="lyrics-cards-grid" id="lyricsResultsGrid">
+        <div class="lyrics-result-card lyrics-skeleton-card">
+          <div class="lyrics-card-cover-wrapper skeleton"></div>
+          <div class="lyrics-card-info" style="width: 100%;">
+            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+          </div>
+          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+        </div>
+        <div class="lyrics-result-card lyrics-skeleton-card">
+          <div class="lyrics-card-cover-wrapper skeleton"></div>
+          <div class="lyrics-card-info" style="width: 100%;">
+            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+          </div>
+          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+        </div>
+        <div class="lyrics-result-card lyrics-skeleton-card">
+          <div class="lyrics-card-cover-wrapper skeleton"></div>
+          <div class="lyrics-card-info" style="width: 100%;">
+            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+          </div>
+          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+        </div>
+        <div class="lyrics-result-card lyrics-skeleton-card">
+          <div class="lyrics-card-cover-wrapper skeleton"></div>
+          <div class="lyrics-card-info" style="width: 100%;">
+            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+          </div>
+          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+        </div>
+        <div class="lyrics-result-card lyrics-skeleton-card">
+          <div class="lyrics-card-cover-wrapper skeleton"></div>
+          <div class="lyrics-card-info" style="width: 100%;">
+            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+          </div>
+          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <div class="lyrics-not-found-wrapper">
+        <p class="lyrics-not-found-text">Didn't find it? Try another search</p>
+        <a href="./" class="lyrics-retry-btn">
+          <animate-icons name="chevron-left" size="18"></animate-icons>
+          <span>Try another search</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-info">
+      <span class="info-line-1">
+        ©
+        <span id="currentYear">2026</span>
+        BubbleFM.
+      </span>
+      <span class="separator">|</span>
+      <span class="info-line-3">
+        by
+        <a href="https://github.com/snw-mint/" target="_blank" rel="noopener noreferrer">Snow Mint</a>
+      </span>
+    </div>
+    <div class="footer-links">
+      <a href="https://buymeacoffee.com/snw.mint" target="_blank" rel="noopener noreferrer">Buy Me a Coffee</a>
+      <span class="dot">•</span>
+      <a href="https://github.com/snw-mint/bubblefm" target="_blank" rel="noopener noreferrer">Star on GitHub</a>
+      <span class="dot">•</span>
+      <a href="/privacy.html">Privacy Policy</a>
+      <span class="dot">•</span>
+      <a href="/terms.html">Terms of Use</a>
+      <span class="dot">•</span>
+      <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+      <span class="dot">•</span>
+      <span class="versao">v1.0.0</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/lyrics/lyrics.js"></script>
+</body>
+
+</html>
