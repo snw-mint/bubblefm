@@ -26,6 +26,7 @@ export default defineConfig({
         result: resolve(__dirname, "result.html"),
         match: resolve(__dirname, "match/index.html"),
         matchResult: resolve(__dirname, "match/result.html"),
+        lyrics: resolve(__dirname, "lyrics/index.html"),
         privacy: resolve(__dirname, "privacy.html"),
         terms: resolve(__dirname, "terms.html"),
       },
