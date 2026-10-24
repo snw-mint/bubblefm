@@ -19,6 +19,8 @@ import {
   Moon,
   Download,
   Languages,
+  SlidersHorizontal,
+  Paintbrush,
 } from "@animateicons/vanilla/lucide";
 
 defineIcons({
@@ -41,6 +43,8 @@ defineIcons({
   Moon,
   Download,
   Languages,
+  SlidersHorizontal,
+  Paintbrush,
 });
 
 if (typeof document !== "undefined") {

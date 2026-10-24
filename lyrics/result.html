@@ -155,6 +155,37 @@
           <span>Back to results</span>
         </button>
       </div>
+
+      <div id="stepLayout" class="lyrics-step" style="display: none; max-width: 1160px; width: 100%;">
+        <div class="lyrics-results-header">
+          <h1 class="lyrics-results-title">Choose <span class="highlight-serif">Layout</span></h1>
+          <p class="lyrics-results-subtitle">Select a style and customize your lyrics card</p>
+        </div>
+
+        <div class="segmented-control lyrics-format-segmented" id="lyricsFormatSegmented">
+          <button type="button" class="segment-btn active" data-format="card">Card</button>
+          <button type="button" class="segment-btn" data-format="story">Story</button>
+        </div>
+
+        <div class="lyrics-layouts-grid" id="lyricsLayoutsGrid"></div>
+
+        <div class="lyrics-layout-actions">
+          <button type="button" id="btnOpenPersonalize" class="lyrics-action-btn">
+            <animate-icons name="sliders-horizontal" size="20"></animate-icons>
+            <span>Personalize</span>
+          </button>
+          <button type="button" id="btnDownloadCard" class="btn-primary lyrics-action-btn-primary">
+            <animate-icons name="download" size="20"></animate-icons>
+            <span>Download PNG</span>
+          </button>
+        </div>
+
+        <button type="button" id="btnBackToSelect" class="lyrics-retry-btn"
+          style="margin-top: 1rem; border: 1px solid var(--color-border); cursor: pointer;">
+          <animate-icons name="chevron-left" size="18"></animate-icons>
+          <span>Back to lyrics</span>
+        </button>
+      </div>
     </div>
   </main>
 
@@ -185,6 +216,73 @@
       <span class="versao">v1.0.0</span>
     </div>
   </footer>
+
+  <div id="lyricsPersonalizeModal" class="modal">
+    <div class="modal-content settings-sheet">
+      <div class="sheet-header">
+        <h2>Personalize</h2>
+        <button class="icon-button" id="btnClosePersonalize" aria-label="Close">
+          <animate-icons name="x" size="24"></animate-icons>
+        </button>
+      </div>
+      <div class="modal-subtitle">Customize appearance, service and colors</div>
+
+      <div style="margin-top: 1.25rem;">
+        <label for="lyricsServiceSelect" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-text);">Service Logo</label>
+        <select id="lyricsServiceSelect" class="custom-select modal-select">
+          <option value="lastfm" selected>Last.fm</option>
+          <option value="spotify">Spotify</option>
+          <option value="youtubemusic">YouTube Music</option>
+          <option value="deezer">Deezer</option>
+          <option value="applemusic">Apple Music</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div class="apple-toggle">
+        <span style="font-weight: 600;">Black Text</span>
+        <label class="switch" style="margin: 0">
+          <input type="checkbox" id="lyricsBlackTextSwitch" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="apple-toggle" id="lyricsBilingualToggleRow" style="display: none;">
+        <div>
+          <span style="font-weight: 600;">Show Original Lyrics</span>
+          <div style="font-size: 0.78rem; color: var(--color-text-muted);">Small original text above translation</div>
+        </div>
+        <label class="switch" style="margin: 0">
+          <input type="checkbox" id="lyricsBilingualSwitch" checked />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="apple-toggle">
+        <div>
+          <span style="font-weight: 600;">Custom Color</span>
+          <div style="font-size: 0.78rem; color: var(--color-text-muted);" id="lyricsColorLabel">Override automatic color</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button type="button" id="btnLyricsColorPicker" class="lyrics-color-btn" title="Choose color" aria-label="Choose color">
+            <animate-icons name="paintbrush" size="18"></animate-icons>
+            <input type="color" id="lyricsColorInput" value="#1DB954" style="position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;" />
+          </button>
+          <button type="button" id="btnResetLyricsColor" class="icon-button" title="Reset color" aria-label="Reset color" style="display: none;">
+            <animate-icons name="x" size="18"></animate-icons>
+          </button>
+        </div>
+      </div>
+
+      <button type="button" id="btnDonePersonalize" class="btn-primary full-width" style="margin-top: 1.75rem;">Done</button>
+    </div>
+  </div>
+
+  <div id="lyricsExportModal" class="modal">
+    <div class="apple-alert">
+      <span class="loader"></span>
+    </div>
+  </div>
 
   <script type="module" src="/lyrics/lyrics.js"></script>
 </body>
