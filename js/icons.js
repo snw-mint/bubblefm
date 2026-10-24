@@ -18,6 +18,7 @@ import {
   Sun,
   Moon,
   Download,
+  Languages,
 } from "@animateicons/vanilla/lucide";
 
 defineIcons({
@@ -39,6 +40,7 @@ defineIcons({
   Sun,
   Moon,
   Download,
+  Languages,
 });
 
 if (typeof document !== "undefined") {

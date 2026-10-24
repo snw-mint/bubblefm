@@ -141,6 +141,217 @@ async function searchSongs(rawQuery) {
   return tracks.slice(0, 5);
 }
 
+async function fetchLyricsFromLRCLIB(track, artist) {
+  try {
+    const cleanTrack = (track || "").trim();
+    const cleanArtist = (artist || "").trim();
+    const getUrl = `https://lrclib.net/api/get?track_name=${encodeURIComponent(cleanTrack)}&artist_name=${encodeURIComponent(cleanArtist)}`;
+    const res = await fetch(getUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.plainLyrics) return data.plainLyrics;
+      if (data.syncedLyrics) {
+        return data.syncedLyrics.replace(/\[\d{2}:\d{2}\.\d{2,3}\]\s*/g, "").trim();
+      }
+    }
+  } catch {}
+
+  try {
+    const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(`${track} ${artist}`)}`;
+    const res = await fetch(searchUrl);
+    if (res.ok) {
+      const list = await res.json();
+      if (Array.isArray(list) && list.length > 0) {
+        const item = list.find((i) => i.plainLyrics || i.syncedLyrics) || list[0];
+        if (item.plainLyrics) return item.plainLyrics;
+        if (item.syncedLyrics) {
+          return item.syncedLyrics.replace(/\[\d{2}:\d{2}\.\d{2,3}\]\s*/g, "").trim();
+        }
+      }
+    }
+  } catch {}
+
+  try {
+    const ovhUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(track)}`;
+    const res = await fetch(ovhUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.lyrics) return data.lyrics;
+    }
+  } catch {}
+
+  return null;
+}
+
+async function translateText(text, targetLang = "pt") {
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(text)}`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (Array.isArray(json) && Array.isArray(json[0])) {
+      return json[0].map((item) => item[0]).join("");
+    }
+  } catch {}
+  return null;
+}
+
+let currentTrack = null;
+let originalLines = [];
+let translatedLines = null;
+let isTranslated = false;
+let selectedIndices = new Set();
+
+function showStep(stepName) {
+  const stepResults = document.getElementById("stepResults");
+  const stepSelect = document.getElementById("stepSelect");
+
+  if (stepName === "results") {
+    if (stepSelect) stepSelect.style.display = "none";
+    if (stepResults) {
+      stepResults.style.display = "flex";
+      stepResults.classList.remove("fade-in");
+      void stepResults.offsetWidth;
+      stepResults.classList.add("fade-in");
+    }
+  } else if (stepName === "select") {
+    if (stepResults) stepResults.style.display = "none";
+    if (stepSelect) {
+      stepSelect.style.display = "flex";
+      stepSelect.classList.remove("fade-in");
+      void stepSelect.offsetWidth;
+      stepSelect.classList.add("fade-in");
+    }
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderSelectLines() {
+  const linesWrapper = document.getElementById("lyricsLinesWrapper");
+  const countDisplay = document.getElementById("lyricsCountDisplay");
+  if (!linesWrapper) return;
+
+  if (!originalLines || originalLines.length === 0) {
+    linesWrapper.innerHTML = `
+      <div style="text-align: center; padding: 2.5rem 0;">
+        <p style="color: var(--color-text-muted);">No lyrics found for this song.</p>
+      </div>
+    `;
+    if (countDisplay) countDisplay.textContent = "0 / 5";
+    return;
+  }
+
+  const existingItems = linesWrapper.querySelectorAll(".lyric-line-item");
+  if (existingItems.length === originalLines.length) {
+    existingItems.forEach((el, idx) => {
+      const orig = originalLines[idx];
+      const isSelected = selectedIndices.has(idx);
+      el.className = `lyric-line-item ${isSelected ? "selected" : ""}`;
+      if (isTranslated && translatedLines) {
+        const trans = translatedLines[idx] || orig;
+        el.innerHTML = `
+          <span class="lyric-line-original">${escapeHTML(orig)}</span>
+          <span class="lyric-line-translated">${escapeHTML(trans)}</span>
+        `;
+      } else {
+        el.innerHTML = `
+          <span class="lyric-line-text">${escapeHTML(orig)}</span>
+        `;
+      }
+    });
+    if (countDisplay) {
+      countDisplay.textContent = `${selectedIndices.size} / 5`;
+    }
+    return;
+  }
+
+  linesWrapper.innerHTML = originalLines
+    .map((orig, idx) => {
+      const isSelected = selectedIndices.has(idx);
+      if (isTranslated && translatedLines) {
+        const trans = translatedLines[idx] || orig;
+        return `
+          <div class="lyric-line-item ${isSelected ? "selected" : ""}" data-index="${idx}">
+            <span class="lyric-line-original">${escapeHTML(orig)}</span>
+            <span class="lyric-line-translated">${escapeHTML(trans)}</span>
+          </div>
+        `;
+      }
+      return `
+        <div class="lyric-line-item ${isSelected ? "selected" : ""}" data-index="${idx}">
+          <span class="lyric-line-text">${escapeHTML(orig)}</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  linesWrapper.querySelectorAll(".lyric-line-item").forEach((el) => {
+    el.addEventListener("click", () => {
+      const idx = parseInt(el.dataset.index, 10);
+      if (selectedIndices.has(idx)) {
+        selectedIndices.delete(idx);
+        el.classList.remove("selected");
+      } else {
+        if (selectedIndices.size < 5) {
+          selectedIndices.add(idx);
+          el.classList.add("selected");
+        }
+      }
+      if (countDisplay) {
+        countDisplay.textContent = `${selectedIndices.size} / 5`;
+      }
+    });
+  });
+
+  if (countDisplay) {
+    countDisplay.textContent = `${selectedIndices.size} / 5`;
+  }
+}
+
+async function loadTrackLyrics(item) {
+  currentTrack = item;
+  originalLines = [];
+  translatedLines = null;
+  isTranslated = false;
+  selectedIndices.clear();
+
+  const titleEl = document.getElementById("trackTitleDisplay");
+  const artistEl = document.getElementById("trackArtistDisplay");
+  const coverEl = document.getElementById("trackCoverThumb");
+  const linesWrapper = document.getElementById("lyricsLinesWrapper");
+  const translateBtn = document.getElementById("btnTranslateToggle");
+
+  if (titleEl) titleEl.textContent = item.title;
+  if (artistEl) artistEl.textContent = item.artist;
+  if (coverEl) coverEl.src = item.cover || "/logo.svg";
+  if (translateBtn) translateBtn.classList.remove("active");
+
+  if (linesWrapper) {
+    linesWrapper.innerHTML = `
+      <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.6;"></div>
+      <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.5;"></div>
+      <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.4;"></div>
+      <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.3;"></div>
+      <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.2;"></div>
+    `;
+  }
+
+  showStep("select");
+
+  const rawLyrics = await fetchLyricsFromLRCLIB(item.title, item.artist);
+  if (rawLyrics) {
+    originalLines = rawLyrics
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+  } else {
+    originalLines = [];
+  }
+
+  renderSelectLines();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("theme-toggle");
   const savedTheme = localStorage.getItem("theme");
@@ -201,6 +412,64 @@ document.addEventListener("DOMContentLoaded", () => {
   if (resultsGrid) {
     initResultsPage(resultsGrid);
   }
+
+  const translateBtn = document.getElementById("btnTranslateToggle");
+  if (translateBtn) {
+    translateBtn.addEventListener("click", async () => {
+      if (originalLines.length === 0) return;
+
+      if (!translatedLines) {
+        translateBtn.disabled = true;
+        const textSpan = translateBtn.querySelector("span");
+        if (textSpan) textSpan.textContent = "Translating...";
+        const fullLyrics = originalLines.join("\n");
+        const translatedText = await translateText(fullLyrics, "pt");
+        translateBtn.disabled = false;
+        if (textSpan) textSpan.textContent = "Translate";
+
+        if (translatedText) {
+          const rawSplits = translatedText.split("\n");
+          translatedLines = originalLines.map((_, i) => (rawSplits[i] ? rawSplits[i].trim() : originalLines[i]));
+        }
+      }
+
+      if (translatedLines) {
+        isTranslated = !isTranslated;
+        translateBtn.classList.toggle("active", isTranslated);
+        renderSelectLines();
+      }
+    });
+  }
+
+  const backToResultsBtn = document.getElementById("btnBackToResults");
+  if (backToResultsBtn) {
+    backToResultsBtn.addEventListener("click", () => {
+      showStep("results");
+    });
+  }
+
+  const continueBtn = document.getElementById("btnContinue");
+  if (continueBtn) {
+    continueBtn.addEventListener("click", () => {
+      const sortedSelected = Array.from(selectedIndices)
+        .sort((a, b) => a - b)
+        .map((idx) => ({
+          original: originalLines[idx],
+          translated: translatedLines ? translatedLines[idx] || originalLines[idx] : null,
+        }));
+
+      sessionStorage.setItem(
+        "selectedLyricsPayload",
+        JSON.stringify({
+          title: currentTrack?.title || "",
+          artist: currentTrack?.artist || "",
+          cover: currentTrack?.cover || "",
+          isTranslated,
+          lines: sortedSelected,
+        })
+      );
+    });
+  }
 });
 
 async function initResultsPage(gridContainer) {
@@ -257,9 +526,7 @@ async function initResultsPage(gridContainer) {
           artist: btn.dataset.artist,
           cover: btn.dataset.cover,
         };
-        sessionStorage.setItem("selectedLyricsItem", JSON.stringify(item));
-        const event = new CustomEvent("lyricsItemSelected", { detail: item });
-        window.dispatchEvent(event);
+        loadTrackLyrics(item);
       });
     });
   } catch (error) {

@@ -7,8 +7,7 @@
 
   <title>Lyrics Search Results - BubbleFM</title>
   <meta name="title" content="Lyrics Search Results - BubbleFM" />
-  <meta name="description"
-    content="Select a track or album to create shareable lyrics cards." />
+  <meta name="description" content="Select a track or album to create shareable lyrics cards." />
   <meta name="robots" content="noindex, nofollow" />
 
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -28,7 +27,7 @@
 <body>
   <header class="home-header floating-header">
     <div class="header-brand-group">
-      <a href="/index.html" class="logo-container">
+      <a href="/lyrics/" class="logo-container">
         <img src="/logo.svg" alt="BubbleFM Logo" class="logo-icon" />
         <span class="logo-text">
           <span class="brand-bubble">Bubble</span>
@@ -51,60 +50,110 @@
 
   <main class="main-container">
     <div class="lyrics-results-container">
-      <div class="lyrics-results-header">
-        <h1 class="lyrics-results-title">Select a <span class="highlight-serif">Result</span></h1>
-        <p class="lyrics-results-subtitle" id="searchSubtitle">Searching for songs...</p>
+      <div id="stepResults" class="lyrics-step fade-in">
+        <div class="lyrics-results-header">
+          <h1 class="lyrics-results-title">Select a <span class="highlight-serif">Result</span></h1>
+          <p class="lyrics-results-subtitle" id="searchSubtitle">Searching for songs...</p>
+        </div>
+
+        <div class="lyrics-cards-grid" id="lyricsResultsGrid">
+          <div class="lyrics-result-card lyrics-skeleton-card">
+            <div class="lyrics-card-cover-wrapper skeleton"></div>
+            <div class="lyrics-card-info" style="width: 100%;">
+              <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+              <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+            </div>
+            <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+          </div>
+          <div class="lyrics-result-card lyrics-skeleton-card">
+            <div class="lyrics-card-cover-wrapper skeleton"></div>
+            <div class="lyrics-card-info" style="width: 100%;">
+              <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+              <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+            </div>
+            <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+          </div>
+          <div class="lyrics-result-card lyrics-skeleton-card">
+            <div class="lyrics-card-cover-wrapper skeleton"></div>
+            <div class="lyrics-card-info" style="width: 100%;">
+              <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+              <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+            </div>
+            <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+          </div>
+          <div class="lyrics-result-card lyrics-skeleton-card">
+            <div class="lyrics-card-cover-wrapper skeleton"></div>
+            <div class="lyrics-card-info" style="width: 100%;">
+              <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+              <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+            </div>
+            <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+          </div>
+          <div class="lyrics-result-card lyrics-skeleton-card">
+            <div class="lyrics-card-cover-wrapper skeleton"></div>
+            <div class="lyrics-card-info" style="width: 100%;">
+              <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
+              <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+            </div>
+            <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="lyrics-not-found-wrapper">
+          <p class="lyrics-not-found-text">Didn't find it? Try another search</p>
+          <a href="./" class="lyrics-retry-btn">
+            <animate-icons name="chevron-left" size="18"></animate-icons>
+            <span>Try another search</span>
+          </a>
+        </div>
       </div>
 
-      <div class="lyrics-cards-grid" id="lyricsResultsGrid">
-        <div class="lyrics-result-card lyrics-skeleton-card">
-          <div class="lyrics-card-cover-wrapper skeleton"></div>
-          <div class="lyrics-card-info" style="width: 100%;">
-            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
-            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
+      <div id="stepSelect" class="lyrics-step" style="display: none; max-width: 740px;">
+        <div class="lyrics-sheet-card">
+          <div class="lyrics-sheet-header">
+            <div class="lyrics-track-info-group">
+              <img id="trackCoverThumb" src="/logo.svg" alt="Track Cover" class="lyrics-track-thumb"
+                draggable="false" />
+              <div class="lyrics-track-meta">
+                <h2 id="trackTitleDisplay" class="lyrics-track-name"></h2>
+                <p class="lyrics-track-by">by <span id="trackArtistDisplay" class="lyrics-card-artist-name"></span></p>
+              </div>
+            </div>
+            <button type="button" id="btnTranslateToggle" class="lyrics-translate-btn">
+              <animate-icons name="languages" size="18"></animate-icons>
+              <span>Translate</span>
+            </button>
           </div>
-          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
-        </div>
-        <div class="lyrics-result-card lyrics-skeleton-card">
-          <div class="lyrics-card-cover-wrapper skeleton"></div>
-          <div class="lyrics-card-info" style="width: 100%;">
-            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
-            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
-          </div>
-          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
-        </div>
-        <div class="lyrics-result-card lyrics-skeleton-card">
-          <div class="lyrics-card-cover-wrapper skeleton"></div>
-          <div class="lyrics-card-info" style="width: 100%;">
-            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
-            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
-          </div>
-          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
-        </div>
-        <div class="lyrics-result-card lyrics-skeleton-card">
-          <div class="lyrics-card-cover-wrapper skeleton"></div>
-          <div class="lyrics-card-info" style="width: 100%;">
-            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
-            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
-          </div>
-          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
-        </div>
-        <div class="lyrics-result-card lyrics-skeleton-card">
-          <div class="lyrics-card-cover-wrapper skeleton"></div>
-          <div class="lyrics-card-info" style="width: 100%;">
-            <div class="lyrics-skeleton-line skeleton" style="width: 80%;"></div>
-            <div class="lyrics-skeleton-line skeleton" style="width: 50%;"></div>
-          </div>
-          <div class="lyrics-card-btn skeleton" style="width: 100%;"></div>
-        </div>
-      </div>
 
-      <div class="lyrics-not-found-wrapper">
-        <p class="lyrics-not-found-text">Didn't find it? Try another search</p>
-        <a href="./" class="lyrics-retry-btn">
+          <div class="lyrics-select-instruction">
+            <span>Tap lines to select (max 5):</span>
+            <span class="lyrics-count-badge" id="lyricsCountDisplay">0 / 5</span>
+          </div>
+
+          <div class="lyrics-lines-wrapper" id="lyricsLinesWrapper">
+            <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.6;"></div>
+            <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.5;"></div>
+            <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.4;"></div>
+            <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.3;"></div>
+            <div class="lyric-line-item skeleton" style="height: 48px; opacity: 0.2;"></div>
+          </div>
+
+          <div class="lyrics-credits">
+            <span>Lyrics provided by <a href="https://lrclib.net" target="_blank"
+                rel="noopener noreferrer">LRCLIB</a></span>
+          </div>
+        </div>
+
+        <button type="button" id="btnContinue" class="btn-primary"
+          style="width: 100%; max-width: 320px; margin-top: 1.5rem;">
+          Continue
+        </button>
+
+        <button type="button" id="btnBackToResults" class="lyrics-retry-btn"
+          style="margin-top: 1rem; border: 1px solid var(--color-border); cursor: pointer;">
           <animate-icons name="chevron-left" size="18"></animate-icons>
-          <span>Try another search</span>
-        </a>
+          <span>Back to results</span>
+        </button>
       </div>
     </div>
   </main>
