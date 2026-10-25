@@ -116,13 +116,27 @@
                 draggable="false" />
               <div class="lyrics-track-meta">
                 <h2 id="trackTitleDisplay" class="lyrics-track-name"></h2>
-                <p class="lyrics-track-by">by <span id="trackArtistDisplay" class="lyrics-card-artist-name"></span></p>
+                <p class="lyrics-track-by"><span id="trackArtistDisplay" class="lyrics-card-artist-name"></span></p>
               </div>
             </div>
-            <button type="button" id="btnTranslateToggle" class="lyrics-translate-btn">
-              <animate-icons name="languages" size="18"></animate-icons>
-              <span>Translate</span>
-            </button>
+            <div class="lyrics-translate-group">
+              <select id="lyricsLangSelect" class="lyrics-lang-select" aria-label="Select translation language">
+                <option value="pt">Português</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="it">Italiano</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="zh-CN">中文</option>
+                <option value="ru">Русский</option>
+              </select>
+              <button type="button" id="btnTranslateToggle" class="lyrics-translate-btn">
+                <animate-icons name="languages" size="18"></animate-icons>
+                <span>Translate</span>
+              </button>
+            </div>
           </div>
 
           <div class="lyrics-select-instruction">
@@ -162,19 +176,20 @@
           <p class="lyrics-results-subtitle">Select a style and customize your lyrics card</p>
         </div>
 
-        <div class="segmented-control lyrics-format-segmented" id="lyricsFormatSegmented">
-          <button type="button" class="segment-btn active" data-format="card">Card</button>
-          <button type="button" class="segment-btn" data-format="story">Story</button>
+        <div class="lyrics-controls-bar">
+          <div class="segmented-control lyrics-format-segmented" id="lyricsFormatSegmented">
+            <button type="button" class="segment-btn active" data-format="card">Card</button>
+            <button type="button" class="segment-btn" data-format="story">Story</button>
+          </div>
+          <button type="button" id="btnOpenPersonalize" class="lyrics-settings-btn" aria-label="Personalize" title="Personalize">
+            <animate-icons name="settings" size="20"></animate-icons>
+          </button>
         </div>
 
         <div class="lyrics-layouts-grid" id="lyricsLayoutsGrid"></div>
 
         <div class="lyrics-layout-actions">
-          <button type="button" id="btnOpenPersonalize" class="lyrics-action-btn">
-            <animate-icons name="sliders-horizontal" size="20"></animate-icons>
-            <span>Personalize</span>
-          </button>
-          <button type="button" id="btnDownloadCard" class="btn-primary lyrics-action-btn-primary">
+          <button type="button" id="btnDownloadCard" class="btn-primary lyrics-action-btn-primary full-width">
             <animate-icons name="download" size="20"></animate-icons>
             <span>Download PNG</span>
           </button>
@@ -283,6 +298,10 @@
       <span class="loader"></span>
     </div>
   </div>
+
+  <button type="button" id="btnScrollDownLyrics" class="lyrics-scroll-down-btn" aria-label="Scroll down" title="Scroll down">
+    <animate-icons name="chevron-down" size="20"></animate-icons>
+  </button>
 
   <script type="module" src="/lyrics/lyrics.js"></script>
 </body>

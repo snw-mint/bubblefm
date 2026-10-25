@@ -22,6 +22,30 @@ function sanitizeQuery(query) {
     .trim();
 }
 
+function getHighQualityCover(url) {
+  if (!url) return "";
+  let hq = url;
+  if (hq.includes("dzcdn.net")) {
+    hq = hq.replace(/\b(56x56|120x120|250x250|500x500)\b/g, "1000x1000");
+  } else if (hq.includes("mzstatic.com")) {
+    hq = hq.replace(/\b\d+x\d+bb\b/g, "1000x1000bb");
+  } else if (hq.includes("i.scdn.co")) {
+    hq = hq.replace(/ab67616d0000(1e02|4851)/g, "ab67616d0000b273");
+  }
+  return hq;
+}
+
+function preloadImage(src) {
+  return new Promise((resolve) => {
+    if (!src) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
 function fetchDeezerJsonp(type, query) {
   return new Promise((resolve) => {
     const callbackName = "deezer_lyrics_cb_" + Math.random().toString(36).substring(2);
@@ -67,6 +91,7 @@ async function fetchItunesSongs(query) {
       title: item.trackName || "",
       artist: item.artistName || "",
       cover: item.artworkUrl100 ? item.artworkUrl100.replace("100x100bb", "400x400bb") : "",
+      coverHq: item.artworkUrl100 ? item.artworkUrl100.replace("100x100bb", "1000x1000bb") : "",
       album: item.collectionName || "",
     }));
   } catch {
@@ -117,6 +142,7 @@ async function searchSongs(rawQuery) {
           title: t.title || t.title_short || "",
           artist: t.artist?.name || "",
           cover: t.album?.cover_medium || t.album?.cover_big || t.album?.cover || "",
+          coverHq: t.album?.cover_xl || (t.album?.cover_big ? t.album.cover_big.replace("500x500", "1000x1000") : "") || t.album?.cover_medium || "",
           album: t.album?.title || "",
         }));
     }
@@ -130,6 +156,7 @@ async function searchSongs(rawQuery) {
       title: t.title || t.title_short || "",
       artist: t.artist?.name || "",
       cover: t.album?.cover_medium || t.album?.cover_big || t.album?.cover || "",
+      coverHq: t.album?.cover_xl || (t.album?.cover_big ? t.album.cover_big.replace("500x500", "1000x1000") : "") || t.album?.cover_medium || "",
       album: t.album?.title || "",
     }));
   }
@@ -183,17 +210,108 @@ async function fetchLyricsFromLRCLIB(track, artist) {
   return null;
 }
 
-async function translateText(text, targetLang = "pt") {
+function getUserLanguage() {
+  const lang = (navigator.language || navigator.userLanguage || "pt").toLowerCase();
+  if (lang.startsWith("pt")) return "pt";
+  if (lang.startsWith("es")) return "es";
+  if (lang.startsWith("fr")) return "fr";
+  if (lang.startsWith("de")) return "de";
+  if (lang.startsWith("it")) return "it";
+  if (lang.startsWith("ja")) return "ja";
+  if (lang.startsWith("ko")) return "ko";
+  if (lang.startsWith("zh")) return "zh-CN";
+  if (lang.startsWith("ru")) return "ru";
+  if (lang.startsWith("en")) return "en";
+  return "pt";
+}
+
+let currentTargetLang = getUserLanguage();
+
+async function requestTranslation(text, targetLang) {
+  const lang = targetLang || currentTargetLang || "pt";
+
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(text)}`;
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(lang)}&dt=t&q=${encodeURIComponent(text)}`;
     const res = await fetch(url);
-    if (!res.ok) return null;
-    const json = await res.json();
-    if (Array.isArray(json) && Array.isArray(json[0])) {
-      return json[0].map((item) => item[0]).join("");
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json) && Array.isArray(json[0])) {
+        const full = json[0]
+          .map((item) => (item && item[0] ? item[0] : ""))
+          .join("");
+        if (full && full.trim()) return full;
+      }
     }
   } catch {}
+
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${encodeURIComponent(lang)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.responseData && json.responseData.translatedText) {
+        return json.responseData.translatedText;
+      }
+    }
+  } catch {}
+
   return null;
+}
+
+async function translateLyricsLines(lines, targetLang = currentTargetLang) {
+  const lang = targetLang || currentTargetLang || "pt";
+  const chunkSize = 8;
+  const results = new Array(lines.length).fill("");
+
+  for (let i = 0; i < lines.length; i += chunkSize) {
+    const chunk = lines.slice(i, i + chunkSize);
+    const textToTranslate = chunk
+      .map((line, idx) => `${idx + 1}. ${line}`)
+      .join("\n");
+
+    const translatedText = await requestTranslation(textToTranslate, lang);
+    const translatedChunk = new Array(chunk.length).fill("");
+
+    if (translatedText) {
+      const tLines = translatedText
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+
+      tLines.forEach((tLine) => {
+        const match = tLine.match(/^\s*(\d+)[\.\)\:\-]\s*(.*)$/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num >= 1 && num <= chunk.length && match[2].trim()) {
+            translatedChunk[num - 1] = match[2].trim();
+          }
+        }
+      });
+
+      if (translatedChunk.some((line) => !line)) {
+        if (tLines.length === chunk.length) {
+          tLines.forEach((tLine, idx) => {
+            if (!translatedChunk[idx]) {
+              translatedChunk[idx] = tLine.replace(/^\s*\d+[\.\)\:\-]\s*/, "").trim();
+            }
+          });
+        }
+      }
+    }
+
+    for (let j = 0; j < chunk.length; j++) {
+      results[i + j] =
+        translatedChunk[j] && translatedChunk[j].trim()
+          ? translatedChunk[j]
+          : chunk[j];
+    }
+
+    if (i + chunkSize < lines.length) {
+      await new Promise((r) => setTimeout(r, 60));
+    }
+  }
+
+  return results;
 }
 
 let currentTrack = null;
@@ -209,6 +327,123 @@ let isBilingual = true;
 let customColor = null;
 let currentService = "lastfm";
 let extractedDominant = { hex: "#2b2f3a", darkerHex: "#171a21" };
+
+const CACHE_KEY = "bubblefm_lyrics_cache";
+
+function saveLyricsState(stepOverride) {
+  if (!currentTrack) return;
+  const stepLayout = document.getElementById("stepLayout");
+  const stepSelect = document.getElementById("stepSelect");
+  const currentVisibleStep =
+    stepOverride ||
+    (stepLayout && stepLayout.style.display !== "none"
+      ? "layout"
+      : stepSelect && stepSelect.style.display !== "none"
+      ? "select"
+      : "results");
+
+  const state = {
+    searchQuery: new URLSearchParams(window.location.search).get("search") || "",
+    step: currentVisibleStep,
+    track: currentTrack,
+    originalLines,
+    translatedLines,
+    isTranslated,
+    selectedIndices: Array.from(selectedIndices),
+    layout: currentLayout,
+    format: currentFormat,
+    blackText: isBlackText,
+    bilingual: isBilingual,
+    customColor,
+    service: currentService,
+    targetLang: currentTargetLang,
+  };
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(state));
+  } catch {}
+}
+
+function restoreLyricsStateIfAvailable(currentQuery) {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return false;
+    const state = JSON.parse(raw);
+    if (!state || !state.track) return false;
+    if (currentQuery && state.searchQuery && state.searchQuery.toLowerCase() !== currentQuery.toLowerCase()) {
+      sessionStorage.removeItem(CACHE_KEY);
+      return false;
+    }
+    if (state.step === "results") {
+      return false;
+    }
+
+    currentTrack = state.track;
+    originalLines = state.originalLines || [];
+    translatedLines = state.translatedLines || null;
+    isTranslated = !!state.isTranslated;
+    selectedIndices = new Set(state.selectedIndices || []);
+    currentLayout = state.layout || "solid";
+    currentFormat = state.format || "card";
+    isBlackText = !!state.blackText;
+    isBilingual = state.bilingual !== false;
+    customColor = state.customColor || null;
+    currentService = state.service || "lastfm";
+    currentTargetLang = state.targetLang || getUserLanguage();
+
+    const langSelectEl = document.getElementById("lyricsLangSelect");
+    if (langSelectEl) langSelectEl.value = currentTargetLang;
+
+    const serviceSelectEl = document.getElementById("lyricsServiceSelect");
+    if (serviceSelectEl) serviceSelectEl.value = currentService;
+
+    const blackTextSwitchEl = document.getElementById("lyricsBlackTextSwitch");
+    if (blackTextSwitchEl) blackTextSwitchEl.checked = isBlackText;
+
+    const bilingualSwitchEl = document.getElementById("lyricsBilingualSwitch");
+    if (bilingualSwitchEl) bilingualSwitchEl.checked = isBilingual;
+
+    const colorPickerBtn = document.getElementById("btnLyricsColorPicker");
+    const colorInput = document.getElementById("lyricsColorInput");
+    const resetColorBtn = document.getElementById("btnResetLyricsColor");
+    if (customColor) {
+      if (colorInput) colorInput.value = customColor;
+      if (colorPickerBtn) {
+        colorPickerBtn.style.backgroundColor = customColor;
+        colorPickerBtn.style.borderColor = customColor;
+      }
+      if (resetColorBtn) resetColorBtn.style.display = "flex";
+    }
+
+    const formatSegmented = document.getElementById("lyricsFormatSegmented");
+    if (formatSegmented) {
+      formatSegmented.querySelectorAll(".segment-btn").forEach((b) =>
+        b.classList.toggle("active", b.dataset.format === currentFormat)
+      );
+    }
+
+    const titleEl = document.getElementById("trackTitleDisplay");
+    const artistEl = document.getElementById("trackArtistDisplay");
+    const coverEl = document.getElementById("trackCoverThumb");
+    const translateBtn = document.getElementById("btnTranslateToggle");
+
+    if (titleEl) titleEl.textContent = currentTrack.title;
+    if (artistEl) artistEl.textContent = currentTrack.artist;
+    if (coverEl) coverEl.src = currentTrack.cover || "/logo.svg";
+    if (translateBtn) translateBtn.classList.toggle("active", isTranslated);
+
+    const targetStep = state.step || "select";
+    showStep(targetStep);
+
+    if (targetStep === "select") {
+      renderSelectLines();
+    } else if (targetStep === "layout") {
+      prepareAndShowLayoutStep();
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function showStep(stepName) {
   const stepResults = document.getElementById("stepResults");
@@ -234,6 +469,33 @@ function showStep(stepName) {
   }
 
   window.scrollTo({ top: 0, behavior: "smooth" });
+  updateScrollDownVisibility();
+  setTimeout(updateScrollDownVisibility, 100);
+  saveLyricsState(stepName);
+}
+
+function updateScrollDownVisibility() {
+  const scrollDownBtn = document.getElementById("btnScrollDownLyrics");
+  const stepSelect = document.getElementById("stepSelect");
+  if (!scrollDownBtn || !stepSelect) return;
+
+  if (stepSelect.style.display === "none") {
+    scrollDownBtn.style.display = "none";
+    return;
+  }
+
+  scrollDownBtn.style.display = "flex";
+  const scrollY = window.scrollY;
+  const windowHeight = window.innerHeight;
+  const docHeight = document.documentElement.scrollHeight;
+
+  if (docHeight - (scrollY + windowHeight) < 140) {
+    scrollDownBtn.style.opacity = "0";
+    scrollDownBtn.style.pointerEvents = "none";
+  } else {
+    scrollDownBtn.style.opacity = "1";
+    scrollDownBtn.style.pointerEvents = "auto";
+  }
 }
 
 function renderSelectLines() {
@@ -310,15 +572,22 @@ function renderSelectLines() {
       if (countDisplay) {
         countDisplay.textContent = `${selectedIndices.size} / 5`;
       }
+      saveLyricsState("select");
     });
   });
 
   if (countDisplay) {
     countDisplay.textContent = `${selectedIndices.size} / 5`;
   }
+  setTimeout(updateScrollDownVisibility, 50);
 }
 
 async function loadTrackLyrics(item) {
+  const hqCover = getHighQualityCover(item.coverHq || item.cover);
+  item.cover = hqCover;
+  item.coverHq = hqCover;
+  preloadImage(hqCover);
+
   currentTrack = item;
   originalLines = [];
   translatedLines = null;
@@ -335,6 +604,9 @@ async function loadTrackLyrics(item) {
   if (artistEl) artistEl.textContent = item.artist;
   if (coverEl) coverEl.src = item.cover || "/logo.svg";
   if (translateBtn) translateBtn.classList.remove("active");
+
+  const langSelectEl = document.getElementById("lyricsLangSelect");
+  if (langSelectEl) langSelectEl.value = currentTargetLang;
 
   if (linesWrapper) {
     linesWrapper.innerHTML = `
@@ -359,6 +631,7 @@ async function loadTrackLyrics(item) {
   }
 
   renderSelectLines();
+  saveLyricsState("select");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -412,14 +685,63 @@ document.addEventListener("DOMContentLoaded", () => {
       const input = document.getElementById("lyricsInput");
       const query = input ? input.value.trim() : "";
       if (query) {
+        try {
+          sessionStorage.removeItem(CACHE_KEY);
+        } catch {}
         window.location.href = `result.html?search=${encodeURIComponent(query)}`;
       }
     });
   }
 
+  const featureSections = document.querySelectorAll(".landing-features .feature-section");
+  if (featureSections.length > 0) {
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12 }
+      );
+      featureSections.forEach((section) => observer.observe(section));
+    } else {
+      featureSections.forEach((section) => section.classList.add("is-visible"));
+    }
+  }
+
   const resultsGrid = document.getElementById("lyricsResultsGrid");
   if (resultsGrid) {
     initResultsPage(resultsGrid);
+  }
+
+  const langSelect = document.getElementById("lyricsLangSelect");
+  if (langSelect) {
+    langSelect.value = currentTargetLang;
+    langSelect.addEventListener("change", async (e) => {
+      currentTargetLang = e.target.value;
+      saveLyricsState();
+
+      if (isTranslated && originalLines.length > 0) {
+        const translateBtn = document.getElementById("btnTranslateToggle");
+        const textSpan = translateBtn ? translateBtn.querySelector("span") : null;
+        if (translateBtn) translateBtn.disabled = true;
+        if (textSpan) textSpan.textContent = "Translating...";
+
+        translatedLines = await translateLyricsLines(originalLines, currentTargetLang);
+
+        if (translateBtn) translateBtn.disabled = false;
+        if (textSpan) textSpan.textContent = "Translate";
+
+        renderSelectLines();
+        saveLyricsState("select");
+      } else {
+        translatedLines = null;
+      }
+    });
   }
 
   const translateBtn = document.getElementById("btnTranslateToggle");
@@ -431,21 +753,17 @@ document.addEventListener("DOMContentLoaded", () => {
         translateBtn.disabled = true;
         const textSpan = translateBtn.querySelector("span");
         if (textSpan) textSpan.textContent = "Translating...";
-        const fullLyrics = originalLines.join("\n");
-        const translatedText = await translateText(fullLyrics, "pt");
+
+        translatedLines = await translateLyricsLines(originalLines, currentTargetLang);
         translateBtn.disabled = false;
         if (textSpan) textSpan.textContent = "Translate";
-
-        if (translatedText) {
-          const rawSplits = translatedText.split("\n");
-          translatedLines = originalLines.map((_, i) => (rawSplits[i] ? rawSplits[i].trim() : originalLines[i]));
-        }
       }
 
       if (translatedLines) {
         isTranslated = !isTranslated;
         translateBtn.classList.toggle("active", isTranslated);
         renderSelectLines();
+        saveLyricsState("select");
       }
     });
   }
@@ -454,6 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (backToResultsBtn) {
     backToResultsBtn.addEventListener("click", () => {
       showStep("results");
+      saveLyricsState("results");
     });
   }
 
@@ -461,7 +780,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if (continueBtn) {
     continueBtn.addEventListener("click", () => {
       prepareAndShowLayoutStep();
+      saveLyricsState("layout");
     });
+  }
+
+  const scrollDownBtn = document.getElementById("btnScrollDownLyrics");
+  if (scrollDownBtn) {
+    scrollDownBtn.addEventListener("click", () => {
+      const continueBtn = document.getElementById("btnContinue");
+      if (continueBtn) {
+        continueBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      }
+    });
+
+    window.addEventListener("scroll", updateScrollDownVisibility, { passive: true });
+    window.addEventListener("resize", updateScrollDownVisibility, { passive: true });
   }
 
   const formatSegmented = document.getElementById("lyricsFormatSegmented");
@@ -473,6 +808,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentFormat = fmt;
         formatSegmented.querySelectorAll(".segment-btn").forEach((b) => b.classList.toggle("active", b.dataset.format === fmt));
         renderLayouts();
+        saveLyricsState("layout");
       });
     });
   }
@@ -513,6 +849,7 @@ document.addEventListener("DOMContentLoaded", () => {
     serviceSelectEl.addEventListener("change", (e) => {
       currentService = e.target.value;
       renderLayouts();
+      saveLyricsState("layout");
     });
   }
 
@@ -521,6 +858,7 @@ document.addEventListener("DOMContentLoaded", () => {
     blackTextSwitchEl.addEventListener("change", (e) => {
       isBlackText = e.target.checked;
       renderLayouts();
+      saveLyricsState("layout");
     });
   }
 
@@ -529,6 +867,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bilingualSwitchEl.addEventListener("change", (e) => {
       isBilingual = e.target.checked;
       renderLayouts();
+      saveLyricsState("layout");
     });
   }
 
@@ -546,6 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
       colorPickerBtn.style.borderColor = customColor;
       if (resetColorBtn) resetColorBtn.style.display = "flex";
       renderLayouts();
+      saveLyricsState("layout");
     });
   }
 
@@ -557,6 +897,7 @@ document.addEventListener("DOMContentLoaded", () => {
       colorPickerBtn.style.borderColor = "";
       resetColorBtn.style.display = "none";
       renderLayouts();
+      saveLyricsState("layout");
     });
   }
 
@@ -667,6 +1008,15 @@ function extractDominantColor(imgSrc) {
           b = Math.round(totalB / count);
         }
 
+        const maxBrightness = 138;
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        if (brightness > maxBrightness) {
+          const factor = maxBrightness / brightness;
+          r = Math.round(r * factor);
+          g = Math.round(g * factor);
+          b = Math.round(b * factor);
+        }
+
         const hex = rgbToHex(r, g, b);
         const darkerHex = darkenHex(hex, 0.4);
         resolve({ hex, darkerHex });
@@ -677,6 +1027,21 @@ function extractDominantColor(imgSrc) {
     img.onerror = () => resolve(fallback);
     img.src = imgSrc;
   });
+}
+
+function clampHexBrightness(hexColor, maxB = 138) {
+  const rgb = hexToRgb(hexColor);
+  if (!rgb) return hexColor;
+  const b = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+  if (b > maxB) {
+    const factor = maxB / b;
+    return rgbToHex(
+      Math.round(rgb.r * factor),
+      Math.round(rgb.g * factor),
+      Math.round(rgb.b * factor)
+    );
+  }
+  return hexColor;
 }
 
 function getServiceLogoSvg(service) {
@@ -733,12 +1098,21 @@ function renderLayouts() {
   const mutedTextColor = isBlackText ? "rgba(20, 21, 24, 0.72)" : "rgba(255, 255, 255, 0.75)";
   const dividerColor = isBlackText ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.14)";
 
-  const solidCardBg = customColor || extractedDominant.hex;
+  const solidCardBg = customColor || clampHexBrightness(extractedDominant.hex, 138);
   const solidStoryBg = customColor ? darkenHex(customColor, 0.35) : extractedDominant.darkerHex;
 
   const modernStoryBg = customColor ? customColor : extractedDominant.darkerHex;
 
-  const blurredCardBg = customColor || "#101114";
+  const getBlurredCardBg = (isStory) => {
+    if (!isStory) return customColor || "#000000";
+    if (customColor) {
+      const rgb = hexToRgb(customColor);
+      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.55)`;
+    }
+    return "rgba(0, 0, 0, 0.55)";
+  };
+
+  const blurredCardBg = getBlurredCardBg(currentFormat === "story");
 
   const serviceLogoSvg = getServiceLogoSvg(currentService);
 
@@ -773,13 +1147,13 @@ function renderLayouts() {
             <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
             <div class="lyrics-card-meta">
               <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
-              <span class="lyrics-card-artist" style="color: ${mutedTextColor};">by ${escapeHTML(currentTrack.artist)}</span>
+              <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
             </div>
           </div>
-          <div class="lyrics-card-lines">
+          <div class="lyrics-card-lines lines-count-${sortedLines.length}">
             ${renderLinesHtml()}
           </div>
-          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
+          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
         </div>
       `,
     },
@@ -795,13 +1169,13 @@ function renderLayouts() {
             <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
             <div class="lyrics-card-meta">
               <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
-              <span class="lyrics-card-artist" style="color: ${mutedTextColor};">by ${escapeHTML(currentTrack.artist)}</span>
+              <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
             </div>
           </div>
-          <div class="lyrics-card-lines" style="position: relative; z-index: 2;">
+          <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">
             ${renderLinesHtml()}
           </div>
-          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor};">${serviceLogoSvg}</div>` : ""}
+          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
         </div>
       `,
     },
@@ -813,19 +1187,17 @@ function renderLayouts() {
       bgHtml: currentFormat === "story" ? `<img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" class="story-blur-image" alt="Blurred BG" crossorigin="anonymous" />` : "",
       html: `
         <div class="lyrics-card-target lyrics-card-blurred" style="background-color: ${blurredCardBg}; color: ${textColor};">
-          <div class="lyrics-card-lines">
+          <div class="lyrics-card-lines lines-count-${sortedLines.length}">
             ${renderLinesHtml()}
           </div>
           <div class="lyrics-card-divider" style="border-top-color: ${dividerColor};">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; width: 100%;">
-              <div class="lyrics-card-header" style="flex: 1;">
-                <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" style="width: 38px; height: 38px; border-radius: 8px;" crossorigin="anonymous" draggable="false" />
-                <div class="lyrics-card-meta">
-                  <span class="lyrics-card-title" style="color: ${textColor}; font-size: 0.88rem;">${escapeHTML(currentTrack.title)}</span>
-                  <span class="lyrics-card-artist" style="color: ${mutedTextColor}; font-size: 0.75rem;">by ${escapeHTML(currentTrack.artist)}</span>
-                </div>
+            <div class="lyrics-card-header" style="align-items: flex-start;">
+              <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" style="width: 48px; height: 48px; border-radius: 10px;" crossorigin="anonymous" draggable="false" />
+              <div class="lyrics-card-meta">
+                <span class="lyrics-card-title" style="color: ${textColor}; font-size: 0.9rem;">${escapeHTML(currentTrack.title)}</span>
+                <span class="lyrics-card-artist" style="color: ${mutedTextColor}; font-size: 0.76rem;">${escapeHTML(currentTrack.artist)}</span>
+                ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: 0.35rem;">${serviceLogoSvg}</div>` : ""}
               </div>
-              ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; flex-shrink: 0;">${serviceLogoSvg}</div>` : ""}
             </div>
           </div>
         </div>
@@ -862,28 +1234,201 @@ function renderLayouts() {
   });
 }
 
+function createExportElement(layoutId, format) {
+  const sortedLines = Array.from(selectedIndices)
+    .sort((a, b) => a - b)
+    .map((idx) => ({
+      orig: originalLines[idx] || "",
+      trans: translatedLines ? translatedLines[idx] || originalLines[idx] : null,
+    }));
+
+  const textColor = isBlackText ? "#141518" : "#FFFFFF";
+  const mutedTextColor = isBlackText ? "rgba(20, 21, 24, 0.72)" : "rgba(255, 255, 255, 0.75)";
+  const dividerColor = isBlackText ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.14)";
+
+  const solidCardBg = customColor || clampHexBrightness(extractedDominant.hex, 138);
+  const solidStoryBg = customColor ? darkenHex(customColor, 0.35) : extractedDominant.darkerHex;
+  const modernStoryBg = customColor ? customColor : extractedDominant.darkerHex;
+
+  const getBlurredCardBg = (isStory) => {
+    if (!isStory) return customColor || "#000000";
+    if (customColor) {
+      const rgb = hexToRgb(customColor);
+      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.55)`;
+    }
+    return "rgba(0, 0, 0, 0.55)";
+  };
+
+  const blurredCardBg = getBlurredCardBg(format === "story");
+  const serviceLogoSvg = getServiceLogoSvg(currentService);
+
+  const renderLinesHtml = () => {
+    return sortedLines
+      .map((item) => {
+        if (isTranslated && isBilingual && item.trans && item.trans !== item.orig) {
+          return `
+            <div class="lyrics-card-line">
+              <span class="lyrics-card-line-orig" style="color: ${mutedTextColor};">${escapeHTML(item.orig)}</span>
+              <span class="lyrics-card-line-trans" style="color: ${textColor};">${escapeHTML(item.trans)}</span>
+            </div>
+          `;
+        }
+        const text = isTranslated && item.trans ? item.trans : item.orig;
+        return `
+          <div class="lyrics-card-line" style="color: ${textColor};">${escapeHTML(text)}</div>
+        `;
+      })
+      .join("");
+  };
+
+  const wrapper = document.createElement("div");
+  wrapper.className = `lyrics-export-wrapper export-${format} export-${layoutId}`;
+
+  let innerCardHtml = "";
+
+  if (layoutId === "solid") {
+    innerCardHtml = `
+      <div class="lyrics-card-target lyrics-card-solid" style="background-color: ${solidCardBg}; color: ${textColor};">
+        <div class="lyrics-card-header">
+          <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
+          <div class="lyrics-card-meta">
+            <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+            <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
+          </div>
+        </div>
+        <div class="lyrics-card-lines lines-count-${sortedLines.length}">
+          ${renderLinesHtml()}
+        </div>
+        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
+      </div>
+    `;
+  } else if (layoutId === "modern") {
+    innerCardHtml = `
+      <div class="lyrics-card-target lyrics-card-modern" style="background: url('${escapeHTML(currentTrack.cover || "/logo.svg")}') center / cover no-repeat; color: ${textColor};">
+        <div class="lyrics-card-modern-overlay"></div>
+        <div class="lyrics-card-header" style="position: relative; z-index: 2;">
+          <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
+          <div class="lyrics-card-meta">
+            <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+            <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
+          </div>
+        </div>
+        <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">
+          ${renderLinesHtml()}
+        </div>
+        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
+      </div>
+    `;
+  } else {
+    innerCardHtml = `
+      <div class="lyrics-card-target lyrics-card-blurred" style="background-color: ${blurredCardBg}; color: ${textColor};">
+        <div class="lyrics-card-lines lines-count-${sortedLines.length}">
+          ${renderLinesHtml()}
+        </div>
+        <div class="lyrics-card-divider" style="border-top-color: ${dividerColor};">
+          <div class="lyrics-card-header" style="align-items: flex-start;">
+            <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" style="width: 48px; height: 48px; border-radius: 10px;" crossorigin="anonymous" draggable="false" />
+            <div class="lyrics-card-meta">
+              <span class="lyrics-card-title" style="color: ${textColor}; font-size: 0.88rem;">${escapeHTML(currentTrack.title)}</span>
+              <span class="lyrics-card-artist" style="color: ${mutedTextColor}; font-size: 0.75rem;">${escapeHTML(currentTrack.artist)}</span>
+              ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: 0.35rem;">${serviceLogoSvg}</div>` : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (format === "story") {
+    let storyBgStyle = "";
+    let bgImgHtml = "";
+    if (layoutId === "solid") {
+      storyBgStyle = `background-color: ${solidStoryBg};`;
+    } else if (layoutId === "modern") {
+      storyBgStyle = `background-color: ${modernStoryBg};`;
+    } else {
+      storyBgStyle = `background-color: #0b0c0e;`;
+      bgImgHtml = `<img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" class="story-blur-image" alt="Blurred BG" crossorigin="anonymous" />`;
+    }
+
+    wrapper.style.cssText = `
+      width: 540px;
+      height: 960px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      box-sizing: border-box;
+      ${storyBgStyle}
+    `;
+
+    wrapper.innerHTML = `
+      ${bgImgHtml}
+      <div style="position: relative; z-index: 2; width: 100%; display: flex; justify-content: center; padding: 0 3.25rem; box-sizing: border-box;">
+        ${innerCardHtml}
+      </div>
+    `;
+  } else {
+    wrapper.style.cssText = `
+      width: 340px;
+      min-width: 340px;
+      max-width: 340px;
+      position: relative;
+      display: flex;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    `;
+    wrapper.innerHTML = innerCardHtml;
+  }
+
+  return wrapper;
+}
+
 async function exportSelectedLyricsImage() {
-  const selectedItem = document.querySelector(`.lyrics-layout-item[data-layout="${currentLayout}"]`);
-  if (!selectedItem) return;
+  if (!currentTrack) return;
 
   const exportModal = document.getElementById("lyricsExportModal");
   if (exportModal) exportModal.classList.add("show");
 
-  let targetElement;
-  if (currentFormat === "story") {
-    targetElement = selectedItem.querySelector(".lyrics-layout-frame");
-  } else {
-    targetElement = selectedItem.querySelector(".lyrics-card-target");
-  }
-
-  if (!targetElement) {
-    if (exportModal) exportModal.classList.remove("show");
-    return;
-  }
+  const exportContainer = document.createElement("div");
+  exportContainer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 9999px;
+    width: 1200px;
+    height: 1200px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -9999;
+  `;
+  document.body.appendChild(exportContainer);
 
   try {
+    if (currentTrack?.cover) {
+      await preloadImage(currentTrack.cover);
+    }
+
+    const exportNode = createExportElement(currentLayout, currentFormat);
+    exportContainer.appendChild(exportNode);
+
+    const targetElement = currentFormat === "story"
+      ? exportNode
+      : (exportNode.querySelector(".lyrics-card-target") || exportNode);
+
     const dataUrl = await htmlToImage.toPng(targetElement, {
-      pixelRatio: 2.5,
+      pixelRatio: 2,
       cacheBust: true,
       backgroundColor: null,
     });
@@ -896,6 +1441,9 @@ async function exportSelectedLyricsImage() {
   } catch (err) {
     console.error("Export error:", err);
   } finally {
+    if (exportContainer.parentNode) {
+      exportContainer.parentNode.removeChild(exportContainer);
+    }
     if (exportModal) {
       setTimeout(() => {
         exportModal.classList.remove("show");
@@ -913,6 +1461,48 @@ async function initResultsPage(gridContainer) {
     return;
   }
 
+  const restored = restoreLyricsStateIfAvailable(query);
+  if (restored) {
+    searchSongs(query).then((results) => {
+      if (results && results.length > 0) {
+        gridContainer.classList.toggle("is-centered", results.length < 4);
+        gridContainer.innerHTML = results
+          .map(
+            (item) => `
+            <div class="lyrics-result-card">
+              <div class="lyrics-card-cover-wrapper">
+                <img src="${escapeHTML(item.cover || "/logo.svg")}" alt="${escapeHTML(item.title)}" class="lyrics-card-cover" draggable="false" loading="lazy" />
+              </div>
+              <div class="lyrics-card-info">
+                <h3 class="lyrics-card-title">${escapeHTML(item.title)}</h3>
+                <p class="lyrics-card-artist"><span class="lyrics-card-artist-name">${escapeHTML(item.artist)}</span></p>
+              </div>
+              <button class="btn-primary lyrics-card-btn" data-type="song" data-id="${item.id}" data-title="${escapeHTML(item.title)}" data-artist="${escapeHTML(item.artist)}" data-cover="${escapeHTML(item.cover)}" data-cover-hq="${escapeHTML(item.coverHq || "")}">
+                Use
+              </button>
+            </div>
+          `
+          )
+          .join("");
+
+        gridContainer.querySelectorAll(".lyrics-card-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const item = {
+              type: "song",
+              id: btn.dataset.id,
+              title: btn.dataset.title,
+              artist: btn.dataset.artist,
+              cover: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
+              coverHq: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
+            };
+            loadTrackLyrics(item);
+          });
+        });
+      }
+    });
+    return;
+  }
+
   const subtitle = document.getElementById("searchSubtitle");
   if (subtitle) {
     subtitle.innerHTML = `Showing results for "<strong>${escapeHTML(query)}</strong>"`;
@@ -922,6 +1512,7 @@ async function initResultsPage(gridContainer) {
     const results = await searchSongs(query);
 
     if (!results || results.length === 0) {
+      gridContainer.classList.remove("is-centered");
       gridContainer.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 2rem 0;">
           <p style="font-size: 1.1rem; color: var(--color-text-muted);">No songs found for "${escapeHTML(query)}".</p>
@@ -929,6 +1520,8 @@ async function initResultsPage(gridContainer) {
       `;
       return;
     }
+
+    gridContainer.classList.toggle("is-centered", results.length < 4);
 
     gridContainer.innerHTML = results
       .map(
@@ -939,9 +1532,9 @@ async function initResultsPage(gridContainer) {
           </div>
           <div class="lyrics-card-info">
             <h3 class="lyrics-card-title">${escapeHTML(item.title)}</h3>
-            <p class="lyrics-card-artist">by <span class="lyrics-card-artist-name">${escapeHTML(item.artist)}</span></p>
+            <p class="lyrics-card-artist"><span class="lyrics-card-artist-name">${escapeHTML(item.artist)}</span></p>
           </div>
-          <button class="btn-primary lyrics-card-btn" data-type="song" data-id="${item.id}" data-title="${escapeHTML(item.title)}" data-artist="${escapeHTML(item.artist)}" data-cover="${escapeHTML(item.cover)}">
+          <button class="btn-primary lyrics-card-btn" data-type="song" data-id="${item.id}" data-title="${escapeHTML(item.title)}" data-artist="${escapeHTML(item.artist)}" data-cover="${escapeHTML(item.cover)}" data-cover-hq="${escapeHTML(item.coverHq || "")}">
             Use
           </button>
         </div>
@@ -956,7 +1549,8 @@ async function initResultsPage(gridContainer) {
           id: btn.dataset.id,
           title: btn.dataset.title,
           artist: btn.dataset.artist,
-          cover: btn.dataset.cover,
+          cover: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
+          coverHq: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
         };
         loadTrackLyrics(item);
       });
