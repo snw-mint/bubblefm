@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Lyrics - BubbleFM Shareable Lyrics Cards</title>
+  <meta name="title" content="Lyrics - BubbleFM Shareable Lyrics Cards" />
+  <meta name="description"
+    content="Search song lyrics, select your favorite lines, translate if desired, and export beautiful shareable cards." />
+  <meta name="keywords"
+    content="lyrics card, music lyrics generator, share lyrics instagram, bubblefm lyrics, lyrics quote" />
+  <meta name="author" content="Snow Mint" />
+  <meta name="robots" content="index, follow" />
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="9fef3880-f9cb-4b34-9863-c5709690fb6d"
+    data-exclude-search="true"></script>
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bubblefm.vercel.app/lyrics/" />
+  <meta property="og:title" content="Lyrics - BubbleFM Shareable Lyrics Cards" />
+  <meta property="og:description"
+    content="Search song lyrics, select your favorite lines, translate if desired, and export beautiful shareable cards." />
+  <meta property="og:image" content="https://bubblefm.vercel.app/assets/images/og-image.jpg" />
+
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://bubblefm.vercel.app/lyrics/" />
+  <meta property="twitter:title" content="Lyrics - BubbleFM Shareable Lyrics Cards" />
+  <meta property="twitter:description"
+    content="Search song lyrics, select your favorite lines, translate if desired, and export beautiful shareable cards." />
+  <meta property="twitter:image" content="https://bubblefm.vercel.app/assets/images/og-image.jpg" />
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <header class="home-header floating-header">
+    <div class="header-brand-group">
+      <a href="/lyrics/" class="logo-container">
+        <img src="/logo.svg" alt="BubbleFM Logo" class="logo-icon" />
+        <span class="logo-text">
+          <span class="brand-bubble">Bubble</span>
+          <span class="brand-fm">FM</span>
+        </span>
+      </a>
+      <div class="header-divider"></div>
+      <nav class="header-nav">
+        <a href="/index.html" class="nav-link">Charts</a>
+        <a href="/match/" class="nav-link">Match</a>
+        <a href="/lyrics/" class="nav-link active">
+          <span class="nav-badge-container">
+            Lyrics
+            <span class="nav-badge-new">new</span>
+          </span>
+        </a>
+      </nav>
+    </div>
+    <div class="header-actions">
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme"></button>
+      <a href="https://buymeacoffee.com/snw.mint" target="_blank" rel="noopener noreferrer" class="bmac-link-btn"
+        aria-label="Buy Me a Coffee" title="Buy Me a Coffee">
+        <animate-icons name="coffee" size="24"></animate-icons>
+      </a>
+      <a href="https://github.com/snw-mint/bubblefm" target="_blank" rel="noopener noreferrer" class="github-link-btn"
+        aria-label="GitHub Repository" title="GitHub Repository">
+        <animate-icons name="github" size="24"></animate-icons>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <animate-icons name="menu" size="24"></animate-icons>
+      </button>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="landing-card">
+      <h1 class="landing-title">Share your favorite song <span class="highlight-serif">Lyrics</span></h1>
+      <p class="landing-subtitle">
+        Search for any song to select your favorite lines and create aesthetic cards.
+      </p>
+
+      <form id="form-lyrics" class="username-form">
+        <div class="input-group">
+          <div class="input-with-icon">
+            <span class="input-icon">
+              <animate-icons name="disc-3" size="20"></animate-icons>
+            </span>
+            <input type="text" id="lyricsInput" placeholder="Song, or Song, Artist..." autocomplete="off" required />
+          </div>
+          <button type="submit" id="btnSearchLyrics" class="btn-primary">Search Lyrics</button>
+        </div>
+      </form>
+
+      <p id="mensagemErro" class="error-message"></p>
+    </section>
+
+    <div class="landing-features">
+      <section class="feature-section">
+        <div class="feature-content">
+          <h2>Transform Quotes into Aesthetic <span class="highlight-serif">Lyrics</span> Cards</h2>
+          <p>
+            Search for any track, select your favorite lines, and turn them into stunning music cards. Choose between Solid, Modern, or Blurred layouts and customize palettes and streaming service logos.
+          </p>
+        </div>
+        <div class="feature-image-container">
+          <img src="/assets/leading/square-cards.webp" alt="Shareable Lyrics Cards" class="feature-img" loading="lazy" />
+        </div>
+      </section>
+
+      <section class="feature-section reverse">
+        <div class="feature-content">
+          <h2>Perfect for Instagram <span class="highlight-serif">Stories</span></h2>
+          <p>
+            Export high-definition 9:16 vertical cards featuring immersive blurred cover backgrounds and optional automatic translations, sized and crafted to share your taste across socials.
+          </p>
+        </div>
+        <div class="feature-image-container">
+          <img src="/assets/leading/story-cards.webp" alt="Shareable Lyrics Stories" class="feature-img" loading="lazy" />
+        </div>
+      </section>
+    </div>
+
+    <section class="support-section">
+      <img src="/logo.svg" alt="BubbleFM Logo" class="support-logo" />
+      <h2>Support <span class="highlight-serif">BubbleFM</span></h2>
+      <p>
+        BubbleFM is free and open-source. If you enjoy using it, consider buying me a coffee to support development and server costs!
+      </p>
+      <a href="https://buymeacoffee.com/snw.mint" target="_blank" rel="noopener noreferrer" class="btn-bmac">
+        <animate-icons name="coffee" size="20"></animate-icons>
+        <span>Buy Me a Coffee</span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-info">
+      <span class="info-line-1">
+        ©
+        <span id="currentYear">2026</span>
+        BubbleFM.
+      </span>
+      <span class="separator">|</span>
+      <span class="info-line-3">
+        by
+        <a href="https://github.com/snw-mint/" target="_blank" rel="noopener noreferrer">Snow Mint</a>
+      </span>
+    </div>
+    <div class="footer-links">
+      <a href="https://buymeacoffee.com/snw.mint" target="_blank" rel="noopener noreferrer">Buy Me a Coffee</a>
+      <span class="dot">•</span>
+      <a href="https://github.com/snw-mint/bubblefm" target="_blank" rel="noopener noreferrer">Star on GitHub</a>
+      <span class="dot">•</span>
+      <a href="/privacy.html">Privacy Policy</a>
+      <span class="dot">•</span>
+      <a href="/terms.html">Terms of Use</a>
+      <span class="dot">•</span>
+      <a href="https://github.com/snw-mint/bubblefm/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+      <span class="dot">•</span>
+      <span class="versao">v1.0.0</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/lyrics/lyrics.js"></script>
+</body>
+
+</html>

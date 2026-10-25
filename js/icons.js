@@ -15,9 +15,14 @@ import {
   Check,
   CircleCheck,
   ChevronLeft,
+  ChevronDown,
   Sun,
   Moon,
   Download,
+  Languages,
+  SlidersHorizontal,
+  Paintbrush,
+  Settings,
 } from "@animateicons/vanilla/lucide";
 
 defineIcons({
@@ -36,9 +41,14 @@ defineIcons({
   Check,
   CircleCheck,
   ChevronLeft,
+  ChevronDown,
   Sun,
   Moon,
   Download,
+  Languages,
+  SlidersHorizontal,
+  Paintbrush,
+  Settings,
 });
 
 if (typeof document !== "undefined") {
