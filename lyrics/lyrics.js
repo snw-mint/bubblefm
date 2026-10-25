@@ -1352,14 +1352,14 @@ function createExportElement(layoutId, format) {
     }
 
     wrapper.style.cssText = `
-      width: 540px;
-      height: 960px;
+      width: 360px;
+      height: 640px;
       position: relative;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0;
+      padding: 3.5rem 1.75rem;
       margin: 0;
       border: none;
       border-radius: 0;
@@ -1370,15 +1370,13 @@ function createExportElement(layoutId, format) {
 
     wrapper.innerHTML = `
       ${bgImgHtml}
-      <div style="position: relative; z-index: 2; width: 100%; display: flex; justify-content: center; padding: 0 3.25rem; box-sizing: border-box;">
-        ${innerCardHtml}
-      </div>
+      ${innerCardHtml}
     `;
   } else {
     wrapper.style.cssText = `
-      width: 340px;
-      min-width: 340px;
-      max-width: 340px;
+      width: 320px;
+      min-width: 320px;
+      max-width: 320px;
       position: relative;
       display: flex;
       border: none;
@@ -1404,8 +1402,8 @@ async function exportSelectedLyricsImage() {
   const exportContainer = document.createElement("div");
   exportContainer.style.cssText = `
     position: fixed;
-    top: 0;
-    left: 9999px;
+    top: -9999px;
+    left: 0;
     width: 1200px;
     height: 1200px;
     overflow: hidden;
@@ -1428,7 +1426,7 @@ async function exportSelectedLyricsImage() {
       : (exportNode.querySelector(".lyrics-card-target") || exportNode);
 
     const dataUrl = await htmlToImage.toPng(targetElement, {
-      pixelRatio: 2,
+      pixelRatio: 3,
       cacheBust: true,
       backgroundColor: null,
     });
