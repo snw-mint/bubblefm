@@ -1321,6 +1321,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const serviceSelectInput = document.getElementById("serviceSelect");
+  if (serviceSelectInput) {
+    serviceSelectInput.addEventListener("change", (e) => {
+      if (typeof umami !== "undefined") {
+        umami.track("Service Selected", {
+          service: e.target.value,
+          tool: "charts"
+        });
+      }
+    });
+  }
+
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
       if (typeof umami !== "undefined") {
@@ -1536,6 +1548,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 service: serviceSelect,
                 theme: isLight ? "light" : "dark",
                 metric: useScrobbles ? "scrobbles" : "minutes"
+              });
+              umami.track("Card Downloaded", {
+                tool: "charts",
+                service: serviceSelect,
               });
             }
 

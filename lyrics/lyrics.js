@@ -685,6 +685,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const input = document.getElementById("lyricsInput");
       const query = input ? input.value.trim() : "";
       if (query) {
+        if (typeof umami !== "undefined") {
+          umami.track("Lyrics Search Started");
+        }
         try {
           sessionStorage.removeItem(CACHE_KEY);
         } catch {}
@@ -736,6 +739,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (translateBtn) translateBtn.disabled = false;
         if (textSpan) textSpan.textContent = "Translate";
 
+        if (typeof umami !== "undefined") {
+          umami.track("Lyrics Translation Language Changed", { language: currentTargetLang });
+        }
+
         renderSelectLines();
         saveLyricsState("select");
       } else {
@@ -762,6 +769,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (translatedLines) {
         isTranslated = !isTranslated;
         translateBtn.classList.toggle("active", isTranslated);
+        if (typeof umami !== "undefined") {
+          umami.track("Lyrics Translation Toggled", {
+            translated: isTranslated,
+            language: currentTargetLang,
+          });
+        }
         renderSelectLines();
         saveLyricsState("select");
       }
@@ -807,6 +820,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fmt === currentFormat) return;
         currentFormat = fmt;
         formatSegmented.querySelectorAll(".segment-btn").forEach((b) => b.classList.toggle("active", b.dataset.format === fmt));
+        if (typeof umami !== "undefined") {
+          umami.track("Lyrics Format Selected", { format: fmt });
+        }
         renderLayouts();
         saveLyricsState("layout");
       });
@@ -818,21 +834,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const closePersonalizeBtn = document.getElementById("btnClosePersonalize");
   const donePersonalizeBtn = document.getElementById("btnDonePersonalize");
 
+  const trackLyricsConfigSaved = () => {
+    if (typeof umami !== "undefined") {
+      umami.track("Lyrics Config Saved", {
+        service: currentService,
+        black_text: isBlackText,
+        bilingual: isBilingual,
+        custom_color: Boolean(customColor),
+      });
+    }
+  };
+
   if (openPersonalizeBtn && personalizeModal) {
     openPersonalizeBtn.addEventListener("click", () => {
       personalizeModal.classList.add("show");
+      if (typeof umami !== "undefined") {
+        umami.track("Lyrics Config Modal Opened");
+      }
     });
   }
 
   if (closePersonalizeBtn && personalizeModal) {
     closePersonalizeBtn.addEventListener("click", () => {
       personalizeModal.classList.remove("show");
+      trackLyricsConfigSaved();
     });
   }
 
   if (donePersonalizeBtn && personalizeModal) {
     donePersonalizeBtn.addEventListener("click", () => {
       personalizeModal.classList.remove("show");
+      trackLyricsConfigSaved();
     });
   }
 
@@ -840,6 +872,7 @@ document.addEventListener("DOMContentLoaded", () => {
     personalizeModal.addEventListener("click", (e) => {
       if (e.target === personalizeModal) {
         personalizeModal.classList.remove("show");
+        trackLyricsConfigSaved();
       }
     });
   }
@@ -848,6 +881,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (serviceSelectEl) {
     serviceSelectEl.addEventListener("change", (e) => {
       currentService = e.target.value;
+      if (typeof umami !== "undefined") {
+        umami.track("Service Selected", {
+          service: currentService,
+          tool: "lyrics",
+        });
+      }
       renderLayouts();
       saveLyricsState("layout");
     });
@@ -914,6 +953,17 @@ document.addEventListener("DOMContentLoaded", () => {
       exportSelectedLyricsImage();
     });
   }
+
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (!link || !link.href || typeof umami === "undefined") return;
+
+    if (link.href.includes("buymeacoffee.com")) {
+      umami.track("Outbound Click", { destination: "buymeacoffee" });
+    } else if (link.href.includes("github.com")) {
+      umami.track("Outbound Click", { destination: "github" });
+    }
+  });
 });
 
 function rgbToHex(r, g, b) {
@@ -1230,6 +1280,9 @@ function renderLayouts() {
       grid.querySelectorAll(".lyrics-layout-item").forEach((item) => {
         item.classList.toggle("selected", item.dataset.layout === currentLayout);
       });
+      if (typeof umami !== "undefined") {
+        umami.track("Lyrics Layout Selected", { layout: currentLayout });
+      }
     });
   });
 }
@@ -1436,6 +1489,25 @@ async function exportSelectedLyricsImage() {
     link.download = `bubblefm_${cleanTitle}_${currentLayout}_${currentFormat}.png`;
     link.href = dataUrl;
     link.click();
+
+    if (typeof umami !== "undefined") {
+      umami.track("Lyrics Card Generated", {
+        format: currentFormat,
+        layout: currentLayout,
+        service: currentService,
+        translated: isTranslated,
+        target_lang: isTranslated ? currentTargetLang : "none",
+        black_text: isBlackText,
+        bilingual: isBilingual,
+        custom_color: Boolean(customColor),
+      });
+      umami.track("Card Downloaded", {
+        tool: "lyrics",
+        service: currentService,
+        format: currentFormat,
+        layout: currentLayout,
+      });
+    }
   } catch (err) {
     console.error("Export error:", err);
   } finally {
@@ -1485,6 +1557,9 @@ async function initResultsPage(gridContainer) {
 
         gridContainer.querySelectorAll(".lyrics-card-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
+            if (typeof umami !== "undefined") {
+              umami.track("Lyrics Track Selected");
+            }
             const item = {
               type: "song",
               id: btn.dataset.id,
@@ -1542,6 +1617,9 @@ async function initResultsPage(gridContainer) {
 
     gridContainer.querySelectorAll(".lyrics-card-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
+        if (typeof umami !== "undefined") {
+          umami.track("Lyrics Track Selected");
+        }
         const item = {
           type: "song",
           id: btn.dataset.id,

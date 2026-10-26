@@ -760,9 +760,14 @@ function initReportGenerator(matchContext) {
 
             if (typeof umami !== "undefined") {
               umami.track("Match Report Generated", {
+                service: "lastfm",
                 color: selectedBg,
                 theme: isLight ? "light" : "dark",
                 score: matchContext.matchPercentage,
+              });
+              umami.track("Card Downloaded", {
+                tool: "match",
+                service: "lastfm",
               });
             }
 
