@@ -196,6 +196,10 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedOffset = parseInt(opt.getAttribute("data-offset") || "0", 10);
         sessionStorage.setItem("lastfm_period", selectedPeriod);
         sessionStorage.setItem("lastfm_offset", selectedOffset.toString());
+        const timeVal = selectedOffset === -1 ? "past" : "current";
+        if (typeof umami !== "undefined") {
+          umami.track("period_selected", { period: selectedPeriod, time: timeVal });
+        }
         syncPeriodUI();
         periodDropdown.classList.remove("show");
         periodPickerBtn.classList.remove("active");
@@ -248,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sessionStorage.setItem("lastfm_offset", selectedOffset.toString());
         const timeVal = selectedOffset === -1 ? "past" : "current";
         if (typeof umami !== "undefined") {
-          umami.track("Period Selected", { period: selectedPeriod, time: timeVal });
+          umami.track("search_initiated", { tool: "charts" });
         }
         window.location.href = `result.html?user=${encodeURIComponent(userInput)}&period=${encodeURIComponent(selectedPeriod)}&time=${timeVal}`;
       }
@@ -281,6 +285,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         sessionStorage.setItem("lastfm_user1", userInput1);
         sessionStorage.setItem("lastfm_user2", userInput2);
+        if (typeof umami !== "undefined") {
+          umami.track("search_initiated", { tool: "match" });
+        }
         window.location.href = `result.html?user1=${encodeURIComponent(userInput1)}&user2=${encodeURIComponent(userInput2)}`;
       }
     });
@@ -302,9 +309,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (urlParams.get("time") !== timeVal || !urlParams.get("user")) {
         const newUrl = `result.html?user=${encodeURIComponent(user)}&period=${encodeURIComponent(currentPeriod)}&time=${timeVal}`;
         window.history.replaceState(null, "", newUrl);
-      }
-      if (typeof umami !== "undefined") {
-        umami.track("Period Selected", { period: currentPeriod, time: timeVal });
       }
       fetchLastfmAndDeezerData(user, currentPeriod, periodOffset);
     }
@@ -410,6 +414,12 @@ async function fetchAssetData(type, query) {
     if (jsonpData && jsonpData.data && jsonpData.data.length > 0) return jsonpData;
   } catch (e) {
     console.warn("Deezer JSONP fetch warning:", e);
+    if (typeof umami !== "undefined") {
+      umami.track("api_error", {
+        tool: "charts",
+        reason: e.message || "user_not_found",
+      });
+    }
   }
   return null;
 }
@@ -644,6 +654,12 @@ function initFaqModal() {
   const openFaq = () => {
     faqModal.classList.add("show");
     faqModal.setAttribute("aria-hidden", "false");
+    if (typeof umami !== "undefined") {
+      umami.track("modal_opened", {
+        modal: "faq",
+        tool: isMatchMode ? "match" : "charts",
+      });
+    }
     try {
       const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
       localStorage.setItem("bubblefm_faq_open_count", count.toString());
@@ -938,6 +954,14 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     }
 
     const topArtistName = artists[0]?.name;
+    if (userInfo?.error) {
+      if (typeof umami !== "undefined") {
+        umami.track("api_error", {
+          tool: "charts",
+          reason: userInfo.message || "user_not_found",
+        });
+      }
+    }
     const topAlbumName = albums[0]?.name;
     const topAlbumArtist = albums[0]?.artist?.name;
     const topTrackName = tracks[0]?.name;
@@ -1038,6 +1062,12 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     renderData(username, data);
   } catch (error) {
     console.error("Error fetching API data:", error);
+    if (typeof umami !== "undefined") {
+      umami.track("api_error", {
+        tool: "charts",
+        reason: error.message || "user_not_found",
+      });
+    }
   }
 }
 
@@ -1250,7 +1280,10 @@ async function handleShareCharts() {
   const shareText = `Check out ${user ? user + "'s" : "my"} music charts on BubbleFM!`;
 
   if (typeof umami !== "undefined") {
-    umami.track("Share Clicked", { type: "single" });
+    umami.track("share_clicked", {
+      tool: "charts",
+      method: navigator.share ? "native" : "clipboard",
+    });
   }
 
   if (navigator.share) {
@@ -1336,7 +1369,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
       if (typeof umami !== "undefined") {
-        umami.track("Report Modal Opened");
+        umami.track("modal_opened", {
+          modal: "report_settings",
+          tool: "charts",
+        });
       }
       if (step1 && step2) {
         step1.style.display = "block";
@@ -1385,6 +1421,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const selectedBgOption = document.querySelector(".bg-option.selected");
       const selectedBg = selectedBgOption ? selectedBgOption.dataset.bg : "candy";
+      const selectedTypeOption = document.querySelector(".type-option.selected");
+      const selectedType = selectedTypeOption ? selectedTypeOption.dataset.type : "grid";
+      const currentPeriod = data.period || sessionStorage.getItem("lastfm_period") || "month";
       const isLight = document.getElementById("themeToggleCheckbox").checked;
       const useScrobbles = Boolean(document.getElementById("useScrobblesCheckbox")?.checked);
 
@@ -1543,15 +1582,13 @@ document.addEventListener("DOMContentLoaded", () => {
             link.click();
 
             if (typeof umami !== "undefined") {
-              umami.track("Report Generated", {
-                color: selectedBg,
-                service: serviceSelect,
-                theme: isLight ? "light" : "dark",
-                metric: useScrobbles ? "scrobbles" : "minutes"
-              });
-              umami.track("Card Downloaded", {
+              umami.track("report_download", {
                 tool: "charts",
                 service: serviceSelect,
+                color: selectedBg,
+                type: selectedType || "grid",
+                metric: useScrobbles ? "scrobbles" : "minutes",
+                period: currentPeriod,
               });
             }
 

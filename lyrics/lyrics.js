@@ -181,7 +181,14 @@ async function fetchLyricsFromLRCLIB(track, artist) {
         return data.syncedLyrics.replace(/\[\d{2}:\d{2}\.\d{2,3}\]\s*/g, "").trim();
       }
     }
-  } catch {}
+  } catch (error) {
+    if (typeof umami !== "undefined") {
+      umami.track("api_error", {
+        tool: "lyrics",
+        reason: error.message || "user_not_found",
+      });
+    }
+  }
 
   try {
     const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(`${track} ${artist}`)}`;
@@ -196,7 +203,14 @@ async function fetchLyricsFromLRCLIB(track, artist) {
         }
       }
     }
-  } catch {}
+  } catch (error) {
+    if (typeof umami !== "undefined") {
+      umami.track("api_error", {
+        tool: "lyrics",
+        reason: error.message || "user_not_found",
+      });
+    }
+  }
 
   try {
     const ovhUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(track)}`;
@@ -205,7 +219,14 @@ async function fetchLyricsFromLRCLIB(track, artist) {
       const data = await res.json();
       if (data.lyrics) return data.lyrics;
     }
-  } catch {}
+  } catch (error) {
+    if (typeof umami !== "undefined") {
+      umami.track("api_error", {
+        tool: "lyrics",
+        reason: error.message || "user_not_found",
+      });
+    }
+  }
 
   return null;
 }
@@ -686,7 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const query = input ? input.value.trim() : "";
       if (query) {
         if (typeof umami !== "undefined") {
-          umami.track("Lyrics Search Started");
+          umami.track("search_initiated", { tool: "lyrics" });
         }
         try {
           sessionStorage.removeItem(CACHE_KEY);
@@ -849,7 +870,10 @@ document.addEventListener("DOMContentLoaded", () => {
     openPersonalizeBtn.addEventListener("click", () => {
       personalizeModal.classList.add("show");
       if (typeof umami !== "undefined") {
-        umami.track("Lyrics Config Modal Opened");
+        umami.track("modal_opened", {
+          modal: "lyrics_config",
+          tool: "lyrics",
+        });
       }
     });
   }
@@ -1491,21 +1515,13 @@ async function exportSelectedLyricsImage() {
     link.click();
 
     if (typeof umami !== "undefined") {
-      umami.track("Lyrics Card Generated", {
-        format: currentFormat,
-        layout: currentLayout,
-        service: currentService,
-        translated: isTranslated,
-        target_lang: isTranslated ? currentTargetLang : "none",
-        black_text: isBlackText,
-        bilingual: isBilingual,
-        custom_color: Boolean(customColor),
-      });
-      umami.track("Card Downloaded", {
+      umami.track("report_download", {
         tool: "lyrics",
         service: currentService,
         format: currentFormat,
         layout: currentLayout,
+        has_custom_color: Boolean(customColor),
+        is_translated: isTranslated,
       });
     }
   } catch (err) {
@@ -1632,6 +1648,12 @@ async function initResultsPage(gridContainer) {
       });
     });
   } catch (error) {
+    if (typeof umami !== "undefined") {
+      umami.track("api_error", {
+        tool: "lyrics",
+        reason: error.message || "user_not_found",
+      });
+    }
     gridContainer.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 2rem 0;">
         <p style="font-size: 1.1rem; color: var(--color-error);">Error loading songs. Please try again.</p>
