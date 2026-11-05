@@ -346,7 +346,7 @@ let currentFormat = "card";
 let isBlackText = false;
 let isBilingual = true;
 let customColor = null;
-let currentService = "lastfm";
+let currentService = "none";
 let extractedDominant = { hex: "#2b2f3a", darkerHex: "#171a21" };
 
 const CACHE_KEY = "bubblefm_lyrics_cache";
@@ -408,7 +408,7 @@ function restoreLyricsStateIfAvailable(currentQuery) {
     isBlackText = !!state.blackText;
     isBilingual = state.bilingual !== false;
     customColor = state.customColor || null;
-    currentService = state.service || "lastfm";
+    currentService = state.service || "none";
     currentTargetLang = state.targetLang || getUserLanguage();
 
     const langSelectEl = document.getElementById("lyricsLangSelect");
@@ -581,15 +581,29 @@ function renderSelectLines() {
   linesWrapper.querySelectorAll(".lyric-line-item").forEach((el) => {
     el.addEventListener("click", () => {
       const idx = parseInt(el.dataset.index, 10);
+      const sorted = Array.from(selectedIndices).sort((a, b) => a - b);
+      const min = sorted[0];
+      const max = sorted[sorted.length - 1];
+
       if (selectedIndices.has(idx)) {
-        selectedIndices.delete(idx);
-        el.classList.remove("selected");
-      } else {
-        if (selectedIndices.size < 5) {
+        if (idx === min || idx === max) {
+          selectedIndices.delete(idx);
+        } else {
+          selectedIndices.clear();
           selectedIndices.add(idx);
-          el.classList.add("selected");
         }
+      } else if (selectedIndices.size > 0 && selectedIndices.size < 5 && idx === max + 1) {
+        selectedIndices.add(idx);
+      } else {
+        selectedIndices.clear();
+        selectedIndices.add(idx);
       }
+
+      linesWrapper.querySelectorAll(".lyric-line-item").forEach((itemEl) => {
+        const itemIdx = parseInt(itemEl.dataset.index, 10);
+        itemEl.classList.toggle("selected", selectedIndices.has(itemIdx));
+      });
+
       if (countDisplay) {
         countDisplay.textContent = `${selectedIndices.size} / 5`;
       }
@@ -1193,18 +1207,13 @@ function renderLayouts() {
   const renderLinesHtml = () => {
     return sortedLines
       .map((item) => {
-        if (isTranslated && isBilingual && item.trans && item.trans !== item.orig) {
-          return `
-            <div class="lyrics-card-line">
-              <span class="lyrics-card-line-orig" style="color: ${mutedTextColor};">${escapeHTML(item.orig)}</span>
-              <span class="lyrics-card-line-trans" style="color: ${textColor};">${escapeHTML(item.trans)}</span>
-            </div>
-          `;
+        const origText = (item.orig || "").replace(/\s+/g, " ").trim();
+        const transText = item.trans ? item.trans.replace(/\s+/g, " ").trim() : "";
+        if (isTranslated && isBilingual && transText && transText !== origText) {
+          return `<div class="lyrics-card-line"><span class="lyrics-card-line-orig" style="color: ${mutedTextColor};">${escapeHTML(origText)}</span><span class="lyrics-card-line-trans" style="color: ${textColor};">${escapeHTML(transText)}</span></div>`;
         }
-        const text = isTranslated && item.trans ? item.trans : item.orig;
-        return `
-          <div class="lyrics-card-line" style="color: ${textColor};">${escapeHTML(text)}</div>
-        `;
+        const text = isTranslated && transText ? transText : origText;
+        return `<div class="lyrics-card-line" style="color: ${textColor};">${escapeHTML(text)}</div>`;
       })
       .join("");
   };
@@ -1224,10 +1233,8 @@ function renderLayouts() {
               <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
             </div>
           </div>
-          <div class="lyrics-card-lines lines-count-${sortedLines.length}">
-            ${renderLinesHtml()}
-          </div>
-          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
+          <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
+          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
         </div>
       `,
     },
@@ -1246,10 +1253,8 @@ function renderLayouts() {
               <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
             </div>
           </div>
-          <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">
-            ${renderLinesHtml()}
-          </div>
-          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
+          <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">${renderLinesHtml()}</div>
+          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor};">${serviceLogoSvg}</div>` : ""}
         </div>
       `,
     },
@@ -1261,16 +1266,14 @@ function renderLayouts() {
       bgHtml: currentFormat === "story" ? `<img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" class="story-blur-image" alt="Blurred BG" crossorigin="anonymous" />` : "",
       html: `
         <div class="lyrics-card-target lyrics-card-blurred" style="background-color: ${blurredCardBg}; color: ${textColor};">
-          <div class="lyrics-card-lines lines-count-${sortedLines.length}">
-            ${renderLinesHtml()}
-          </div>
+          <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
           <div class="lyrics-card-divider" style="border-top-color: ${dividerColor};">
             <div class="lyrics-card-header" style="align-items: flex-start;">
-              <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" style="width: 48px; height: 48px; border-radius: 10px;" crossorigin="anonymous" draggable="false" />
+              <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
               <div class="lyrics-card-meta">
-                <span class="lyrics-card-title" style="color: ${textColor}; font-size: 0.9rem;">${escapeHTML(currentTrack.title)}</span>
-                <span class="lyrics-card-artist" style="color: ${mutedTextColor}; font-size: 0.76rem;">${escapeHTML(currentTrack.artist)}</span>
-                ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: 0.35rem;">${serviceLogoSvg}</div>` : ""}
+                <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+                <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
+                ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
               </div>
             </div>
           </div>
@@ -1342,18 +1345,13 @@ function createExportElement(layoutId, format) {
   const renderLinesHtml = () => {
     return sortedLines
       .map((item) => {
-        if (isTranslated && isBilingual && item.trans && item.trans !== item.orig) {
-          return `
-            <div class="lyrics-card-line">
-              <span class="lyrics-card-line-orig" style="color: ${mutedTextColor};">${escapeHTML(item.orig)}</span>
-              <span class="lyrics-card-line-trans" style="color: ${textColor};">${escapeHTML(item.trans)}</span>
-            </div>
-          `;
+        const origText = (item.orig || "").replace(/\s+/g, " ").trim();
+        const transText = item.trans ? item.trans.replace(/\s+/g, " ").trim() : "";
+        if (isTranslated && isBilingual && transText && transText !== origText) {
+          return `<div class="lyrics-card-line"><span class="lyrics-card-line-orig" style="color: ${mutedTextColor};">${escapeHTML(origText)}</span><span class="lyrics-card-line-trans" style="color: ${textColor};">${escapeHTML(transText)}</span></div>`;
         }
-        const text = isTranslated && item.trans ? item.trans : item.orig;
-        return `
-          <div class="lyrics-card-line" style="color: ${textColor};">${escapeHTML(text)}</div>
-        `;
+        const text = isTranslated && transText ? transText : origText;
+        return `<div class="lyrics-card-line" style="color: ${textColor};">${escapeHTML(text)}</div>`;
       })
       .join("");
   };
@@ -1373,10 +1371,8 @@ function createExportElement(layoutId, format) {
             <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
           </div>
         </div>
-        <div class="lyrics-card-lines lines-count-${sortedLines.length}">
-          ${renderLinesHtml()}
-        </div>
-        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
+        <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
+        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
       </div>
     `;
   } else if (layoutId === "modern") {
@@ -1390,25 +1386,21 @@ function createExportElement(layoutId, format) {
             <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
           </div>
         </div>
-        <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">
-          ${renderLinesHtml()}
-        </div>
-        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor}; margin-top: -0.25rem;">${serviceLogoSvg}</div>` : ""}
+        <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">${renderLinesHtml()}</div>
+        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor};">${serviceLogoSvg}</div>` : ""}
       </div>
     `;
   } else {
     innerCardHtml = `
       <div class="lyrics-card-target lyrics-card-blurred" style="background-color: ${blurredCardBg}; color: ${textColor};">
-        <div class="lyrics-card-lines lines-count-${sortedLines.length}">
-          ${renderLinesHtml()}
-        </div>
+        <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
         <div class="lyrics-card-divider" style="border-top-color: ${dividerColor};">
           <div class="lyrics-card-header" style="align-items: flex-start;">
-            <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" style="width: 48px; height: 48px; border-radius: 10px;" crossorigin="anonymous" draggable="false" />
+            <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
             <div class="lyrics-card-meta">
-              <span class="lyrics-card-title" style="color: ${textColor}; font-size: 0.88rem;">${escapeHTML(currentTrack.title)}</span>
-              <span class="lyrics-card-artist" style="color: ${mutedTextColor}; font-size: 0.75rem;">${escapeHTML(currentTrack.artist)}</span>
-              ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor}; margin-top: 0.35rem;">${serviceLogoSvg}</div>` : ""}
+              <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+              <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
+              ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
             </div>
           </div>
         </div>
@@ -1436,7 +1428,7 @@ function createExportElement(layoutId, format) {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 3.5rem 1.75rem;
+      padding: 2.5rem 1.25rem;
       margin: 0;
       border: none;
       border-radius: 0;
@@ -1494,6 +1486,9 @@ async function exportSelectedLyricsImage() {
     if (currentTrack?.cover) {
       await preloadImage(currentTrack.cover);
     }
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
 
     const exportNode = createExportElement(currentLayout, currentFormat);
     exportContainer.appendChild(exportNode);
@@ -1502,10 +1497,51 @@ async function exportSelectedLyricsImage() {
       ? exportNode
       : (exportNode.querySelector(".lyrics-card-target") || exportNode);
 
+    const allNodes = [exportNode, ...exportNode.querySelectorAll("*")];
+    const fontRecords = allNodes.map((el) => {
+      const computed = window.getComputedStyle(el);
+      const origFontSize = computed.getPropertyValue("font-size");
+      let reducedFontSize = origFontSize;
+      if (origFontSize && origFontSize.endsWith("px")) {
+        const reduced = Math.floor(parseFloat(origFontSize.slice(0, -2))) - 0.1;
+        reducedFontSize = `${reduced}px`;
+      }
+      return { el, origFontSize, reducedFontSize };
+    });
+
+    fontRecords.forEach(({ el, reducedFontSize }) => {
+      if (reducedFontSize) {
+        el.style.setProperty("font-size", reducedFontSize, "important");
+      }
+    });
+
+    void exportNode.offsetHeight;
+
+    const sizeRecords = allNodes.map((el) => {
+      const rect = el.getBoundingClientRect();
+      return { el, height: rect.height };
+    });
+    const targetRect = targetElement.getBoundingClientRect();
+
+    sizeRecords.forEach(({ el, height }) => {
+      if (height > 0) {
+        el.style.setProperty("height", `${height}px`, "important");
+        el.style.setProperty("block-size", `${height}px`, "important");
+      }
+    });
+
+    fontRecords.forEach(({ el, origFontSize }) => {
+      if (origFontSize) {
+        el.style.setProperty("font-size", origFontSize, "important");
+      }
+    });
+
     const dataUrl = await htmlToImage.toPng(targetElement, {
       pixelRatio: 3,
       cacheBust: true,
       backgroundColor: null,
+      width: Math.round(targetRect.width),
+      height: Math.round(targetRect.height),
     });
 
     const link = document.createElement("a");
