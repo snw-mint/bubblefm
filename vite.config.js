@@ -28,6 +28,8 @@ export default defineConfig({
         matchResult: resolve(__dirname, "match/result.html"),
         lyrics: resolve(__dirname, "lyrics/index.html"),
         lyricsResult: resolve(__dirname, "lyrics/result.html"),
+        cards: resolve(__dirname, "cards/index.html"),
+        cardsResult: resolve(__dirname, "cards/result.html"),
         privacy: resolve(__dirname, "privacy.html"),
         terms: resolve(__dirname, "terms.html"),
       },

@@ -23,6 +23,8 @@ import {
   SlidersHorizontal,
   Paintbrush,
   Settings,
+  FileText,
+  FileMusic,
 } from "@animateicons/vanilla/lucide";
 
 defineIcons({
@@ -49,6 +51,8 @@ defineIcons({
   SlidersHorizontal,
   Paintbrush,
   Settings,
+  FileText,
+  FileMusic,
 });
 
 if (typeof document !== "undefined") {

@@ -1576,7 +1576,35 @@ async function exportSelectedLyricsImage() {
 
 async function initResultsPage(gridContainer) {
   const params = new URLSearchParams(window.location.search);
+  const trackParam = params.get("track");
+  const artistParam = params.get("artist") || "";
+  const imageParam = params.get("image") || "";
   const query = params.get("search");
+
+  if (trackParam) {
+    if (typeof umami !== "undefined") {
+      umami.track("Lyrics Direct Loaded", { type: "song" });
+    }
+    let coverUrl = getHighQualityCover(imageParam);
+    if (!coverUrl) {
+      try {
+        const found = await searchSongs(`${trackParam} ${artistParam}`);
+        if (found && found.length > 0) {
+          coverUrl = found[0].coverHq || found[0].cover;
+        }
+      } catch { }
+    }
+    const directItem = {
+      type: "song",
+      id: "direct",
+      title: trackParam,
+      artist: artistParam,
+      cover: coverUrl,
+      coverHq: coverUrl,
+    };
+    loadTrackLyrics(directItem);
+    return;
+  }
 
   if (!query) {
     window.location.href = "./";

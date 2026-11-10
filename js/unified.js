@@ -1099,6 +1099,33 @@ function renderData(username, data) {
       const playcountStr = playcountNum.toLocaleString("en-US");
       const minutesStr = Math.round(playcountNum * 3.5).toLocaleString("en-US");
 
+      let actionsHtml = "";
+      if (type === "track") {
+        const artist = item.artist?.name || "";
+        const lyricsUrl = `/lyrics/result.html?track=${encodeURIComponent(item.name)}&artist=${encodeURIComponent(artist)}`;
+        const cardsUrl = `/cards/result.html?track=${encodeURIComponent(item.name)}&artist=${encodeURIComponent(artist)}`;
+        actionsHtml = `
+          <div class="chart-item-actions">
+            <a href="${lyricsUrl}" class="chart-action-btn" data-tool="lyrics" data-type="track" title="Lyrics" aria-label="Lyrics" onclick="event.stopPropagation()">
+              <animate-icons name="file-text" size="16"></animate-icons>
+            </a>
+            <a href="${cardsUrl}" class="chart-action-btn" data-tool="cards" data-type="track" title="Card" aria-label="Card" onclick="event.stopPropagation()">
+              <animate-icons name="file-music" size="16"></animate-icons>
+            </a>
+          </div>
+        `;
+      } else if (type === "album") {
+        const artist = item.artist?.name || "";
+        const cardsUrl = `/cards/result.html?album=${encodeURIComponent(item.name)}&artist=${encodeURIComponent(artist)}`;
+        actionsHtml = `
+          <div class="chart-item-actions">
+            <a href="${cardsUrl}" class="chart-action-btn" data-tool="cards" data-type="album" title="Card" aria-label="Card" onclick="event.stopPropagation()">
+              <animate-icons name="file-music" size="16"></animate-icons>
+            </a>
+          </div>
+        `;
+      }
+
       if (rank === 1) {
         let subText = "";
         if (type === "artist") {
@@ -1117,6 +1144,7 @@ function renderData(username, data) {
                             <span title="${name}">${name}</span>
                             <span style="font-size: 0.9rem; opacity: 0.8;" title="${subText}">${subText}</span>
                         </div>
+                        ${actionsHtml}
                     </div>
                 `;
       } else {
@@ -1130,6 +1158,7 @@ function renderData(username, data) {
                     <div class="chart-item" data-plays="${playcountStr}" data-minutes="${minutesStr}" style="cursor: pointer;">
                         <span style="font-weight: bold; margin-right: 15px; color: var(--color-neutral-500); flex-shrink: 0;">#${rank}</span>
                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;" title="${text}">${text}</span>
+                        ${actionsHtml}
                     </div>
                 `;
       }
@@ -1636,6 +1665,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.addEventListener("click", (e) => {
+    const actionBtn = e.target.closest(".chart-action-btn");
+    if (actionBtn && typeof umami !== "undefined") {
+      umami.track("quick_action_clicked", {
+        tool: actionBtn.dataset.tool,
+        type: actionBtn.dataset.type,
+      });
+    }
+
     const link = e.target.closest("a");
     if (!link || !link.href || typeof umami === "undefined") return;
 

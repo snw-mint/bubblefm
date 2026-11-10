@@ -4,12 +4,6 @@
 
 <h1 align="center">BubbleFM</h1>
 
-<p align="center">
-  <a href="https://github.com/snw-mint/bubblefm/activity"><img src="https://img.shields.io/github/last-commit/snw-mint/bubblefm?style=plastic&color=%23E53E3E" alt="last commit" /></a>
-  <a href="https://github.com/snw-mint/bubblefm?tab=GPL-3.0-1-ov-file"><img src="https://img.shields.io/badge/GPLv3-message?style=plastic&label=license&color=%23E53E3E" alt="license" /></a>
-  <img src="https://img.shields.io/badge/yes-label?style=plastic&label=maintained" alt="maintained" />
-</p>
-
 <div align="center">
   <img src="assets\images\repo.png" alt="BubbleFM Dashboard"/>
 </div>
