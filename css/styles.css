@@ -4782,7 +4782,7 @@ input:checked+.slider:before {
 .lyrics-card-modern-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.92));
+  background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85));
   z-index: 1;
 }
 
