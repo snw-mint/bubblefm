@@ -4083,6 +4083,13 @@ input:checked+.slider:before {
   max-width: 320px !important;
 }
 
+.lyrics-export-wrapper.export-card .lyrics-card-wrapper {
+  width: 320px !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
+  gap: 0.75rem !important;
+}
+
 .lyrics-export-wrapper.export-card .lyrics-card-target {
   width: 320px !important;
   min-width: 320px !important;
@@ -4140,52 +4147,80 @@ input:checked+.slider:before {
   line-height: 1.35 !important;
 }
 
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-5 {
+  gap: 0.75rem !important;
+}
+
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-5 .lyrics-card-line,
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-5 .lyrics-card-line-trans {
+  font-size: 1.15rem !important;
+}
+
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-5 .lyrics-card-line-orig {
+  font-size: 0.75rem !important;
+}
+
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-4 {
+  gap: 0.82rem !important;
+}
+
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-4 .lyrics-card-line,
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-4 .lyrics-card-line-trans {
+  font-size: 1.22rem !important;
+}
+
+.lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-4 .lyrics-card-line-orig {
+  font-size: 0.78rem !important;
+}
+
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-3 {
-  gap: 0.85rem !important;
+  gap: 0.90rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-3 .lyrics-card-line,
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-3 .lyrics-card-line-trans {
-  font-size: 1.25rem !important;
+  font-size: 1.32rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-3 .lyrics-card-line-orig {
-  font-size: 0.78rem !important;
+  font-size: 0.82rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-2 {
-  gap: 0.95rem !important;
+  gap: 1rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-2 .lyrics-card-line,
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-2 .lyrics-card-line-trans {
-  font-size: 1.36rem !important;
+  font-size: 1.44rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-2 .lyrics-card-line-orig {
-  font-size: 0.82rem !important;
+  font-size: 0.86rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-1 {
-  gap: 1rem !important;
+  gap: 1.1rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-1 .lyrics-card-line,
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-1 .lyrics-card-line-trans {
-  font-size: 1.5rem !important;
+  font-size: 1.58rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-lines.lines-count-1 .lyrics-card-line-orig {
-  font-size: 0.86rem !important;
+  font-size: 0.92rem !important;
 }
 
 .lyrics-export-wrapper.export-card .lyrics-card-service-logo {
-  margin-top: 0.45rem !important;
-  opacity: 0.72 !important;
+  padding: 0 0.5rem 0.25rem 0.5rem !important;
+  margin-left: 1rem !important;
+  opacity: 0.85 !important;
 }
 
-.lyrics-export-wrapper.export-card .lyrics-card-blurred .lyrics-card-service-logo {
-  margin-top: 0.4rem !important;
+.lyrics-export-wrapper.export-card .lyrics-card-service-logo svg {
+  height: 14px !important;
+  max-width: 70px !important;
 }
 
 .lyrics-export-wrapper.export-story {
@@ -4204,6 +4239,13 @@ input:checked+.slider:before {
   justify-content: center !important;
   position: relative !important;
   overflow: hidden !important;
+}
+
+.lyrics-export-wrapper.export-story .lyrics-card-wrapper {
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
+  gap: 0.5rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-target {
@@ -4274,57 +4316,80 @@ input:checked+.slider:before {
   line-height: 1.28 !important;
 }
 
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-5 {
+  gap: 0.38rem !important;
+}
+
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-5 .lyrics-card-line,
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-5 .lyrics-card-line-trans {
+  font-size: 0.78rem !important;
+}
+
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-5 .lyrics-card-line-orig {
+  font-size: 0.56rem !important;
+}
+
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-4 {
+  gap: 0.42rem !important;
+}
+
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-4 .lyrics-card-line,
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-4 .lyrics-card-line-trans {
+  font-size: 0.84rem !important;
+}
+
+.lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-4 .lyrics-card-line-orig {
+  font-size: 0.59rem !important;
+}
+
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-3 {
-  gap: 0.44rem !important;
+  gap: 0.48rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-3 .lyrics-card-line,
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-3 .lyrics-card-line-trans {
-  font-size: 0.85rem !important;
+  font-size: 0.92rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-3 .lyrics-card-line-orig {
-  font-size: 0.6rem !important;
+  font-size: 0.63rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-2 {
-  gap: 0.5rem !important;
+  gap: 0.55rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-2 .lyrics-card-line,
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-2 .lyrics-card-line-trans {
-  font-size: 0.92rem !important;
+  font-size: 1.02rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-2 .lyrics-card-line-orig {
-  font-size: 0.64rem !important;
+  font-size: 0.68rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-1 {
-  gap: 0.55rem !important;
+  gap: 0.64rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-1 .lyrics-card-line,
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-1 .lyrics-card-line-trans {
-  font-size: 1rem !important;
+  font-size: 1.14rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-lines.lines-count-1 .lyrics-card-line-orig {
-  font-size: 0.68rem !important;
+  font-size: 0.74rem !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-service-logo {
-  margin-top: 0.25rem !important;
-  opacity: 0.72 !important;
+  padding: 0 0.4rem 0.2rem 0.4rem !important;
+  margin-left: 0.85rem !important;
+  opacity: 0.85 !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-service-logo svg {
-  height: 9px !important;
-  max-width: 42px !important;
-}
-
-.lyrics-export-wrapper.export-story .lyrics-card-blurred .lyrics-card-service-logo {
-  margin-top: 0.2rem !important;
+  height: 11px !important;
+  max-width: 55px !important;
 }
 
 .lyrics-export-wrapper.export-story .lyrics-card-divider {
@@ -4347,6 +4412,17 @@ input:checked+.slider:before {
   filter: blur(40px) brightness(0.55);
   pointer-events: none;
   z-index: 1;
+}
+
+.lyrics-card-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 320px;
 }
 
 .lyrics-card-target {
@@ -4434,43 +4510,69 @@ input:checked+.slider:before {
   display: block;
 }
 
+.lyrics-card-lines.lines-count-5 {
+  gap: 0.75rem;
+}
+
+.lyrics-card-lines.lines-count-5 .lyrics-card-line,
+.lyrics-card-lines.lines-count-5 .lyrics-card-line-trans {
+  font-size: 1.15rem;
+}
+
+.lyrics-card-lines.lines-count-5 .lyrics-card-line-orig {
+  font-size: 0.75rem;
+}
+
+.lyrics-card-lines.lines-count-4 {
+  gap: 0.82rem;
+}
+
+.lyrics-card-lines.lines-count-4 .lyrics-card-line,
+.lyrics-card-lines.lines-count-4 .lyrics-card-line-trans {
+  font-size: 1.22rem;
+}
+
+.lyrics-card-lines.lines-count-4 .lyrics-card-line-orig {
+  font-size: 0.78rem;
+}
+
 .lyrics-card-lines.lines-count-3 {
-  gap: 0.85rem;
+  gap: 0.9rem;
 }
 
 .lyrics-card-lines.lines-count-3 .lyrics-card-line,
 .lyrics-card-lines.lines-count-3 .lyrics-card-line-trans {
-  font-size: 1.25rem;
+  font-size: 1.32rem;
 }
 
 .lyrics-card-lines.lines-count-3 .lyrics-card-line-orig {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
 }
 
 .lyrics-card-lines.lines-count-2 {
-  gap: 0.95rem;
+  gap: 1rem;
 }
 
 .lyrics-card-lines.lines-count-2 .lyrics-card-line,
 .lyrics-card-lines.lines-count-2 .lyrics-card-line-trans {
-  font-size: 1.36rem;
+  font-size: 1.44rem;
 }
 
 .lyrics-card-lines.lines-count-2 .lyrics-card-line-orig {
-  font-size: 0.82rem;
+  font-size: 0.86rem;
 }
 
 .lyrics-card-lines.lines-count-1 {
-  gap: 1rem;
+  gap: 1.1rem;
 }
 
 .lyrics-card-lines.lines-count-1 .lyrics-card-line,
 .lyrics-card-lines.lines-count-1 .lyrics-card-line-trans {
-  font-size: 1.5rem;
+  font-size: 1.58rem;
 }
 
 .lyrics-card-lines.lines-count-1 .lyrics-card-line-orig {
-  font-size: 0.86rem;
+  font-size: 0.92rem;
 }
 
 .lyrics-card-divider {
@@ -4493,22 +4595,29 @@ input:checked+.slider:before {
 .lyrics-card-service-logo {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   line-height: 1;
-  margin-top: 0.45rem;
-  opacity: 0.72;
-  padding: 0;
-}
-
-.lyrics-card-blurred .lyrics-card-service-logo {
-  margin-top: 0.4rem;
+  padding: 0 0.5rem 0.25rem 0.5rem;
+  margin-left: 1rem;
+  opacity: 0.85;
 }
 
 .lyrics-card-service-logo svg {
   display: block;
-  height: 12px;
+  height: 14px;
   width: auto;
-  max-width: 58px;
+  max-width: 70px;
   fill: currentColor;
+  overflow: visible !important;
+}
+
+.lyrics-layout-frame.format-card .lyrics-card-service-logo {
+  color: var(--color-text);
+}
+
+.format-story .lyrics-card-wrapper {
+  max-width: 250px;
+  gap: 0.5rem;
 }
 
 .format-story .lyrics-card-target {
@@ -4570,55 +4679,89 @@ input:checked+.slider:before {
   line-height: 1.28;
 }
 
+.format-story .lyrics-card-lines.lines-count-5,
+.export-story .lyrics-card-lines.lines-count-5 {
+  gap: 0.38rem;
+}
+
+.format-story .lyrics-card-lines.lines-count-5 .lyrics-card-line,
+.format-story .lyrics-card-lines.lines-count-5 .lyrics-card-line-trans,
+.export-story .lyrics-card-lines.lines-count-5 .lyrics-card-line,
+.export-story .lyrics-card-lines.lines-count-5 .lyrics-card-line-trans {
+  font-size: 0.78rem;
+}
+
+.format-story .lyrics-card-lines.lines-count-5 .lyrics-card-line-orig,
+.export-story .lyrics-card-lines.lines-count-5 .lyrics-card-line-orig {
+  font-size: 0.56rem;
+}
+
+.format-story .lyrics-card-lines.lines-count-4,
+.export-story .lyrics-card-lines.lines-count-4 {
+  gap: 0.42rem;
+}
+
+.format-story .lyrics-card-lines.lines-count-4 .lyrics-card-line,
+.format-story .lyrics-card-lines.lines-count-4 .lyrics-card-line-trans,
+.export-story .lyrics-card-lines.lines-count-4 .lyrics-card-line,
+.export-story .lyrics-card-lines.lines-count-4 .lyrics-card-line-trans {
+  font-size: 0.84rem;
+}
+
+.format-story .lyrics-card-lines.lines-count-4 .lyrics-card-line-orig,
+.export-story .lyrics-card-lines.lines-count-4 .lyrics-card-line-orig {
+  font-size: 0.59rem;
+}
+
 .format-story .lyrics-card-lines.lines-count-3,
 .export-story .lyrics-card-lines.lines-count-3 {
-  gap: 0.44rem;
+  gap: 0.48rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-3 .lyrics-card-line,
 .format-story .lyrics-card-lines.lines-count-3 .lyrics-card-line-trans,
 .export-story .lyrics-card-lines.lines-count-3 .lyrics-card-line,
 .export-story .lyrics-card-lines.lines-count-3 .lyrics-card-line-trans {
-  font-size: 0.85rem;
+  font-size: 0.92rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-3 .lyrics-card-line-orig,
 .export-story .lyrics-card-lines.lines-count-3 .lyrics-card-line-orig {
-  font-size: 0.6rem;
+  font-size: 0.63rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-2,
 .export-story .lyrics-card-lines.lines-count-2 {
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-2 .lyrics-card-line,
 .format-story .lyrics-card-lines.lines-count-2 .lyrics-card-line-trans,
 .export-story .lyrics-card-lines.lines-count-2 .lyrics-card-line,
 .export-story .lyrics-card-lines.lines-count-2 .lyrics-card-line-trans {
-  font-size: 0.92rem;
+  font-size: 1.02rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-2 .lyrics-card-line-orig,
 .export-story .lyrics-card-lines.lines-count-2 .lyrics-card-line-orig {
-  font-size: 0.64rem;
+  font-size: 0.68rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-1,
 .export-story .lyrics-card-lines.lines-count-1 {
-  gap: 0.55rem;
+  gap: 0.64rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-1 .lyrics-card-line,
 .format-story .lyrics-card-lines.lines-count-1 .lyrics-card-line-trans,
 .export-story .lyrics-card-lines.lines-count-1 .lyrics-card-line,
 .export-story .lyrics-card-lines.lines-count-1 .lyrics-card-line-trans {
-  font-size: 1rem;
+  font-size: 1.14rem;
 }
 
 .format-story .lyrics-card-lines.lines-count-1 .lyrics-card-line-orig,
 .export-story .lyrics-card-lines.lines-count-1 .lyrics-card-line-orig {
-  font-size: 0.68rem;
+  font-size: 0.74rem;
 }
 
 .format-story .lyrics-card-divider {
@@ -4627,23 +4770,19 @@ input:checked+.slider:before {
 }
 
 .format-story .lyrics-card-service-logo {
-  margin-top: 0.25rem;
-  opacity: 0.72;
-}
-
-.format-story .lyrics-card-blurred .lyrics-card-service-logo {
-  margin-top: 0.2rem;
+  padding: 0 0.4rem 0.2rem 0.4rem;
+  margin-left: 0.85rem;
 }
 
 .format-story .lyrics-card-service-logo svg {
-  height: 9px;
-  max-width: 42px;
+  height: 11px;
+  max-width: 55px;
 }
 
 .lyrics-card-modern-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.82));
+  background: linear-gradient(rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.92));
   z-index: 1;
 }
 

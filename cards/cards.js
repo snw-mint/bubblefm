@@ -1658,9 +1658,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mode === currentMode) return;
         currentMode = mode;
         updateModeSegmentedUI();
-        if (typeof umami !== "undefined") {
-          umami.track("Cards Mode Selected", { mode });
-        }
         renderLayouts();
         saveCardsState("layout");
       });

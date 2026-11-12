@@ -855,9 +855,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fmt === currentFormat) return;
         currentFormat = fmt;
         formatSegmented.querySelectorAll(".segment-btn").forEach((b) => b.classList.toggle("active", b.dataset.format === fmt));
-        if (typeof umami !== "undefined") {
-          umami.track("Lyrics Format Selected", { format: fmt });
-        }
         renderLayouts();
         saveLyricsState("layout");
       });
@@ -1203,6 +1200,8 @@ function renderLayouts() {
   const blurredCardBg = getBlurredCardBg(currentFormat === "story");
 
   const serviceLogoSvg = getServiceLogoSvg(currentService);
+  const isStory = currentFormat === "story";
+  const logoColor = isStory ? "rgba(255, 255, 255, 0.9)" : textColor;
 
   const renderLinesHtml = () => {
     return sortedLines
@@ -1218,13 +1217,10 @@ function renderLayouts() {
       .join("");
   };
 
-  const layouts = [
-    {
-      id: "solid",
-      name: "Solid",
-      cardStyle: `background-color: ${solidCardBg}; color: ${textColor};`,
-      frameStyle: currentFormat === "story" ? `background-color: ${solidStoryBg};` : "",
-      html: `
+  const buildInnerCardHtml = (layoutId) => {
+    let cardTargetHtml = "";
+    if (layoutId === "solid") {
+      cardTargetHtml = `
         <div class="lyrics-card-target lyrics-card-solid" style="background-color: ${solidCardBg}; color: ${textColor};">
           <div class="lyrics-card-header">
             <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
@@ -1234,16 +1230,10 @@ function renderLayouts() {
             </div>
           </div>
           <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
-          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
         </div>
-      `,
-    },
-    {
-      id: "modern",
-      name: "Modern",
-      cardStyle: `background: url("${escapeHTML(currentTrack.cover || "/logo.svg")}") center / cover no-repeat; color: ${textColor};`,
-      frameStyle: currentFormat === "story" ? `background-color: ${modernStoryBg};` : "",
-      html: `
+      `;
+    } else if (layoutId === "modern") {
+      cardTargetHtml = `
         <div class="lyrics-card-target lyrics-card-modern" style="background: url('${escapeHTML(currentTrack.cover || "/logo.svg")}') center / cover no-repeat; color: ${textColor};">
           <div class="lyrics-card-modern-overlay"></div>
           <div class="lyrics-card-header" style="position: relative; z-index: 2;">
@@ -1254,17 +1244,10 @@ function renderLayouts() {
             </div>
           </div>
           <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">${renderLinesHtml()}</div>
-          ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor};">${serviceLogoSvg}</div>` : ""}
         </div>
-      `,
-    },
-    {
-      id: "blurred",
-      name: "Blurred",
-      cardStyle: `background-color: ${blurredCardBg}; color: ${textColor};`,
-      frameStyle: "",
-      bgHtml: currentFormat === "story" ? `<img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" class="story-blur-image" alt="Blurred BG" crossorigin="anonymous" />` : "",
-      html: `
+      `;
+    } else {
+      cardTargetHtml = `
         <div class="lyrics-card-target lyrics-card-blurred" style="background-color: ${blurredCardBg}; color: ${textColor};">
           <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
           <div class="lyrics-card-divider" style="border-top-color: ${dividerColor};">
@@ -1273,12 +1256,43 @@ function renderLayouts() {
               <div class="lyrics-card-meta">
                 <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
                 <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
-                ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
               </div>
             </div>
           </div>
         </div>
-      `,
+      `;
+    }
+
+    return `
+      <div class="lyrics-card-wrapper">
+        ${cardTargetHtml}
+        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${logoColor};">${serviceLogoSvg}</div>` : ""}
+      </div>
+    `;
+  };
+
+  const layouts = [
+    {
+      id: "solid",
+      name: "Solid",
+      cardStyle: `background-color: ${solidCardBg}; color: ${textColor};`,
+      frameStyle: currentFormat === "story" ? `background-color: ${solidStoryBg};` : "",
+      html: buildInnerCardHtml("solid"),
+    },
+    {
+      id: "modern",
+      name: "Modern",
+      cardStyle: `background: url("${escapeHTML(currentTrack.cover || "/logo.svg")}") center / cover no-repeat; color: ${textColor};`,
+      frameStyle: currentFormat === "story" ? `background-color: ${modernStoryBg};` : "",
+      html: buildInnerCardHtml("modern"),
+    },
+    {
+      id: "blurred",
+      name: "Blurred",
+      cardStyle: `background-color: ${blurredCardBg}; color: ${textColor};`,
+      frameStyle: "",
+      bgHtml: currentFormat === "story" ? `<img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" class="story-blur-image" alt="Blurred BG" crossorigin="anonymous" />` : "",
+      html: buildInnerCardHtml("blurred"),
     },
   ];
 
@@ -1341,6 +1355,8 @@ function createExportElement(layoutId, format) {
 
   const blurredCardBg = getBlurredCardBg(format === "story");
   const serviceLogoSvg = getServiceLogoSvg(currentService);
+  const isStory = format === "story";
+  const logoColor = isStory ? "rgba(255, 255, 255, 0.9)" : textColor;
 
   const renderLinesHtml = () => {
     return sortedLines
@@ -1359,10 +1375,10 @@ function createExportElement(layoutId, format) {
   const wrapper = document.createElement("div");
   wrapper.className = `lyrics-export-wrapper export-${format} export-${layoutId}`;
 
-  let innerCardHtml = "";
+  let cardTargetHtml = "";
 
   if (layoutId === "solid") {
-    innerCardHtml = `
+    cardTargetHtml = `
       <div class="lyrics-card-target lyrics-card-solid" style="background-color: ${solidCardBg}; color: ${textColor};">
         <div class="lyrics-card-header">
           <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
@@ -1372,11 +1388,10 @@ function createExportElement(layoutId, format) {
           </div>
         </div>
         <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
-        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
       </div>
     `;
   } else if (layoutId === "modern") {
-    innerCardHtml = `
+    cardTargetHtml = `
       <div class="lyrics-card-target lyrics-card-modern" style="background: url('${escapeHTML(currentTrack.cover || "/logo.svg")}') center / cover no-repeat; color: ${textColor};">
         <div class="lyrics-card-modern-overlay"></div>
         <div class="lyrics-card-header" style="position: relative; z-index: 2;">
@@ -1387,11 +1402,10 @@ function createExportElement(layoutId, format) {
           </div>
         </div>
         <div class="lyrics-card-lines lines-count-${sortedLines.length}" style="position: relative; z-index: 2;">${renderLinesHtml()}</div>
-        ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="position: relative; z-index: 2; color: ${textColor};">${serviceLogoSvg}</div>` : ""}
       </div>
     `;
   } else {
-    innerCardHtml = `
+    cardTargetHtml = `
       <div class="lyrics-card-target lyrics-card-blurred" style="background-color: ${blurredCardBg}; color: ${textColor};">
         <div class="lyrics-card-lines lines-count-${sortedLines.length}">${renderLinesHtml()}</div>
         <div class="lyrics-card-divider" style="border-top-color: ${dividerColor};">
@@ -1400,13 +1414,19 @@ function createExportElement(layoutId, format) {
             <div class="lyrics-card-meta">
               <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
               <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
-              ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${textColor};">${serviceLogoSvg}</div>` : ""}
             </div>
           </div>
         </div>
       </div>
     `;
   }
+
+  const innerCardHtml = `
+    <div class="lyrics-card-wrapper">
+      ${cardTargetHtml}
+      ${serviceLogoSvg ? `<div class="lyrics-card-service-logo" style="color: ${logoColor};">${serviceLogoSvg}</div>` : ""}
+    </div>
+  `;
 
   if (format === "story") {
     let storyBgStyle = "";
@@ -1448,6 +1468,8 @@ function createExportElement(layoutId, format) {
       max-width: 320px;
       position: relative;
       display: flex;
+      flex-direction: column;
+      align-items: flex-start;
       border: none;
       border-radius: 0;
       background: transparent;
@@ -1495,7 +1517,7 @@ async function exportSelectedLyricsImage() {
 
     const targetElement = currentFormat === "story"
       ? exportNode
-      : (exportNode.querySelector(".lyrics-card-target") || exportNode);
+      : (exportNode.querySelector(".lyrics-card-wrapper") || exportNode);
 
     const allNodes = [exportNode, ...exportNode.querySelectorAll("*")];
     const fontRecords = allNodes.map((el) => {
