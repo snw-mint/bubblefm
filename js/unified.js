@@ -318,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const periodCache = {};
 let currentActiveData = null;
+let customArtistImage = null;
 
 function getLocalStorageCache(key) {
   try {
@@ -1071,6 +1072,36 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
   }
 }
 
+function updateTop1Image(type, imageUrl) {
+  const imgEl = document.getElementById(`${type}1Img`);
+  const skeletonEl = document.getElementById(`${type}1Skeleton`);
+  if (imgEl && skeletonEl && imageUrl) {
+    imgEl.src = imageUrl;
+    imgEl.onload = () => {
+      imgEl.classList.add("fade-in");
+      imgEl.style.display = "block";
+      skeletonEl.style.display = "none";
+    };
+  }
+}
+
+function applyArtistCoverImage(imageUrl) {
+  const artistCoverEl = document.getElementById("artistCover");
+  const coverContainer = document.getElementById("coverContainer");
+  const coverSkeletonIcon = document.getElementById("coverSkeletonIcon");
+  if (artistCoverEl && coverContainer && imageUrl) {
+    artistCoverEl.src = imageUrl;
+    artistCoverEl.onload = () => {
+      artistCoverEl.classList.add("fade-in");
+      artistCoverEl.style.display = "block";
+      if (coverSkeletonIcon) {
+        coverSkeletonIcon.style.display = "none";
+      }
+      coverContainer.classList.remove("skeleton", "skeleton-icon");
+    };
+  }
+}
+
 function renderData(username, data) {
   const {
     artists,
@@ -1124,6 +1155,14 @@ function renderData(username, data) {
             </a>
           </div>
         `;
+      } else if (type === "artist" && rank === 1) {
+        actionsHtml = `
+          <div class="chart-item-actions">
+            <button type="button" id="btnUploadArtistImage" class="chart-action-btn" data-tool="artist-image" data-type="artist" title="Upload Artist Image" aria-label="Upload Artist Image">
+              <animate-icons name="image-plus" size="16"></animate-icons>
+            </button>
+          </div>
+        `;
       }
 
       if (rank === 1) {
@@ -1170,29 +1209,13 @@ function renderData(username, data) {
   renderList("listTopTracks", tracks, "track");
   renderList("listTopAlbums", albums, "album");
 
-  function updateTop1Image(type, imageUrl) {
-    const imgEl = document.getElementById(`${type}1Img`);
-    const skeletonEl = document.getElementById(`${type}1Skeleton`);
-    if (imgEl && skeletonEl && imageUrl) {
-      imgEl.src = imageUrl;
-      imgEl.onload = () => {
-        imgEl.classList.add("fade-in");
-        imgEl.style.display = "block";
-        skeletonEl.style.display = "none";
-      };
-    }
-  }
-
-  updateTop1Image("artist", artistImage);
+  updateTop1Image("artist", customArtistImage || artistImage);
   updateTop1Image("album", albumImage);
   updateTop1Image("track", trackImage);
 
   const userAvatarEl = document.getElementById("userAvatar");
   const userAvatarContainer = document.getElementById("userAvatarContainer");
   const userDisplayNameEl = document.getElementById("userDisplayName");
-
-  const artistCoverEl = document.getElementById("artistCover");
-  const coverContainer = document.getElementById("coverContainer");
 
   if (userDisplayNameEl) {
     userDisplayNameEl.textContent = userInfo?.user?.realname || userInfo?.user?.name || username;
@@ -1218,15 +1241,7 @@ function renderData(username, data) {
     }
   }
 
-  if (artistCoverEl && coverContainer && artistCoverImage) {
-    artistCoverEl.src = artistCoverImage;
-    artistCoverEl.onload = () => {
-      artistCoverEl.classList.add("fade-in");
-      artistCoverEl.style.display = "block";
-      document.getElementById("coverSkeletonIcon").style.display = "none";
-      coverContainer.classList.remove("skeleton", "skeleton-icon");
-    };
-  }
+  applyArtistCoverImage(customArtistImage || artistCoverImage);
 
   const userScrobblesEl = document.getElementById("userScrobbles");
   const userMinutesEl = document.getElementById("userMinutes");
@@ -1569,7 +1584,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const topSong = data.tracks[0];
       const topAlbum = data.albums[0];
 
-      if (topArtist) {
+      if (customArtistImage) {
+        document.getElementById("storyImageArtist").src = customArtistImage;
+      } else if (topArtist) {
         const src = (await fetchAssetImage("artist", topArtist.name, topArtist.name)) || "https://via.placeholder.com/320";
         document.getElementById("storyImageArtist").src = src;
       }
@@ -1664,7 +1681,48 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const artistImageUploadInput = document.getElementById("artistImageUploadInput");
+  if (artistImageUploadInput) {
+    artistImageUploadInput.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const isAllowedType =
+        file.type === "image/png" ||
+        file.type === "image/jpeg" ||
+        (!file.type && /\.(png|jpe?g)$/i.test(file.name || ""));
+
+      if (!isAllowedType) {
+        artistImageUploadInput.value = "";
+        showToast("Only PNG or JPG images are allowed.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result !== "string") return;
+        customArtistImage = reader.result;
+        updateTop1Image("artist", customArtistImage);
+        applyArtistCoverImage(customArtistImage);
+        showToast("Artist image updated!");
+      };
+      reader.onerror = () => {
+        showToast("Failed to load image.");
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   document.addEventListener("click", (e) => {
+    const uploadBtn = e.target.closest("#btnUploadArtistImage");
+    if (uploadBtn) {
+      e.stopPropagation();
+      if (artistImageUploadInput) {
+        artistImageUploadInput.value = "";
+        artistImageUploadInput.click();
+      }
+    }
+
     const actionBtn = e.target.closest(".chart-action-btn");
     if (actionBtn && typeof umami !== "undefined") {
       umami.track("quick_action_clicked", {

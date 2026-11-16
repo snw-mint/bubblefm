@@ -1,5 +1,6 @@
 import * as htmlToImage from 'html-to-image';
 import '/js/icons.js';
+import { cleanTitle } from '/js/titleFilter.js';
 
 const SUN_ICON = `<animate-icons name="sun" size="24"></animate-icons>`;
 const MOON_ICON = `<animate-icons name="moon" size="24"></animate-icons>`;
@@ -88,11 +89,11 @@ async function fetchItunesSongs(query) {
     return (json?.results || []).map((item) => ({
       type: "song",
       id: item.trackId,
-      title: item.trackName || "",
+      title: cleanTitle(item.trackName || ""),
       artist: item.artistName || "",
       cover: item.artworkUrl100 ? item.artworkUrl100.replace("100x100bb", "400x400bb") : "",
       coverHq: item.artworkUrl100 ? item.artworkUrl100.replace("100x100bb", "1000x1000bb") : "",
-      album: item.collectionName || "",
+      album: cleanTitle(item.collectionName || ""),
     }));
   } catch {
     return [];
@@ -139,11 +140,11 @@ async function searchSongs(rawQuery) {
         .map((t) => ({
           type: "song",
           id: t.id,
-          title: t.title || t.title_short || "",
+          title: cleanTitle(t.title || t.title_short || ""),
           artist: t.artist?.name || "",
           cover: t.album?.cover_medium || t.album?.cover_big || t.album?.cover || "",
           coverHq: t.album?.cover_xl || (t.album?.cover_big ? t.album.cover_big.replace("500x500", "1000x1000") : "") || t.album?.cover_medium || "",
-          album: t.album?.title || "",
+          album: cleanTitle(t.album?.title || ""),
         }));
     }
   }
@@ -153,11 +154,11 @@ async function searchSongs(rawQuery) {
     tracks = (generalRes?.data || []).map((t) => ({
       type: "song",
       id: t.id,
-      title: t.title || t.title_short || "",
+      title: cleanTitle(t.title || t.title_short || ""),
       artist: t.artist?.name || "",
       cover: t.album?.cover_medium || t.album?.cover_big || t.album?.cover || "",
       coverHq: t.album?.cover_xl || (t.album?.cover_big ? t.album.cover_big.replace("500x500", "1000x1000") : "") || t.album?.cover_medium || "",
-      album: t.album?.title || "",
+      album: cleanTitle(t.album?.title || ""),
     }));
   }
 
@@ -447,7 +448,7 @@ function restoreLyricsStateIfAvailable(currentQuery) {
     const coverEl = document.getElementById("trackCoverThumb");
     const translateBtn = document.getElementById("btnTranslateToggle");
 
-    if (titleEl) titleEl.textContent = currentTrack.title;
+    if (titleEl) titleEl.textContent = cleanTitle(currentTrack.title);
     if (artistEl) artistEl.textContent = currentTrack.artist;
     if (coverEl) coverEl.src = currentTrack.cover || "/logo.svg";
     if (translateBtn) translateBtn.classList.toggle("active", isTranslated);
@@ -623,7 +624,10 @@ async function loadTrackLyrics(item) {
   item.coverHq = hqCover;
   preloadImage(hqCover);
 
-  currentTrack = item;
+  currentTrack = {
+    ...item,
+    title: cleanTitle(item.title),
+  };
   originalLines = [];
   translatedLines = null;
   isTranslated = false;
@@ -635,7 +639,7 @@ async function loadTrackLyrics(item) {
   const linesWrapper = document.getElementById("lyricsLinesWrapper");
   const translateBtn = document.getElementById("btnTranslateToggle");
 
-  if (titleEl) titleEl.textContent = item.title;
+  if (titleEl) titleEl.textContent = currentTrack.title;
   if (artistEl) artistEl.textContent = item.artist;
   if (coverEl) coverEl.src = item.cover || "/logo.svg";
   if (translateBtn) translateBtn.classList.remove("active");
@@ -655,7 +659,7 @@ async function loadTrackLyrics(item) {
 
   showStep("select");
 
-  const rawLyrics = await fetchLyricsFromLRCLIB(item.title, item.artist);
+  const rawLyrics = await fetchLyricsFromLRCLIB(currentTrack.title, currentTrack.artist);
   if (rawLyrics) {
     originalLines = rawLyrics
       .split("\n")
@@ -1225,7 +1229,7 @@ function renderLayouts() {
           <div class="lyrics-card-header">
             <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
             <div class="lyrics-card-meta">
-              <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+              <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(cleanTitle(currentTrack.title))}</span>
               <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
             </div>
           </div>
@@ -1239,7 +1243,7 @@ function renderLayouts() {
           <div class="lyrics-card-header" style="position: relative; z-index: 2;">
             <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
             <div class="lyrics-card-meta">
-              <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+              <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(cleanTitle(currentTrack.title))}</span>
               <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
             </div>
           </div>
@@ -1254,7 +1258,7 @@ function renderLayouts() {
             <div class="lyrics-card-header" style="align-items: flex-start;">
               <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
               <div class="lyrics-card-meta">
-                <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+                <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(cleanTitle(currentTrack.title))}</span>
                 <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
               </div>
             </div>
@@ -1383,7 +1387,7 @@ function createExportElement(layoutId, format) {
         <div class="lyrics-card-header">
           <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
           <div class="lyrics-card-meta">
-            <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+            <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(cleanTitle(currentTrack.title))}</span>
             <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
           </div>
         </div>
@@ -1397,7 +1401,7 @@ function createExportElement(layoutId, format) {
         <div class="lyrics-card-header" style="position: relative; z-index: 2;">
           <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
           <div class="lyrics-card-meta">
-            <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+            <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(cleanTitle(currentTrack.title))}</span>
             <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
           </div>
         </div>
@@ -1412,7 +1416,7 @@ function createExportElement(layoutId, format) {
           <div class="lyrics-card-header" style="align-items: flex-start;">
             <img src="${escapeHTML(currentTrack.cover || "/logo.svg")}" alt="Cover" class="lyrics-card-thumb" crossorigin="anonymous" draggable="false" />
             <div class="lyrics-card-meta">
-              <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(currentTrack.title)}</span>
+              <span class="lyrics-card-title" style="color: ${textColor};">${escapeHTML(cleanTitle(currentTrack.title))}</span>
               <span class="lyrics-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentTrack.artist)}</span>
             </div>
           </div>
@@ -1567,8 +1571,8 @@ async function exportSelectedLyricsImage() {
     });
 
     const link = document.createElement("a");
-    const cleanTitle = (currentTrack?.title || "lyrics").replace(/[^a-zA-Z0-9_-]/g, "_");
-    link.download = `bubblefm_${cleanTitle}_${currentLayout}_${currentFormat}.png`;
+    const fileTitle = (cleanTitle(currentTrack?.title) || "lyrics").replace(/[^a-zA-Z0-9_-]/g, "_");
+    link.download = `bubblefm_${fileTitle}_${currentLayout}_${currentFormat}.png`;
     link.href = dataUrl;
     link.click();
 
@@ -1619,7 +1623,7 @@ async function initResultsPage(gridContainer) {
     const directItem = {
       type: "song",
       id: "direct",
-      title: trackParam,
+      title: cleanTitle(trackParam),
       artist: artistParam,
       cover: coverUrl,
       coverHq: coverUrl,
@@ -1665,7 +1669,7 @@ async function initResultsPage(gridContainer) {
             const item = {
               type: "song",
               id: btn.dataset.id,
-              title: btn.dataset.title,
+              title: cleanTitle(btn.dataset.title),
               artist: btn.dataset.artist,
               cover: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
               coverHq: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
@@ -1725,7 +1729,7 @@ async function initResultsPage(gridContainer) {
         const item = {
           type: "song",
           id: btn.dataset.id,
-          title: btn.dataset.title,
+          title: cleanTitle(btn.dataset.title),
           artist: btn.dataset.artist,
           cover: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
           coverHq: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),

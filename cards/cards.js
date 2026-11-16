@@ -1,5 +1,6 @@
 import * as htmlToImage from "html-to-image";
 import "/js/icons.js";
+import { cleanTitle } from "/js/titleFilter.js";
 
 const SUN_ICON = `<animate-icons name="sun" size="24"></animate-icons>`;
 const MOON_ICON = `<animate-icons name="moon" size="24"></animate-icons>`;
@@ -236,11 +237,11 @@ async function fetchItunesResults(query, entity = "song") {
       return {
         type: isAlbum ? "album" : "track",
         id: isAlbum ? item.collectionId : item.trackId,
-        title: isAlbum ? (item.collectionName || "") : (item.trackName || ""),
+        title: cleanTitle(isAlbum ? (item.collectionName || "") : (item.trackName || "")),
         artist: item.artistName || "",
         cover: item.artworkUrl100 ? item.artworkUrl100.replace("100x100bb", "400x400bb") : "",
         coverHq: item.artworkUrl100 ? item.artworkUrl100.replace("100x100bb", "1000x1000bb") : "",
-        album: item.collectionName || "",
+        album: cleanTitle(item.collectionName || ""),
       };
     });
   } catch {
@@ -261,21 +262,21 @@ async function searchTracksAndAlbums(rawQuery) {
   let tracks = (tracksRes?.data || []).map((t) => ({
     type: "track",
     id: `track_${t.id}`,
-    title: t.title || t.title_short || "",
+    title: cleanTitle(t.title || t.title_short || ""),
     artist: t.artist?.name || "",
     cover: t.album?.cover_medium || t.album?.cover_big || t.album?.cover || "",
     coverHq: t.album?.cover_xl || (t.album?.cover_big ? t.album.cover_big.replace("500x500", "1000x1000") : "") || t.album?.cover_medium || "",
-    album: t.album?.title || "",
+    album: cleanTitle(t.album?.title || ""),
   }));
 
   let albums = (albumsRes?.data || []).map((a) => ({
     type: "album",
     id: `album_${a.id}`,
-    title: a.title || "",
+    title: cleanTitle(a.title || ""),
     artist: a.artist?.name || "",
     cover: a.cover_medium || a.cover_big || a.cover || "",
     coverHq: a.cover_xl || (a.cover_big ? a.cover_big.replace("500x500", "1000x1000") : "") || a.cover_medium || "",
-    album: a.title || "",
+    album: cleanTitle(a.title || ""),
   }));
 
   if (tracks.length === 0 && albums.length === 0) {
@@ -641,7 +642,7 @@ function buildInnerCardHtml(useVideo, layoutId = "card") {
           ${mediaHtml}
         </div>
         <div class="music-card-meta">
-          <span class="music-card-title" style="color: ${textColor};">${escapeHTML(currentItem.title)}</span>
+          <span class="music-card-title" style="color: ${textColor};">${escapeHTML(cleanTitle(currentItem.title))}</span>
           <span class="music-card-artist" style="color: ${mutedTextColor};">${escapeHTML(currentItem.artist)}</span>
         </div>
       </div>
@@ -1035,8 +1036,8 @@ async function exportStaticCardImage() {
     });
 
     const link = document.createElement("a");
-    const cleanTitle = (currentItem.title || "card").replace(/[^a-zA-Z0-9_-]/g, "_");
-    link.download = `bubblefm_${cleanTitle}_${currentLayout}.png`;
+    const fileTitle = (cleanTitle(currentItem.title) || "card").replace(/[^a-zA-Z0-9_-]/g, "_");
+    link.download = `bubblefm_${fileTitle}_${currentLayout}.png`;
     link.href = dataUrl;
     link.click();
 
@@ -1355,8 +1356,8 @@ async function exportAnimatedCardVideo() {
 
     const url = URL.createObjectURL(mp4Blob);
     const link = document.createElement("a");
-    const cleanTitle = (currentItem.title || "card").replace(/[^a-zA-Z0-9_-]/g, "_");
-    link.download = `bubblefm_${cleanTitle}_${currentLayout}.mp4`;
+    const fileTitle = (cleanTitle(currentItem.title) || "card").replace(/[^a-zA-Z0-9_-]/g, "_");
+    link.download = `bubblefm_${fileTitle}_${currentLayout}.mp4`;
     link.href = url;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
@@ -1400,14 +1401,15 @@ async function initResultsPage(gridContainer) {
 
   if (trackParam || albumParam) {
     const isAlbum = Boolean(albumParam) && !trackParam;
-    const title = isAlbum ? albumParam : trackParam;
+    const rawTitle = isAlbum ? albumParam : trackParam;
+    const title = cleanTitle(rawTitle);
     if (typeof umami !== "undefined") {
       umami.track("Cards Direct Loaded", { type: isAlbum ? "album" : "track" });
     }
     let coverUrl = getHighQualityCover(imageParam);
     if (!coverUrl) {
       try {
-        const found = await searchTracksAndAlbums(`${title} ${artistParam}`);
+        const found = await searchTracksAndAlbums(`${rawTitle} ${artistParam}`);
         if (found && found.length > 0) {
           coverUrl = found[0].coverHq || found[0].cover;
         }
@@ -1420,7 +1422,7 @@ async function initResultsPage(gridContainer) {
       artist: artistParam,
       cover: coverUrl,
       coverHq: coverUrl,
-      album: albumParam || title,
+      album: cleanTitle(albumParam || title),
     };
     prepareAndShowLayoutStep(directItem);
     return;
@@ -1508,9 +1510,9 @@ function renderSearchCards(gridContainer, results) {
       const item = {
         type: btn.dataset.type,
         id: btn.dataset.id,
-        title: btn.dataset.title,
+        title: cleanTitle(btn.dataset.title),
         artist: btn.dataset.artist,
-        album: btn.dataset.album || btn.dataset.title,
+        album: cleanTitle(btn.dataset.album || btn.dataset.title),
         cover: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
         coverHq: btn.dataset.coverHq || getHighQualityCover(btn.dataset.cover),
       };
