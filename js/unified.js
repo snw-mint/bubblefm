@@ -8,6 +8,7 @@
 
 import * as htmlToImage from 'html-to-image';
 import './icons.js';
+import './sunsetNotice.js';
 
 const SUN_ICON = `<animate-icons name="sun" size="24"></animate-icons>`;
 const MOON_ICON = `<animate-icons name="moon" size="24"></animate-icons>`;

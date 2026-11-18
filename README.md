@@ -4,13 +4,16 @@
 
 <h1 align="center">BubbleFM</h1>
 
-<div align="center">
-  <img src="assets\images\repo.png" alt="BubbleFM Dashboard"/>
-</div>
-
 <p align="center">
   <strong>A clean, experimental dashboard to explore your monthly Last.fm stats.</strong>
 </p>
+
+> [!WARNING]
+> **Shutdown Notice (December 1):** BubbleFM will be shut down and archived on **December 1** with its source code preserved. Last.fm announced that holding a Last.fm API key will require a paid [Last.fm Pro subscription](https://support.last.fm/t/api-keys-will-require-pro-from-1st-december/121030). Because this project is 100% free and generates no revenue, keeping the hosted service online is not sustainable.
+>
+> **Running Locally (BYOK):** Even after the hosted version shuts down, the project remains functional locally on `localhost` (`http://localhost:5173`) under a **BYOK (Bring Your Own Key)** model. **Lyrics** and **Cards** work out of the box without a Last.fm key, while **Charts** and **TasteMatch** work locally using your own Last.fm Pro API key.
+>
+> **Contact:** Issues and Pull Requests are disabled. If you know an alternative or would like to take over the project, email **snowmint.dev@gmail.com**.
 
 ## About
 
@@ -45,6 +48,7 @@ To run the project locally:
    ```bash
    npm run dev
    ```
+   The app will run locally at `http://localhost:5173` (`Lyrics` and `Cards` work without Last.fm; `Charts` and `TasteMatch` require a valid Last.fm Pro API key/endpoint).
 
 ## License
 

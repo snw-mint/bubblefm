@@ -8,6 +8,7 @@
 
 import * as htmlToImage from 'html-to-image';
 import '../js/icons.js';
+import '../js/sunsetNotice.js';
 
 function escapeHTML(str) {
   if (!str) return "";

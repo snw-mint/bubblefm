@@ -26,6 +26,9 @@ import {
   Settings,
   FileText,
   FileMusic,
+  TriangleAlert,
+  ExternalLink,
+  Mail,
 } from "@animateicons/vanilla/lucide";
 
 defineIcons({
@@ -55,6 +58,9 @@ defineIcons({
   Settings,
   FileText,
   FileMusic,
+  TriangleAlert,
+  ExternalLink,
+  Mail,
 });
 
 if (typeof document !== "undefined") {

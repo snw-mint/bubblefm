@@ -1,5 +1,6 @@
 import * as htmlToImage from "html-to-image";
 import "/js/icons.js";
+import "/js/sunsetNotice.js";
 import { cleanTitle } from "/js/titleFilter.js";
 
 const SUN_ICON = `<animate-icons name="sun" size="24"></animate-icons>`;
