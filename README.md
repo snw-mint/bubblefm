@@ -13,7 +13,7 @@
 >
 > **Running Locally (BYOK):** Even after the hosted version shuts down, the project remains functional locally on `localhost` (`http://localhost:5173`) under a **BYOK (Bring Your Own Key)** model. **Lyrics** and **Cards** work out of the box without a Last.fm key, while **Charts** and **TasteMatch** work locally using your own Last.fm Pro API key.
 >
-> **Contact:** Issues and Pull Requests are disabled. If you know an alternative or would like to take over the project, email **snowmint.dev@gmail.com**.
+> **Migration to ListenDeck:** This tool is being migrated for free to [**ListenDeck**](https://github.com/snw-mint/listendeck), which will work powered by **ListenBrainz** instead of Last.fm.
 
 ## About
 

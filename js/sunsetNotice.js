@@ -1,7 +1,7 @@
-const SUNSET_DISMISS_KEY = "bubblefm_sunset_notice_dismissed_v1";
+const SUNSET_DISMISS_KEY = "bubblefm_sunset_notice_dismissed_v2";
 const LASTFM_ANNOUNCEMENT_URL =
   "https://support.last.fm/t/api-keys-will-require-pro-from-1st-december/121030";
-const CONTACT_EMAIL = "snowmint.dev@gmail.com";
+const LISTENDECK_URL = "https://github.com/snw-mint/listendeck";
 
 function trackEvent(name, data) {
   if (typeof umami !== "undefined") {
@@ -115,13 +115,13 @@ function createModal() {
         </p>
 
         <div class="sunset-callout">
-          <span class="sunset-callout-title">Know an alternative or want to take over?</span>
+          <span class="sunset-callout-title">Migrating for free to ListenDeck</span>
           <p>
-            If you know a workaround or would like to take over maintaining the project, please email:
+            This tool is being migrated for free to <strong>ListenDeck</strong>, powered by <strong>ListenBrainz</strong> instead of Last.fm.
           </p>
-          <a href="mailto:${CONTACT_EMAIL}" id="sunsetModalEmailLink" class="sunset-inline-link">
-            <animate-icons name="mail" size="15"></animate-icons>
-            <span>${CONTACT_EMAIL}</span>
+          <a href="${LISTENDECK_URL}" target="_blank" rel="noopener noreferrer" id="sunsetModalListenDeckLink" class="sunset-inline-link">
+            <span>github.com/snw-mint/listendeck</span>
+            <animate-icons name="external-link" size="14"></animate-icons>
           </a>
         </div>
       </div>
@@ -197,7 +197,7 @@ function initSunsetNotice() {
   const detailsBtn = document.getElementById("sunsetInfobarDetailsBtn");
   const infobarLink = document.getElementById("sunsetInfobarLink");
   const modalAnnouncementLink = document.getElementById("sunsetModalAnnouncementLink");
-  const modalEmailLink = document.getElementById("sunsetModalEmailLink");
+  const modalListenDeckLink = document.getElementById("sunsetModalListenDeckLink");
 
   if (closeBtn) closeBtn.addEventListener("click", () => closeModal("close_button"));
   if (ackBtn) ackBtn.addEventListener("click", () => closeModal("understood"));
@@ -212,9 +212,9 @@ function initSunsetNotice() {
       trackEvent("Outbound Click", { destination: "lastfm_announcement", source: "modal" });
     });
   }
-  if (modalEmailLink) {
-    modalEmailLink.addEventListener("click", () => {
-      trackEvent("Outbound Click", { destination: "contact_email", source: "modal" });
+  if (modalListenDeckLink) {
+    modalListenDeckLink.addEventListener("click", () => {
+      trackEvent("Outbound Click", { destination: "listendeck", source: "modal" });
     });
   }
 
