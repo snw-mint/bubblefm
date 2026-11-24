@@ -1,13 +1,8 @@
 const SUNSET_DISMISS_KEY = "bubblefm_sunset_notice_dismissed_v2";
 const LASTFM_ANNOUNCEMENT_URL =
   "https://support.last.fm/t/api-keys-will-require-pro-from-1st-december/121030";
+const LISTENDECK_HOME_URL = "https://listendeck.vercel.app/home/";
 const LISTENDECK_URL = "https://github.com/snw-mint/listendeck";
-
-function trackEvent(name, data) {
-  if (typeof umami !== "undefined") {
-    umami.track(name, data);
-  }
-}
 
 function isDismissed() {
   try {
@@ -43,11 +38,11 @@ function createInfobar() {
       <animate-icons name="triangle-alert" size="16"></animate-icons>
     </span>
     <span class="sunset-infobar-text">
-      BubbleFM will shut down and be archived on Dec 1 due to Last.fm's new Pro API requirement.
+      BubbleFM is shutting down on Dec 1 and migrating to ListenDeck.
     </span>
     <div class="sunset-infobar-actions">
-      <a href="${LASTFM_ANNOUNCEMENT_URL}" target="_blank" rel="noopener noreferrer" id="sunsetInfobarLink" class="sunset-infobar-link">
-        <span>Last.fm announcement</span>
+      <a href="${LISTENDECK_HOME_URL}" target="_blank" rel="noopener noreferrer" id="sunsetInfobarListenDeckLink" class="sunset-infobar-link">
+        <span>Visit ListenDeck</span>
         <animate-icons name="external-link" size="13"></animate-icons>
       </a>
       <button type="button" id="sunsetInfobarDetailsBtn" class="sunset-infobar-btn">Details</button>
@@ -177,59 +172,39 @@ function initSunsetNotice() {
     }
   };
 
-  const openModal = (source = "auto") => {
+  const openModal = () => {
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
     startModalAlertLoop();
-    trackEvent("modal_opened", { modal: "sunset_notice", source });
   };
 
-  const closeModal = (method = "close") => {
+  const closeModal = () => {
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
     stopModalAlertLoop();
     markDismissed();
-    trackEvent("sunset_notice_dismissed", { method });
   };
 
   const closeBtn = document.getElementById("sunsetModalCloseBtn");
   const ackBtn = document.getElementById("sunsetModalAckBtn");
   const detailsBtn = document.getElementById("sunsetInfobarDetailsBtn");
-  const infobarLink = document.getElementById("sunsetInfobarLink");
-  const modalAnnouncementLink = document.getElementById("sunsetModalAnnouncementLink");
-  const modalListenDeckLink = document.getElementById("sunsetModalListenDeckLink");
 
-  if (closeBtn) closeBtn.addEventListener("click", () => closeModal("close_button"));
-  if (ackBtn) ackBtn.addEventListener("click", () => closeModal("understood"));
-  if (detailsBtn) detailsBtn.addEventListener("click", () => openModal("infobar"));
-  if (infobarLink) {
-    infobarLink.addEventListener("click", () => {
-      trackEvent("Outbound Click", { destination: "lastfm_announcement", source: "infobar" });
-    });
-  }
-  if (modalAnnouncementLink) {
-    modalAnnouncementLink.addEventListener("click", () => {
-      trackEvent("Outbound Click", { destination: "lastfm_announcement", source: "modal" });
-    });
-  }
-  if (modalListenDeckLink) {
-    modalListenDeckLink.addEventListener("click", () => {
-      trackEvent("Outbound Click", { destination: "listendeck", source: "modal" });
-    });
-  }
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  if (ackBtn) ackBtn.addEventListener("click", closeModal);
+  if (detailsBtn) detailsBtn.addEventListener("click", openModal);
 
   modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeModal("backdrop");
+    if (e.target === modal) closeModal();
   });
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal.classList.contains("show")) {
-      closeModal("escape");
+      closeModal();
     }
   });
 
   if (!isDismissed()) {
-    requestAnimationFrame(() => openModal("auto"));
+    requestAnimationFrame(openModal);
   }
 }
 

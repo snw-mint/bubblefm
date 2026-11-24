@@ -117,12 +117,6 @@ async function fetchAssetData(type, query) {
     if (jsonpData && jsonpData.data && jsonpData.data.length > 0) return jsonpData;
   } catch (e) {
     console.warn("Deezer JSONP fetch warning:", e);
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "match",
-        reason: e.message || "user_not_found",
-      });
-    }
   }
   return null;
 }
@@ -205,12 +199,6 @@ function initFaqModal() {
   const openFaq = () => {
     faqModal.classList.add("show");
     faqModal.setAttribute("aria-hidden", "false");
-    if (typeof umami !== "undefined") {
-      umami.track("modal_opened", {
-        modal: "faq",
-        tool: "match",
-      });
-    }
 
     try {
       const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
@@ -250,10 +238,6 @@ async function handleShareMatch(user1, user2) {
   const shareUrl = `${window.location.origin}/match/result.html?user1=${encodeURIComponent(user1)}&user2=${encodeURIComponent(user2)}`;
   const shareText = `Check out the music taste match between ${user1} and ${user2} on BubbleFM!`;
 
-  if (typeof umami !== "undefined") {
-    umami.track("share_clicked", { tool: "match", method: navigator.share ? "native" : "clipboard" });
-  }
-
   if (navigator.share) {
     try {
       await navigator.share({
@@ -291,15 +275,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setTheme(currentTheme);
   initFaqModal();
-
-  const formMatch = document.getElementById("form-match");
-  if (formMatch) {
-    formMatch.addEventListener("submit", () => {
-      if (typeof umami !== "undefined") {
-        umami.track("search_initiated", { tool: "match" });
-      }
-    });
-  }
 
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
@@ -362,15 +337,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tracks2Data = await tracks2Res.json();
     const albums1Data = await albums1Res.json();
     const albums2Data = await albums2Res.json();
-
-    if (info1.error || info2.error) {
-      if (typeof umami !== "undefined") {
-        umami.track("api_error", {
-          tool: "match",
-          reason: info1.message || info2.message || "user_not_found",
-        });
-      }
-    }
 
     if (info1.user) {
       document.getElementById("userDisplayName1").textContent = info1.user.name;
@@ -637,24 +603,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   } catch (error) {
     console.error("Error fetching match data:", error);
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "match",
-        reason: error.message || "user_not_found",
-      });
-    }
   }
-
-  document.addEventListener("click", (e) => {
-    const link = e.target.closest("a");
-    if (!link || !link.href || typeof umami === "undefined") return;
-
-    if (link.href.includes("buymeacoffee.com")) {
-      umami.track("Outbound Click", { destination: "buymeacoffee" });
-    } else if (link.href.includes("github.com")) {
-      umami.track("Outbound Click", { destination: "github" });
-    }
-  });
 });
 
 function initReportGenerator(matchContext) {
@@ -680,12 +629,6 @@ function initReportGenerator(matchContext) {
 
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
-      if (typeof umami !== "undefined") {
-        umami.track("modal_opened", {
-          modal: "report_settings",
-          tool: "match",
-        });
-      }
       if (themeToggleCheckbox) {
         themeToggleCheckbox.checked = document.documentElement.getAttribute("data-theme") === "light";
       }
@@ -797,15 +740,6 @@ function initReportGenerator(matchContext) {
             link.download = `bubblefm_match_${matchContext.user1}_${matchContext.user2}_${Date.now()}.png`;
             link.href = dataUrl;
             link.click();
-
-            if (typeof umami !== "undefined") {
-              umami.track("report_download", {
-                tool: "match",
-                service: "lastfm",
-                color: selectedBg,
-                score: matchContext?.matchPercentage,
-              });
-            }
 
             confirmSettings.innerHTML = '<animate-icons name="download" size="20"></animate-icons><span>Generate Report</span>';
 

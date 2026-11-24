@@ -219,30 +219,6 @@ body:has(.landing-card) .home-header {
   font-weight: 600;
 }
 
-.nav-badge-container {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.nav-badge-new {
-  position: absolute;
-  top: -6px;
-  right: -16px;
-  background-color: var(--color-brand);
-  color: #ffffff;
-  font-size: 0.55rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 1px 5px;
-  border-radius: 999px;
-  line-height: 1.1;
-  transform: rotate(12deg);
-  pointer-events: none;
-  user-select: none;
-}
-
 .brand-bubble {
   color: var(--color-text);
 }

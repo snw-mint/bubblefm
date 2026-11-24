@@ -197,10 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedOffset = parseInt(opt.getAttribute("data-offset") || "0", 10);
         sessionStorage.setItem("lastfm_period", selectedPeriod);
         sessionStorage.setItem("lastfm_offset", selectedOffset.toString());
-        const timeVal = selectedOffset === -1 ? "past" : "current";
-        if (typeof umami !== "undefined") {
-          umami.track("period_selected", { period: selectedPeriod, time: timeVal });
-        }
         syncPeriodUI();
         periodDropdown.classList.remove("show");
         periodPickerBtn.classList.remove("active");
@@ -252,9 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sessionStorage.setItem("lastfm_period", selectedPeriod);
         sessionStorage.setItem("lastfm_offset", selectedOffset.toString());
         const timeVal = selectedOffset === -1 ? "past" : "current";
-        if (typeof umami !== "undefined") {
-          umami.track("search_initiated", { tool: "charts" });
-        }
         window.location.href = `result.html?user=${encodeURIComponent(userInput)}&period=${encodeURIComponent(selectedPeriod)}&time=${timeVal}`;
       }
     });
@@ -286,9 +279,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         sessionStorage.setItem("lastfm_user1", userInput1);
         sessionStorage.setItem("lastfm_user2", userInput2);
-        if (typeof umami !== "undefined") {
-          umami.track("search_initiated", { tool: "match" });
-        }
         window.location.href = `result.html?user1=${encodeURIComponent(userInput1)}&user2=${encodeURIComponent(userInput2)}`;
       }
     });
@@ -416,12 +406,6 @@ async function fetchAssetData(type, query) {
     if (jsonpData && jsonpData.data && jsonpData.data.length > 0) return jsonpData;
   } catch (e) {
     console.warn("Deezer JSONP fetch warning:", e);
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "charts",
-        reason: e.message || "user_not_found",
-      });
-    }
   }
   return null;
 }
@@ -656,12 +640,6 @@ function initFaqModal() {
   const openFaq = () => {
     faqModal.classList.add("show");
     faqModal.setAttribute("aria-hidden", "false");
-    if (typeof umami !== "undefined") {
-      umami.track("modal_opened", {
-        modal: "faq",
-        tool: isMatchMode ? "match" : "charts",
-      });
-    }
     try {
       const count = parseInt(localStorage.getItem("bubblefm_faq_open_count") || "0", 10) + 1;
       localStorage.setItem("bubblefm_faq_open_count", count.toString());
@@ -956,14 +934,6 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     }
 
     const topArtistName = artists[0]?.name;
-    if (userInfo?.error) {
-      if (typeof umami !== "undefined") {
-        umami.track("api_error", {
-          tool: "charts",
-          reason: userInfo.message || "user_not_found",
-        });
-      }
-    }
     const topAlbumName = albums[0]?.name;
     const topAlbumArtist = albums[0]?.artist?.name;
     const topTrackName = tracks[0]?.name;
@@ -1064,12 +1034,6 @@ async function fetchLastfmAndDeezerData(username, period = "month", offset = 0) 
     renderData(username, data);
   } catch (error) {
     console.error("Error fetching API data:", error);
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "charts",
-        reason: error.message || "user_not_found",
-      });
-    }
   }
 }
 
@@ -1324,13 +1288,6 @@ async function handleShareCharts() {
   const shareUrl = `${window.location.origin}/result.html?user=${encodeURIComponent(user)}&period=${encodeURIComponent(period)}&time=${timeVal}`;
   const shareText = `Check out ${user ? user + "'s" : "my"} music charts on BubbleFM!`;
 
-  if (typeof umami !== "undefined") {
-    umami.track("share_clicked", {
-      tool: "charts",
-      method: navigator.share ? "native" : "clipboard",
-    });
-  }
-
   if (navigator.share) {
     try {
       await navigator.share({
@@ -1399,26 +1356,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const serviceSelectInput = document.getElementById("serviceSelect");
-  if (serviceSelectInput) {
-    serviceSelectInput.addEventListener("change", (e) => {
-      if (typeof umami !== "undefined") {
-        umami.track("Service Selected", {
-          service: e.target.value,
-          tool: "charts"
-        });
-      }
-    });
-  }
-
   if (btnGerarRelatorio && settingsModal) {
     btnGerarRelatorio.addEventListener("click", () => {
-      if (typeof umami !== "undefined") {
-        umami.track("modal_opened", {
-          modal: "report_settings",
-          tool: "charts",
-        });
-      }
       if (step1 && step2) {
         step1.style.display = "block";
         step2.style.display = "none";
@@ -1628,17 +1567,6 @@ document.addEventListener("DOMContentLoaded", () => {
             link.href = dataUrl;
             link.click();
 
-            if (typeof umami !== "undefined") {
-              umami.track("report_download", {
-                tool: "charts",
-                service: serviceSelect,
-                color: selectedBg,
-                type: selectedType || "grid",
-                metric: useScrobbles ? "scrobbles" : "minutes",
-                period: currentPeriod,
-              });
-            }
-
             confirmSettings.innerHTML = '<animate-icons name="download" size="20"></animate-icons><span>Generate Report</span>';
 
             if (generationModal) {
@@ -1722,23 +1650,6 @@ document.addEventListener("DOMContentLoaded", () => {
         artistImageUploadInput.value = "";
         artistImageUploadInput.click();
       }
-    }
-
-    const actionBtn = e.target.closest(".chart-action-btn");
-    if (actionBtn && typeof umami !== "undefined") {
-      umami.track("quick_action_clicked", {
-        tool: actionBtn.dataset.tool,
-        type: actionBtn.dataset.type,
-      });
-    }
-
-    const link = e.target.closest("a");
-    if (!link || !link.href || typeof umami === "undefined") return;
-
-    if (link.href.includes("buymeacoffee.com")) {
-      umami.track("Outbound Click", { destination: "buymeacoffee" });
-    } else if (link.href.includes("github.com")) {
-      umami.track("Outbound Click", { destination: "github" });
     }
   });
 });

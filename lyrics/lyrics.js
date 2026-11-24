@@ -183,14 +183,7 @@ async function fetchLyricsFromLRCLIB(track, artist) {
         return data.syncedLyrics.replace(/\[\d{2}:\d{2}\.\d{2,3}\]\s*/g, "").trim();
       }
     }
-  } catch (error) {
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "lyrics",
-        reason: error.message || "user_not_found",
-      });
-    }
-  }
+  } catch {}
 
   try {
     const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(`${track} ${artist}`)}`;
@@ -205,14 +198,7 @@ async function fetchLyricsFromLRCLIB(track, artist) {
         }
       }
     }
-  } catch (error) {
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "lyrics",
-        reason: error.message || "user_not_found",
-      });
-    }
-  }
+  } catch {}
 
   try {
     const ovhUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(track)}`;
@@ -221,14 +207,7 @@ async function fetchLyricsFromLRCLIB(track, artist) {
       const data = await res.json();
       if (data.lyrics) return data.lyrics;
     }
-  } catch (error) {
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "lyrics",
-        reason: error.message || "user_not_found",
-      });
-    }
-  }
+  } catch {}
 
   return null;
 }
@@ -725,9 +704,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const input = document.getElementById("lyricsInput");
       const query = input ? input.value.trim() : "";
       if (query) {
-        if (typeof umami !== "undefined") {
-          umami.track("search_initiated", { tool: "lyrics" });
-        }
         try {
           sessionStorage.removeItem(CACHE_KEY);
         } catch {}
@@ -779,10 +755,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (translateBtn) translateBtn.disabled = false;
         if (textSpan) textSpan.textContent = "Translate";
 
-        if (typeof umami !== "undefined") {
-          umami.track("Lyrics Translation Language Changed", { language: currentTargetLang });
-        }
-
         renderSelectLines();
         saveLyricsState("select");
       } else {
@@ -809,12 +781,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (translatedLines) {
         isTranslated = !isTranslated;
         translateBtn.classList.toggle("active", isTranslated);
-        if (typeof umami !== "undefined") {
-          umami.track("Lyrics Translation Toggled", {
-            translated: isTranslated,
-            language: currentTargetLang,
-          });
-        }
         renderSelectLines();
         saveLyricsState("select");
       }
@@ -871,40 +837,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const closePersonalizeBtn = document.getElementById("btnClosePersonalize");
   const donePersonalizeBtn = document.getElementById("btnDonePersonalize");
 
-  const trackLyricsConfigSaved = () => {
-    if (typeof umami !== "undefined") {
-      umami.track("Lyrics Config Saved", {
-        service: currentService,
-        black_text: isBlackText,
-        bilingual: isBilingual,
-        custom_color: Boolean(customColor),
-      });
-    }
-  };
-
   if (openPersonalizeBtn && personalizeModal) {
     openPersonalizeBtn.addEventListener("click", () => {
       personalizeModal.classList.add("show");
-      if (typeof umami !== "undefined") {
-        umami.track("modal_opened", {
-          modal: "lyrics_config",
-          tool: "lyrics",
-        });
-      }
     });
   }
 
   if (closePersonalizeBtn && personalizeModal) {
     closePersonalizeBtn.addEventListener("click", () => {
       personalizeModal.classList.remove("show");
-      trackLyricsConfigSaved();
     });
   }
 
   if (donePersonalizeBtn && personalizeModal) {
     donePersonalizeBtn.addEventListener("click", () => {
       personalizeModal.classList.remove("show");
-      trackLyricsConfigSaved();
     });
   }
 
@@ -912,7 +859,6 @@ document.addEventListener("DOMContentLoaded", () => {
     personalizeModal.addEventListener("click", (e) => {
       if (e.target === personalizeModal) {
         personalizeModal.classList.remove("show");
-        trackLyricsConfigSaved();
       }
     });
   }
@@ -921,12 +867,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (serviceSelectEl) {
     serviceSelectEl.addEventListener("change", (e) => {
       currentService = e.target.value;
-      if (typeof umami !== "undefined") {
-        umami.track("Service Selected", {
-          service: currentService,
-          tool: "lyrics",
-        });
-      }
       renderLayouts();
       saveLyricsState("layout");
     });
@@ -993,17 +933,6 @@ document.addEventListener("DOMContentLoaded", () => {
       exportSelectedLyricsImage();
     });
   }
-
-  document.addEventListener("click", (e) => {
-    const link = e.target.closest("a");
-    if (!link || !link.href || typeof umami === "undefined") return;
-
-    if (link.href.includes("buymeacoffee.com")) {
-      umami.track("Outbound Click", { destination: "buymeacoffee" });
-    } else if (link.href.includes("github.com")) {
-      umami.track("Outbound Click", { destination: "github" });
-    }
-  });
 });
 
 function rgbToHex(r, g, b) {
@@ -1326,9 +1255,6 @@ function renderLayouts() {
       grid.querySelectorAll(".lyrics-layout-item").forEach((item) => {
         item.classList.toggle("selected", item.dataset.layout === currentLayout);
       });
-      if (typeof umami !== "undefined") {
-        umami.track("Lyrics Layout Selected", { layout: currentLayout });
-      }
     });
   });
 }
@@ -1576,17 +1502,6 @@ async function exportSelectedLyricsImage() {
     link.download = `bubblefm_${fileTitle}_${currentLayout}_${currentFormat}.png`;
     link.href = dataUrl;
     link.click();
-
-    if (typeof umami !== "undefined") {
-      umami.track("report_download", {
-        tool: "lyrics",
-        service: currentService,
-        format: currentFormat,
-        layout: currentLayout,
-        has_custom_color: Boolean(customColor),
-        is_translated: isTranslated,
-      });
-    }
   } catch (err) {
     console.error("Export error:", err);
   } finally {
@@ -1609,9 +1524,6 @@ async function initResultsPage(gridContainer) {
   const query = params.get("search");
 
   if (trackParam) {
-    if (typeof umami !== "undefined") {
-      umami.track("Lyrics Direct Loaded", { type: "song" });
-    }
     let coverUrl = getHighQualityCover(imageParam);
     if (!coverUrl) {
       try {
@@ -1664,9 +1576,6 @@ async function initResultsPage(gridContainer) {
 
         gridContainer.querySelectorAll(".lyrics-card-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
-            if (typeof umami !== "undefined") {
-              umami.track("Lyrics Track Selected");
-            }
             const item = {
               type: "song",
               id: btn.dataset.id,
@@ -1724,9 +1633,6 @@ async function initResultsPage(gridContainer) {
 
     gridContainer.querySelectorAll(".lyrics-card-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        if (typeof umami !== "undefined") {
-          umami.track("Lyrics Track Selected");
-        }
         const item = {
           type: "song",
           id: btn.dataset.id,
@@ -1739,12 +1645,6 @@ async function initResultsPage(gridContainer) {
       });
     });
   } catch (error) {
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "lyrics",
-        reason: error.message || "user_not_found",
-      });
-    }
     gridContainer.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 2rem 0;">
         <p style="font-size: 1.1rem; color: var(--color-error);">Error loading songs. Please try again.</p>

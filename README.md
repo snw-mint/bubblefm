@@ -27,7 +27,7 @@ With the **TasteMatch** feature, you can also compare your music taste directly 
 - **TasteMatch:** Compare your scrobbles with another user and generate compatibility reports.
 - **Customizable Reports:** Create and export beautiful, shareable reports for social media.
 - **Light & Dark Mode:** Seamless theme switching to match your preference.
-- **Privacy First:** All data is processed locally in your browser. We use [Umami](https://umami.is/), a privacy-focused and cookie-less analytics tool, to collect anonymous usage data without tracking personal information.
+- **Privacy First:** All data is processed locally in your browser without tracking personal information.
 
 ## Live Demo
 

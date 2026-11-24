@@ -708,9 +708,6 @@ function renderLayouts() {
       grid.querySelectorAll(".lyrics-layout-item").forEach((item) => {
         item.classList.toggle("selected", item.dataset.layout === currentLayout);
       });
-      if (typeof umami !== "undefined") {
-        umami.track("Cards Layout Selected", { layout: currentLayout });
-      }
       saveCardsState("layout");
     });
   });
@@ -1041,24 +1038,8 @@ async function exportStaticCardImage() {
     link.download = `bubblefm_${fileTitle}_${currentLayout}.png`;
     link.href = dataUrl;
     link.click();
-
-    if (typeof umami !== "undefined") {
-      umami.track("report_download", {
-        tool: "cards",
-        mode: "static",
-        layout: currentLayout,
-        service: currentService,
-        has_custom_color: Boolean(customColor),
-      });
-    }
   } catch (err) {
     console.error("Export error:", err);
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "cards",
-        reason: err.message || "export_failed",
-      });
-    }
   } finally {
     if (exportContainer.parentNode) {
       exportContainer.parentNode.removeChild(exportContainer);
@@ -1124,12 +1105,6 @@ async function exportAnimatedCardVideo() {
 
     const video = await preloadVideo(currentAnimatedUrl);
     if (!video) {
-      if (typeof umami !== "undefined") {
-        umami.track("api_error", {
-          tool: "cards",
-          reason: "video_preload_failed",
-        });
-      }
       await exportStaticCardImage();
       return;
     }
@@ -1362,24 +1337,8 @@ async function exportAnimatedCardVideo() {
     link.href = url;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
-
-    if (typeof umami !== "undefined") {
-      umami.track("report_download", {
-        tool: "cards",
-        mode: "animated",
-        layout: currentLayout,
-        service: currentService,
-        has_custom_color: Boolean(customColor),
-      });
-    }
   } catch (err) {
     console.error("Animated export error:", err);
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "cards",
-        reason: err.message || "animated_export_failed",
-      });
-    }
   } finally {
     if (exportContainer.parentNode) {
       exportContainer.parentNode.removeChild(exportContainer);
@@ -1404,9 +1363,6 @@ async function initResultsPage(gridContainer) {
     const isAlbum = Boolean(albumParam) && !trackParam;
     const rawTitle = isAlbum ? albumParam : trackParam;
     const title = cleanTitle(rawTitle);
-    if (typeof umami !== "undefined") {
-      umami.track("Cards Direct Loaded", { type: isAlbum ? "album" : "track" });
-    }
     let coverUrl = getHighQualityCover(imageParam);
     if (!coverUrl) {
       try {
@@ -1464,12 +1420,6 @@ async function initResultsPage(gridContainer) {
 
     renderSearchCards(gridContainer, results);
   } catch (error) {
-    if (typeof umami !== "undefined") {
-      umami.track("api_error", {
-        tool: "cards",
-        reason: error.message || "cards_fetch_failed",
-      });
-    }
     gridContainer.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 2rem 0;">
         <p style="font-size: 1.1rem; color: var(--color-error);">Error loading results. Please try again.</p>
@@ -1505,9 +1455,6 @@ function renderSearchCards(gridContainer, results) {
 
   gridContainer.querySelectorAll(".lyrics-card-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (typeof umami !== "undefined") {
-        umami.track("Cards Item Selected", { type: btn.dataset.type });
-      }
       const item = {
         type: btn.dataset.type,
         id: btn.dataset.id,
@@ -1573,9 +1520,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const input = document.getElementById("cardsInput");
       const query = input ? input.value.trim() : "";
       if (query) {
-        if (typeof umami !== "undefined") {
-          umami.track("search_initiated", { tool: "cards" });
-        }
         try {
           sessionStorage.removeItem(CACHE_KEY);
         } catch { }
@@ -1613,9 +1557,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tryAnotherBtn) {
     tryAnotherBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      if (typeof umami !== "undefined") {
-        umami.track("Cards Try Another Clicked");
-      }
       try {
         sessionStorage.removeItem(CACHE_KEY);
       } catch { }
@@ -1675,9 +1616,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function openPersonalizeModal() {
     if (personalizeModal) {
       personalizeModal.classList.add("show");
-      if (typeof umami !== "undefined") {
-        umami.track("modal_opened", { modal: "cards_personalize" });
-      }
     }
   }
 
@@ -1699,9 +1637,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (serviceSelect) {
     serviceSelect.addEventListener("change", (e) => {
       currentService = e.target.value;
-      if (typeof umami !== "undefined") {
-        umami.track("Cards Service Changed", { service: currentService });
-      }
       renderLayouts();
       saveCardsState("layout");
     });
@@ -1724,12 +1659,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderLayouts();
       saveCardsState("layout");
     });
-
-    colorInput.addEventListener("change", (e) => {
-      if (typeof umami !== "undefined") {
-        umami.track("Cards Color Selected", { color: e.target.value });
-      }
-    });
   }
 
   if (resetColorBtn) {
@@ -1740,9 +1669,6 @@ document.addEventListener("DOMContentLoaded", () => {
         colorPickerBtn.style.borderColor = "";
       }
       resetColorBtn.style.display = "none";
-      if (typeof umami !== "undefined") {
-        umami.track("Cards Color Reset");
-      }
       renderLayouts();
       saveCardsState("layout");
     });
@@ -1751,13 +1677,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("btnDownloadCard");
   if (downloadBtn) {
     downloadBtn.addEventListener("click", () => {
-      if (typeof umami !== "undefined") {
-        umami.track("Cards Download Initiated", {
-          mode: currentMode,
-          layout: currentLayout,
-          service: currentService,
-        });
-      }
       if (currentMode === "animated" && currentAnimatedUrl) {
         exportAnimatedCardVideo();
       } else {
@@ -1765,15 +1684,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  document.addEventListener("click", (e) => {
-    const link = e.target.closest("a");
-    if (!link || !link.href || typeof umami === "undefined") return;
-
-    if (link.href.includes("buymeacoffee.com")) {
-      umami.track("Outbound Click", { destination: "buymeacoffee" });
-    } else if (link.href.includes("github.com")) {
-      umami.track("Outbound Click", { destination: "github" });
-    }
-  });
 });
